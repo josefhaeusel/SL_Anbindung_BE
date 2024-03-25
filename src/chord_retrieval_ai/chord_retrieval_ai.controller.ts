@@ -8,9 +8,9 @@ export class ChordRetrievalAiController {
   constructor(private readonly chordRetrievalAiService: ChordRetrievalAiService) {}
 
   @Post('analyze')
-  analyzeSong(@Body('filename') filename: string, @Res() res: Response) {
+  async analyzeSong(@Body('filename') filename: string, @Res() res: Response) {
     try{
-      const analysisResult = this.chordRetrievalAiService.analyzeSong(filename);
+      const analysisResult = await this.chordRetrievalAiService.analyzeSong(filename);
       res.json(analysisResult)
     } catch (error) {
       res.status(500).send(error.message)

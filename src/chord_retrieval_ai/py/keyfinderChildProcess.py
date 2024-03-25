@@ -19,12 +19,12 @@ if len(sys.argv) > 1:
     else:
         analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
 
-    data = {
+    analysis = {
         "analyzed_audio": song_name,
-        "data": analysis
+        "analysis": analysis
     }
 
-    print(json.dumps(data))
+    print(json.dumps(analysis))
 
     sys.stdout.flush()
 

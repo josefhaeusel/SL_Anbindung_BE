@@ -12,15 +12,30 @@ Next Steps:
 
 async function setup() {
 
+
+    document.body.onclick = async () => {
+        await Tone.start()
+    }
+
+    makeAnalyzeButton();
+
+    //attach a click listener to a play button
+
     const logoPlayer = await loadLogoplayer();
     const envelope = await ampEnvelope();
     const audioPlayer = await loadAudioplayer(envelope);
     playbackHandler(audioPlayer, envelope, logoPlayer);
 }
 
+
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playAudio");
     const audioSlider = document.getElementById("audio-playbar");
+
+    /*playButton.addEventListener('click', async () => {
+        await Tone.start()
+        console.log('audio is ready')
+    })*/
 
     playButton.addEventListener("click", function() {
             const normSliderPosition = parseFloat(audioSlider.value);
@@ -133,6 +148,7 @@ async function loadAudioplayer(Env, Filter) {
 
     const audioPlayer = new Tone.Player("samples/testsong.mp3");
 
+
     if (Env) {
         audioPlayer.connect(Env);
     } else {
@@ -157,5 +173,57 @@ async function ampEnvelope(){
     return ampEnv
 }
 
+function makeAnalyzeButton() {
+    
+    document.getElementById('analyzeButton').addEventListener('click', function() {
+        const songName = 'testsong.mp3';
+        analyzeSong_API(songName);
+      });
+
+  }
+
+async function analyzeSong_API(songName){
+
+    const spinner = document.getElementById('keyLoadingSpinner');
+    const display = document.getElementById('keyResultDisplay');
+
+    //Clear Display
+    display.style.display = 'none'
+    display.value = ''
+
+    //Activate Loadbutton
+    spinner.style.display = 'block';
+
+
+
+    try {
+    const response = await fetch('/chord-retrieval-ai/analyze', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filename: songName }),
+    });
+    const data = await response.json();
+    const key = data.analysis.likely_key;
+
+    console.log('Analysis Result:', data);
+    console.log('Key:', key);
+
+    display.value = key;
+
+    } catch (error) {
+    console.error('Error:', error);
+    }
+
+    //Deactivate Loadbutton
+    spinner.style.display = 'none';
+    //Show Result
+    display.style.display = 'block'
+
+
+
+
+}
 
 setup();

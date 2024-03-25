@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#006D77">
+    <link
+        rel="stylesheet"
+        href="assets/@telekom/scale-components/dist/scale-components/scale-components.css"
+    />
+    <script
+        type="module"
+        src="assets/@telekom/scale-components/dist/scale-components/scale-components.esm.js"
+    ></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "TeleNeo";
+            background-color: #ffffff;
+        }
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #E20074;
+        }
+        scale-button{
+            margin-top:20px;
+        }
+        scale-loading-spinner{
+            margin-top:20px;
+            display: none;
+        }
+        scale-textarea{
+            margin-top:40px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="center-container">
+        <h1 id="title">Soundlogo Anbinder</h1>
+
+        <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar"> </scale-slider>
+
+        <scale-button id="playAudio">Play</scale-button>
+
+        <scale-button id="analyzeButton">Analyze</scale-button>
+
+        <div>
+            <scale-loading-spinner id= "keyLoadingSpinner" text="Loading Key..." alignment="vertical" size="large"></scale-loading-spinner>
+            <scale-textarea id="keyResultDisplay" label="Key" value="" readonly></scale-textarea>
+        </div>
+
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
