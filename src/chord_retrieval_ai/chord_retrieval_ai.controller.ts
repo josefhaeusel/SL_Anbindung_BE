@@ -16,14 +16,16 @@ export class ChordRetrievalAiController {
   async analyzeSong(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
     try {
       // Generate temporary filename
-      const tempFilePath = path.join(__dirname, '../../uploads', file.originalname);
+      const tempFilePath = path.join(__dirname, '../../temp_uploads', file.originalname);
+      const clientFilePath = path.join(__dirname, '../../client/clientUploads', file.originalname); 
   
       // Write the buffer to new file
       fs.writeFileSync(tempFilePath, file.buffer);
+      fs.writeFileSync(clientFilePath, file.buffer);
 
       const analysisResult = await this.chordRetrievalAiService.analyzeSong(tempFilePath);
   
-      //Clean up the file after analysis
+      //Optional: Clean up the file after analysis
       fs.unlinkSync(tempFilePath);
   
       res.json(analysisResult);

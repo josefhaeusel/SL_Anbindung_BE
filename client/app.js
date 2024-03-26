@@ -2,12 +2,15 @@
 
 Next Steps:
 -Audio mit Envelope filtern
--Drag and Drop 
 -FFmpeg trennt audio von video
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
 -Ende von Video muss für Preview isoliert spielbar gemacht werden
 
 */
+
+let logoPlayer
+let audioPlayer
+let audioBuffer
 
 async function setup() {
 
@@ -16,13 +19,12 @@ async function setup() {
         await Tone.start()
     }
 
-    //makeAnalyzeButton();
     makeFileDropzone();
-    
 
-    const logoPlayer = await loadLogoplayer();
     const envelope = await ampEnvelope();
-    const audioPlayer = await loadAudioplayer(envelope);
+    audioPlayer = await loadAudioplayer(envelope);
+    logoPlayer = await loadLogoplayer();
+
     playbackHandler(audioPlayer, envelope, logoPlayer);
 }
 
@@ -30,6 +32,8 @@ async function setup() {
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playAudio");
     const audioSlider = document.getElementById("audio-playbar");
+
+    console.log("AUDIO PLAYER", audioPlayer);
 
     playButton.addEventListener("click", function() {
             const normSliderPosition = parseFloat(audioSlider.value);
@@ -138,18 +142,18 @@ async function loadLogoplayer(tonality = "A") {
     return logoPlayer;
 }
 
-async function loadAudioplayer(Env, Filter) {
+async function loadAudioplayer(Env, Filter, Filepath) {
 
-    const audioPlayer = new Tone.Player("samples/testsong.mp3");
-
+    console.log("Loaded Audio:", Filepath)
+    const newAudioPlayer = new Tone.Player(Filepath);
 
     if (Env) {
-        audioPlayer.connect(Env);
+        newAudioPlayer.connect(Env);
     } else {
-        audioPlayer.toDestination();
+        newAudioPlayer.toDestination();
     }
 
-    return audioPlayer
+    return newAudioPlayer
 
 }
 
@@ -166,15 +170,6 @@ async function ampEnvelope(){
 
     return ampEnv
 }
-
-function makeAnalyzeButton() {
-    
-    document.getElementById('analyzeButton').addEventListener('click', function() {
-        const songName = 'testsong.mp3';
-        analyzeSong_API(songName);
-      });
-
-  }
 
 async function analyzeSong_API(songName){
 
@@ -217,6 +212,11 @@ async function analyzeSong_API(songName){
 
 }
 
+async function updateMainAudioBuffer(filepath){
+    audioBuffer = new Tone.ToneAudioBuffer(filepath);
+    audioPlayer.buffer = audioBuffer;
+}
+
 function makeFileDropzone(){
 
     document.getElementById('dropzone').addEventListener('click', function() {
@@ -226,16 +226,21 @@ function makeFileDropzone(){
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
-            uploadFile_API(file);
+            dropzoneHandler(file);
+
+            const filepath = file.name;
+            console.log(filepath);
         }
     });
 
 }
 
-function uploadFile_API(file) {
+
+async function dropzoneHandler(file) {
 
     const spinner = document.getElementById('keyLoadingSpinner');
     const display = document.getElementById('keyResultDisplay');
+
 
     //Clear Display
     display.style.display = 'none'
@@ -247,30 +252,41 @@ function uploadFile_API(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    fetch('/chord-retrieval-ai/analyze', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        const key = data.analysis.likely_key;
+    const key = await uploadAnalyze_API(formData);
+    updateLogoBuffer();
 
-        console.log('Analysis Result:', data);
-        console.log('Key:', key);
-    
-        display.value = key;
-    })
-    .catch((error) => {
-        display.value = error;
-        console.error('Error:', error);
-    });
+    const uploadFilepath = `clientUploads/${file.name}`;
+    await updateMainAudioBuffer(uploadFilepath);
 
     //Deactivate Loadbutton
     spinner.style.display = 'none';
     //Show Result
+    display.value = key;
     display.style.display = 'block'
 }
 
 
+async function uploadAndAnalyze_API(formData, display) {
+    try {
+        const response = await fetch('/chord-retrieval-ai/analyze', {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await response.json();
+        const key = data.analysis.likely_key;
+
+        console.log('Analysis Result:', data);
+        console.log('Key:', key);
+
+        return key
+
+    }
+    catch (error) {
+        display.value = error;
+        console.error('Error:', error);
+    }
+}
+
 setup();
+
+
