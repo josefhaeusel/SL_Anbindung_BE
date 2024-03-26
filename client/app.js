@@ -9,6 +9,7 @@ Next Steps:
 */
 
 let logoPlayer
+let logoBuffers
 let audioPlayer
 let audioBuffer
 
@@ -23,7 +24,10 @@ async function setup() {
 
     const envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
-    logoPlayer = await loadLogoplayer();
+    await loadLogoBuffers()
+    logoPlayer = await loadLogoPlayer()
+    //logoPlayers = await loadLogoplayers();
+
 
     playbackHandler(audioPlayer, envelope, logoPlayer);
 }
@@ -131,15 +135,31 @@ function updateProgressbar(audioPlayer, audioSlider, currentPosition){
 
 }
 
-async function loadLogoplayer(tonality = "A") {
-    const multiPlayer = new Tone.Players({
+async function loadLogoplayers(tonality = "A") {
+    logoPlayers = new Tone.Players({
         A: "samples/soundlogos/TLS_A-3.wav",
         C: "samples/soundlogos/TLS_C-3.wav"
     }).toDestination();
 
-    const logoPlayer = multiPlayer.player(tonality);
+    return logoPlayers;
+}
 
-    return logoPlayer;
+async function loadLogoBuffers(){
+    logoBuffers = new Tone.ToneAudioBuffers({
+            A: "samples/soundlogos/TLS_A-3.wav",
+            C: "samples/soundlogos/TLS_C-3.wav"
+        })
+    }
+
+async function loadLogoPlayer(tonality = 'A') {
+
+    const logoBuffer = logoBuffers.get('A');
+    const newLogoPlayer = new Tone.Player(logoBuffer);
+
+    newLogoPlayer.toDestination()
+
+    return newLogoPlayer
+
 }
 
 async function loadAudioplayer(Env, Filter, Filepath) {
@@ -213,8 +233,44 @@ async function analyzeSong_API(songName){
 }
 
 async function updateMainAudioBuffer(filepath){
-    audioBuffer = new Tone.ToneAudioBuffer(filepath);
+    const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
+}
+
+async function updateLogoBuffer(key){
+    const tonality = logoKeyMap[key];
+    const logoBuffer = logoBuffers.get(tonality);
+    logoPlayer.buffer = logoBuffer;
+}
+
+const logoKeyMap = {
+
+    'A minor': 'C',
+    'A# minor': 'C#',
+    'B minor': 'D',
+    'C minor': 'E',
+    'C# minor': 'F',
+    'D minor': 'F#',
+    'D# minor': 'G',
+    'E minor': 'G#',
+    'F minor': 'A',
+    'F# minor': 'A#',
+    'G minor': 'B',
+    'G# minor': 'C',
+
+    'A major': 'A',
+    'A# major': 'A#',
+    'B major': 'B',
+    'C major': 'C',
+    'C# major': 'C#',
+    'D major': 'D',
+    'D# major': 'D#',
+    'E major': 'E',
+    'F major': 'F',
+    'F# major': 'F#',
+    'G major': 'G',
+    'G# major': 'G#',
+
 }
 
 function makeFileDropzone(){
@@ -253,7 +309,7 @@ async function dropzoneHandler(file) {
     formData.append('file', file);
 
     const key = await uploadAndAnalyze_API(formData);
-    //updateLogoBuffer();
+    //await updateLogoBuffer(key);
 
     const uploadFilepath = `clientUploads/${file.name}`;
     await updateMainAudioBuffer(uploadFilepath);
@@ -288,5 +344,3 @@ async function uploadAndAnalyze_API(formData, display) {
 }
 
 setup();
-
-
