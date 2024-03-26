@@ -1,13 +1,15 @@
 /*
 
 Next Steps:
--Audio mit Envelope filtern
+-INTERFACE
+-Audio Transition mit Filtern
 -FFmpeg trennt audio von video
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
 -Ende von Video muss für Preview isoliert spielbar gemacht werden
 
 */
 
+//Global Audio Players and Buffers
 let logoPlayer
 let logoBuffers
 let audioPlayer
@@ -26,7 +28,6 @@ async function setup() {
     audioPlayer = await loadAudioplayer(envelope);
     await loadLogoBuffers()
     logoPlayer = await loadLogoPlayer()
-    //logoPlayers = await loadLogoplayers();
 
 
     playbackHandler(audioPlayer, envelope, logoPlayer);
@@ -36,8 +37,6 @@ async function setup() {
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playAudio");
     const audioSlider = document.getElementById("audio-playbar");
-
-    console.log("AUDIO PLAYER", audioPlayer);
 
     playButton.addEventListener("click", function() {
             const normSliderPosition = parseFloat(audioSlider.value);
@@ -135,15 +134,6 @@ function updateProgressbar(audioPlayer, audioSlider, currentPosition){
 
 }
 
-async function loadLogoplayers(tonality = "A") {
-    logoPlayers = new Tone.Players({
-        A: "samples/soundlogos/TLS_A-3.wav",
-        C: "samples/soundlogos/TLS_C-3.wav"
-    }).toDestination();
-
-    return logoPlayers;
-}
-
 async function loadLogoBuffers(){
     logoBuffers = new Tone.ToneAudioBuffers({
             A: "samples/soundlogos/TLS_A-3.wav",
@@ -191,47 +181,6 @@ async function ampEnvelope(){
     return ampEnv
 }
 
-async function analyzeSong_API(songName){
-
-    const spinner = document.getElementById('keyLoadingSpinner');
-    const display = document.getElementById('keyResultDisplay');
-
-    //Clear Display
-    display.style.display = 'none'
-    display.value = ''
-
-    //Activate Loadbutton
-    spinner.style.display = 'block';
-
-
-
-    try {
-    const response = await fetch('/chord-retrieval-ai/analyze', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filename: songName }),
-    });
-    const data = await response.json();
-    const key = data.analysis.likely_key;
-
-    console.log('Analysis Result:', data);
-    console.log('Key:', key);
-
-    display.value = key;
-
-    } catch (error) {
-    console.error('Error:', error);
-    }
-
-    //Deactivate Loadbutton
-    spinner.style.display = 'none';
-    //Show Result
-    display.style.display = 'block'
-
-}
-
 async function updateMainAudioBuffer(filepath){
     const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
@@ -241,36 +190,6 @@ async function updateLogoBuffer(key){
     const tonality = logoKeyMap[key];
     const logoBuffer = logoBuffers.get(tonality);
     logoPlayer.buffer = logoBuffer;
-}
-
-const logoKeyMap = {
-
-    'A minor': 'C',
-    'A# minor': 'C#',
-    'B minor': 'D',
-    'C minor': 'E',
-    'C# minor': 'F',
-    'D minor': 'F#',
-    'D# minor': 'G',
-    'E minor': 'G#',
-    'F minor': 'A',
-    'F# minor': 'A#',
-    'G minor': 'B',
-    'G# minor': 'C',
-
-    'A major': 'A',
-    'A# major': 'A#',
-    'B major': 'B',
-    'C major': 'C',
-    'C# major': 'C#',
-    'D major': 'D',
-    'D# major': 'D#',
-    'E major': 'E',
-    'F major': 'F',
-    'F# major': 'F#',
-    'G major': 'G',
-    'G# major': 'G#',
-
 }
 
 function makeFileDropzone(){
@@ -308,7 +227,7 @@ async function dropzoneHandler(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const key = await uploadAndAnalyze_API(formData);
+    const key = await uploadAndAnalyzeAudio_API(formData);
     //await updateLogoBuffer(key);
 
     const uploadFilepath = `clientUploads/${file.name}`;
@@ -321,8 +240,7 @@ async function dropzoneHandler(file) {
     display.style.display = 'block'
 }
 
-
-async function uploadAndAnalyze_API(formData, display) {
+async function uploadAndAnalyzeAudio_API(formData, display) {
     try {
         const response = await fetch('/chord-retrieval-ai/analyze', {
             method: 'POST',
@@ -341,6 +259,37 @@ async function uploadAndAnalyze_API(formData, display) {
         display.value = error;
         console.error('Error:', error);
     }
+}
+
+
+const logoKeyMap = {
+
+    'A minor': 'C',
+    'A# minor': 'C#',
+    'B minor': 'D',
+    'C minor': 'E',
+    'C# minor': 'F',
+    'D minor': 'F#',
+    'D# minor': 'G',
+    'E minor': 'G#',
+    'F minor': 'A',
+    'F# minor': 'A#',
+    'G minor': 'B',
+    'G# minor': 'C',
+
+    'A major': 'A',
+    'A# major': 'A#',
+    'B major': 'B',
+    'C major': 'C',
+    'C# major': 'C#',
+    'D major': 'D',
+    'D# major': 'D#',
+    'E major': 'E',
+    'F major': 'F',
+    'F# major': 'F#',
+    'G major': 'G',
+    'G# major': 'G#',
+
 }
 
 setup();

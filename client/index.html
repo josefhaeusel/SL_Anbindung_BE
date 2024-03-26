@@ -47,16 +47,21 @@
 <body>
     
     <div class="center-container">
-        <h1 id="title">Soundlogo Anbinder</h1>
+        <h1 id="title">Soundlogo Tool</h1>
+        <div style="color:black; ">
+            Add the iconic Telekom sound-logo at the end of all videos.
+        </div>
+
+        <div id="dropzone" style="border: 2px dashed #ccc; width: 300px; height: 200px; text-align: center; margin-top: 20px; line-height: 200px; position: relative; color:lightgrey">
+            Drop your MP3 file here or click to upload.
+            <input type="file" id="fileInput" accept=".mp3" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;" >
+        </div>     
 
         <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar"> </scale-slider>
 
         <scale-button id="playAudio">Play</scale-button>
 
-        <div id="dropzone" style="border: 2px dashed #ccc; width: 300px; height: 200px; text-align: center; margin-top: 20px; line-height: 200px; position: relative;">
-            Drop your MP3 file here or click to upload.
-            <input type="file" id="fileInput" accept=".mp3" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;" >
-        </div>        
+   
 
         <!--scale-button id="analyzeButton">Analyze</scale-button-->
 
