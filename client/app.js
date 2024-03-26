@@ -16,7 +16,7 @@ async function setup() {
         await Tone.start()
     }
 
-    makeAnalyzeButton();
+    //makeAnalyzeButton();
     makeFileDropzone();
     
 
