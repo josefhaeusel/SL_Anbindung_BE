@@ -252,8 +252,8 @@ async function dropzoneHandler(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const key = await uploadAnalyze_API(formData);
-    updateLogoBuffer();
+    const key = await uploadAndAnalyze_API(formData);
+    //updateLogoBuffer();
 
     const uploadFilepath = `clientUploads/${file.name}`;
     await updateMainAudioBuffer(uploadFilepath);
