@@ -2,24 +2,23 @@
 
 Next Steps:
 -Audio mit Envelope filtern
-
 -Drag and Drop 
 -FFmpeg trennt audio von video
--Audio muss von autochord / cyanite.ai analysiert werden
--Aufnahme- / Rendermöglichkeit des Audios finden
--Ende von Video muss für Preview isolierr spielbar gemacht werden
+-Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
+-Ende von Video muss für Preview isoliert spielbar gemacht werden
+
 */
 
 async function setup() {
 
-
+    //Start Web-Audio Context w. User Gesture
     document.body.onclick = async () => {
         await Tone.start()
     }
 
     makeAnalyzeButton();
-
-    //attach a click listener to a play button
+    makeFileDropzone();
+    
 
     const logoPlayer = await loadLogoplayer();
     const envelope = await ampEnvelope();
@@ -31,11 +30,6 @@ async function setup() {
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playAudio");
     const audioSlider = document.getElementById("audio-playbar");
-
-    /*playButton.addEventListener('click', async () => {
-        await Tone.start()
-        console.log('audio is ready')
-    })*/
 
     playButton.addEventListener("click", function() {
             const normSliderPosition = parseFloat(audioSlider.value);
@@ -221,9 +215,39 @@ async function analyzeSong_API(songName){
     //Show Result
     display.style.display = 'block'
 
+}
 
+function makeFileDropzone(){
 
+    document.getElementById('dropzone').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            uploadFile_API(file);
+        }
+    });
 
 }
+
+function uploadFile_API(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/chord-retrieval-ai/analyze', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 
 setup();
