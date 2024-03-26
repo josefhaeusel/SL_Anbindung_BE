@@ -233,6 +233,17 @@ function makeFileDropzone(){
 }
 
 function uploadFile_API(file) {
+
+    const spinner = document.getElementById('keyLoadingSpinner');
+    const display = document.getElementById('keyResultDisplay');
+
+    //Clear Display
+    display.style.display = 'none'
+    display.value = ''
+
+    //Activate Loadbutton
+    spinner.style.display = 'block';
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -243,10 +254,22 @@ function uploadFile_API(file) {
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
+        const key = data.analysis.likely_key;
+
+        console.log('Analysis Result:', data);
+        console.log('Key:', key);
+    
+        display.value = key;
     })
     .catch((error) => {
+        display.value = error;
         console.error('Error:', error);
     });
+
+    //Deactivate Loadbutton
+    spinner.style.display = 'none';
+    //Show Result
+    display.style.display = 'block'
 }
 
 
