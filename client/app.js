@@ -13,7 +13,7 @@ Next Steps:
 let logoPlayer
 let logoBuffers
 let audioPlayer
-let audioBuffer
+//let audioBuffer
 
 async function setup() {
 
@@ -182,12 +182,14 @@ async function ampEnvelope(){
 }
 
 async function updateMainAudioBuffer(filepath){
+    console.log("Updated Main Audio Buffer:", filepath)
     const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
 }
 
 async function updateLogoBuffer(key){
     const tonality = logoKeyMap[key];
+    console.log("Updated Logo Buffer Key:", tonality)
     const logoBuffer = logoBuffers.get(tonality);
     logoPlayer.buffer = logoBuffer;
 }
@@ -228,9 +230,9 @@ async function dropzoneHandler(file) {
     formData.append('file', file);
 
     const key = await uploadAndAnalyzeAudio_API(formData);
-    //await updateLogoBuffer(key);
+    await updateLogoBuffer(key);
 
-    const uploadFilepath = `clientUploads/${file.name}`;
+    const uploadFilepath = `clientUploads/audioBuffer.mp3`;
     await updateMainAudioBuffer(uploadFilepath);
 
     //Deactivate Loadbutton

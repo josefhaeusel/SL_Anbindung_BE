@@ -15,9 +15,10 @@ export class ChordRetrievalAiController {
   @UseInterceptors(FileInterceptor('file'))
   async analyzeSong(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
     try {
-      // Generate temporary filename
+      // Generate temporary filename for back-end Analysis
       const tempFilePath = path.join(__dirname, '../../temp_uploads', file.originalname);
-      const clientFilePath = path.join(__dirname, '../../client/clientUploads', file.originalname); 
+      // Generate hard-coded filename for client-side audio buffer playback.
+      const clientFilePath = path.join(__dirname, '../../client/clientUploads', 'audioBuffer.mp3'); 
   
       // Write the buffer to new file
       fs.writeFileSync(tempFilePath, file.buffer);
