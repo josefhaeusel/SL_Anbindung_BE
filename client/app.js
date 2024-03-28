@@ -19,23 +19,54 @@ async function setup() {
 
     //Start Web-Audio Context w. User Gesture
     document.body.onclick = async () => {
-        await Tone.start()
+        await Tone.start();
+        await Tone.context.resume();
+
     }
 
     makeFileDropzone();
 
     const envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
-    await loadLogoBuffers()
-    logoPlayer = await loadLogoPlayer()
+    await loadLogoBuffers();
+    logoPlayer = await loadLogoPlayer();
 
+    await videoPlayerHandling();
 
     playbackHandler(audioPlayer, envelope, logoPlayer);
 }
 
+async function videoPlayerHandling() {
+    const video = document.getElementById('myVideo');
+    const playButton = document.getElementById('playButton');
+
+    await extractAudioBuffer();
+
+    playButton.addEventListener('click', () => {
+        video.play();
+    });
+
+    async function extractAudioBuffer() {
+        const videoSource = video.currentSrc;
+        console.log("video.src:", videoSource);
+        const audioContext = Tone.context;
+        const source = audioContext.createMediaElementSource(video);
+
+        try {
+            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource);
+            console.log("Audio buffer loaded:", audioBuffer);
+            // Now you can use the buffer for further audio processing
+            // For example, you can play the buffer using Tone.Player
+            audioPlayer.buffer = audioBuffer;
+        } catch (error) {
+            console.error("Failed to load audio buffer:", error);
+        }
+    }
+}
+
 
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
-    const playButton = document.getElementById("playAudio");
+    const playButton = document.getElementById("playButton");
     const audioSlider = document.getElementById("audio-playbar");
 
     playButton.addEventListener("click", function() {
@@ -182,14 +213,14 @@ async function ampEnvelope(){
 }
 
 async function updateMainAudioBuffer(filepath){
-    console.log("Updated Main Audio Buffer:", filepath)
+    console.log("Updated Main Audio Buffer:", filepath);
     const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
 }
 
 async function updateLogoBuffer(key){
     const tonality = logoKeyMap[key];
-    console.log("Updated Logo Buffer Key:", tonality)
+    console.log("Updated Logo Buffer Key:", tonality);
     const logoBuffer = logoBuffers.get(tonality);
     logoPlayer.buffer = logoBuffer;
 }
