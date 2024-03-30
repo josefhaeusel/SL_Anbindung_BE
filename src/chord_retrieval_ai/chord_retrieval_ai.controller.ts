@@ -11,12 +11,10 @@ import * as path from 'path';
 export class ChordRetrievalAiController {
   constructor(private readonly chordRetrievalAiService: ChordRetrievalAiService) {}
 
-  @Post('analyze')
+  @Post('analyzeAudio')
   @UseInterceptors(FileInterceptor('file'))
   async analyzeSong(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
     try {
-
-      //Service für Filehandling, AV-Splitting
 
       // Generate temporary filename for back-end Analysis
       const tempFilePath = path.join(__dirname, '../../temp_uploads', file.originalname);
@@ -37,5 +35,29 @@ export class ChordRetrievalAiController {
       res.status(500).send(error.message);
     }
   }
+
+  @Post('uploadVideo')
+  @UseInterceptors(FileInterceptor('file'))
+  async videoHandler(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+    try {
+
+      //Service für Audio / Video Splitting
+
+      // Generate temporary filename for back-end Analysis
+      const tempAudioFilePath = path.join(__dirname, '../../temp_uploads/audio', file.originalname);
+      const tempVideoFilePath = path.join(__dirname, '../../temp_uploads/video', file.originalname);
+
+      // Write the audio buffer to new file
+      fs.writeFileSync(tempAudioFilePath, file.buffer);
+
+      const analysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
+      //Optional: Löschen (für Video wohl erst nach rendering relevant)
+      fs.unlinkSync(tempAudioFilePath);
+  
+      res.json(analysisResult);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  } 
   
 }

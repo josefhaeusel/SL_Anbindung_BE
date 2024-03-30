@@ -24,6 +24,9 @@ async function setup() {
 
     }
 
+    const video = document.getElementById('myVideo');
+    Tone.context.createMediaElementSource(video);
+
     makeFileDropzone();
 
     const envelope = await ampEnvelope();
@@ -31,37 +34,9 @@ async function setup() {
     await loadLogoBuffers();
     logoPlayer = await loadLogoPlayer();
 
-    await videoPlayerHandling();
+   // await videoPlayerHandling();
 
     playbackHandler(audioPlayer, envelope, logoPlayer);
-}
-
-async function videoPlayerHandling() {
-    const video = document.getElementById('myVideo');
-    const playButton = document.getElementById('playButton');
-
-    await extractAudioBuffer();
-
-    playButton.addEventListener('click', () => {
-        video.play();
-    });
-
-    async function extractAudioBuffer() {
-        const videoSource = video.currentSrc;
-        console.log("video.src:", videoSource);
-        const audioContext = Tone.context;
-        const source = audioContext.createMediaElementSource(video);
-
-        try {
-            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource);
-            console.log("Audio buffer loaded:", audioBuffer);
-            // Now you can use the buffer for further audio processing
-            // For example, you can play the buffer using Tone.Player
-            audioPlayer.buffer = audioBuffer;
-        } catch (error) {
-            console.error("Failed to load audio buffer:", error);
-        }
-    }
 }
 
 
@@ -225,6 +200,7 @@ async function updateLogoBuffer(key){
     logoPlayer.buffer = logoBuffer;
 }
 
+
 function makeFileDropzone(){
 
     document.getElementById('dropzone').addEventListener('click', function() {
@@ -234,16 +210,119 @@ function makeFileDropzone(){
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
-            dropzoneHandler(file);
-
+            //dropzoneHandler(file);
+            dropzoneHandlerVideo(file)
             const filepath = file.name;
-            console.log(filepath);
+            console.log("Dropped File:",filepath);
         }
     });
 
 }
 
+async function dropzoneHandlerVideo(file) {
 
+    const spinner = document.getElementById('keyLoadingSpinner');
+    const display = document.getElementById('keyResultDisplay');
+    //Clear Display
+    display.style.display = 'none'
+    display.value = ''
+    //Activate Loadbutton
+    spinner.style.display = 'block';
+
+    const url = URL.createObjectURL(file);
+    await videoPlayerHandling(url)
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const key = await uploadVideo_API(formData);
+    //await updateLogoBuffer(key);
+
+    //Deactivate Loadbutton
+    spinner.style.display = 'none';
+    //Show Result
+    display.value = key;
+    display.style.display = 'block'
+
+    async function uploadVideo_API() {
+        try {
+            const response = await fetch('/chord-retrieval-ai/uploadVideo', {
+                method: 'POST',
+                body: formData,
+            });
+            /*const data = await response.json();
+            const key = data.analysis.likely_key;
+    
+            console.log('Analysis Result:', data);
+            console.log('Key:', key);
+    
+            return key*/
+    
+        }
+        catch (error) {
+            display.value = error;
+            console.error('Error:', error);
+        }
+    }
+}
+
+async function videoPlayerHandling(url) {
+    const video = document.getElementById('myVideo');
+    const playButton = document.getElementById('playButton');
+
+    // Access the <source> elements within the <video>
+    const videoSources = video.getElementsByTagName('source')
+    let videoSource;
+
+    if (videoSources.length > 0) {
+        videoSource = videoSources[0];
+    }
+
+    console.log("Video Source Old", videoSource.src)
+    console.log("New Video URL", url)
+
+    const oldObjectUrl = videoSource.src;
+    if (oldObjectUrl && oldObjectUrl.startsWith('blob:')) {
+        // Revoke the old blob URL
+        URL.revokeObjectURL(oldObjectUrl);
+    }
+
+    videoSource.src = url;
+    
+    await video.load();
+
+    console.log("Video Source Updated", videoSource.src)
+
+    await extractAudioBuffer(videoSource.src);
+
+    playButton.addEventListener('click', () => {
+        video.play();
+    });
+
+    async function extractAudioBuffer() {
+        // Now, video.currentSrc will reflect the updated source URL
+        console.log("video.src:", videoSource.src);
+        const audioContext = Tone.context;
+        //audioContext.createMediaElementSource(video);
+
+        try {
+            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource.src);
+            console.log("Audio buffer loaded:", audioBuffer);
+
+            audioPlayer.buffer = audioBuffer;
+        } catch (error) {
+            console.error("Failed to load audio buffer:", error);
+        }
+    }
+}
+
+
+
+
+
+
+
+/*
 async function dropzoneHandler(file) {
 
     const spinner = document.getElementById('keyLoadingSpinner');
@@ -275,7 +354,7 @@ async function dropzoneHandler(file) {
 
 async function uploadAndAnalyzeAudio_API(formData, display) {
     try {
-        const response = await fetch('/chord-retrieval-ai/analyze', {
+        const response = await fetch('/chord-retrieval-ai/analyzeAudio', {
             method: 'POST',
             body: formData,
         });
@@ -293,7 +372,7 @@ async function uploadAndAnalyzeAudio_API(formData, display) {
         console.error('Error:', error);
     }
 }
-
+*/
 
 const logoKeyMap = {
 
