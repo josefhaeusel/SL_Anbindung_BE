@@ -1,11 +1,11 @@
 /*
 
 Next Steps:
+-Audio-Video Player vereinheitlichen
 -INTERFACE
 -Audio Transition mit Filtern
 -FFmpeg trennt audio von video
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
--Ende von Video muss für Preview isoliert spielbar gemacht werden
 
 */
 
@@ -203,31 +203,34 @@ async function updateLogoBuffer(key){
 
 function makeFileDropzone(){
 
-    document.getElementById('dropzone').addEventListener('click', function() {
+    /*document.getElementById('dropzone').addEventListener('click', function() {
         document.getElementById('fileInput').click();
-    });
+    });*/
 
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
-            //dropzoneHandler(file);
             dropzoneHandlerVideo(file)
             const filepath = file.name;
             console.log("Dropped File:",filepath);
         }
     });
 
+
 }
 
 async function dropzoneHandlerVideo(file) {
 
     const spinner = document.getElementById('keyLoadingSpinner');
-    const display = document.getElementById('keyResultDisplay');
+    const display = document.getElementById('keyDisplay');
     //Clear Display
     display.style.display = 'none'
     display.value = ''
     //Activate Loadbutton
     spinner.style.display = 'block';
+
+    document.getElementById('layer1').style.display = 'none';
+    document.getElementById('layer2').style.display = 'flex';
 
     const url = URL.createObjectURL(file);
     await videoPlayerHandling(url)
