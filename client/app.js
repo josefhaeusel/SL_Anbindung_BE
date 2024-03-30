@@ -250,13 +250,14 @@ async function dropzoneHandlerVideo(file) {
                 method: 'POST',
                 body: formData,
             });
-            /*const data = await response.json();
+
+            const data = await response.json();
             const key = data.analysis.likely_key;
     
             console.log('Analysis Result:', data);
             console.log('Key:', key);
     
-            return key*/
+            return key
     
         }
         catch (error) {
@@ -302,8 +303,6 @@ async function videoPlayerHandling(url) {
     async function extractAudioBuffer() {
         // Now, video.currentSrc will reflect the updated source URL
         console.log("video.src:", videoSource.src);
-        const audioContext = Tone.context;
-        //audioContext.createMediaElementSource(video);
 
         try {
             const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource.src);
@@ -315,64 +314,6 @@ async function videoPlayerHandling(url) {
         }
     }
 }
-
-
-
-
-
-
-
-/*
-async function dropzoneHandler(file) {
-
-    const spinner = document.getElementById('keyLoadingSpinner');
-    const display = document.getElementById('keyResultDisplay');
-
-
-    //Clear Display
-    display.style.display = 'none'
-    display.value = ''
-
-    //Activate Loadbutton
-    spinner.style.display = 'block';
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const key = await uploadAndAnalyzeAudio_API(formData);
-    await updateLogoBuffer(key);
-
-    const uploadFilepath = `clientUploads/audioBuffer.mp3`;
-    await updateMainAudioBuffer(uploadFilepath);
-
-    //Deactivate Loadbutton
-    spinner.style.display = 'none';
-    //Show Result
-    display.value = key;
-    display.style.display = 'block'
-}
-
-async function uploadAndAnalyzeAudio_API(formData, display) {
-    try {
-        const response = await fetch('/chord-retrieval-ai/analyzeAudio', {
-            method: 'POST',
-            body: formData,
-        });
-        const data = await response.json();
-        const key = data.analysis.likely_key;
-
-        console.log('Analysis Result:', data);
-        console.log('Key:', key);
-
-        return key
-
-    }
-    catch (error) {
-        display.value = error;
-        console.error('Error:', error);
-    }
-}
-*/
 
 const logoKeyMap = {
 
