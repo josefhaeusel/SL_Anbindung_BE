@@ -42,6 +42,7 @@ async function setup() {
 
 function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playButton");
+    const pauseButton = document.getElementById("pauseButton");
     const audioSlider = document.getElementById("audio-playbar");
 
     playButton.addEventListener("click", function() {

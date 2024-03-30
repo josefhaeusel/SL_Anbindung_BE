@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="theme-color" content="#E20074">
     <link rel="stylesheet" href="assets/@telekom/scale-components/dist/scale-components/scale-components.css"/>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
     <script type="module" src="assets/@telekom/scale-components/dist/scale-components/scale-components.esm.js"></script>
     <style>
         body, html {
@@ -123,14 +124,41 @@
     border-radius: 4px; /* Rounded corners */
 }
 
+.video-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playback-controls {
+    display: flex;
+    width: 888px; /* This width should be the same as the video width */
+    align-items: center;
+    justify-content: space-between; /* This will place the button at the end */
+    margin-top: 20px; /* Spacing between the video player and the controls */
+}
+
 #layer2 scale-slider {
-    max-width: 900px; /* Max width to match video */
+    flex-grow: 1;
+    margin-right: 1em; /* Add space between slider and button */
+    --width: 888px
 }
 
 #layer2 scale-button {
     margin-top: 1em;
     border-radius: 20px;
 }
+
+#layer2 scale-icon-action-play {
+    margin-top: 1em;
+    --size: 200px;
+}
+
+#layer2 scale-icon-action-pause {
+    margin-top: 1em;
+    border-radius: 20px;
+}
+
 
 #layer2 scale-textarea {
     margin-top: 1em;
@@ -162,15 +190,21 @@
         <div id="layer2" class="layer" style="display: none;">
             <div class="title">Soundlogo Tool</div>
             <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
-            <video id="myVideo" width="888" height="576" muted style="margin-top: 30px;">
-                <source type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar"></scale-slider>
-            <scale-button id="playButton">Play</scale-button>
+            <div class="video-controls">
+                <video id="myVideo" width="888" height="576" muted style="margin-top: 30px;">
+                    <source type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="playback-controls">
+                    <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar";></scale-slider>
+                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074"/>
+                    <!--scale-icon-action-pause id="pauseButton" accessibility-title="pause"  fill="#E20074"/-->
+                </div>
+
+            </div>
+
             <scale-textarea id="keyDisplay" label="Key" value="" readonly></scale-textarea>
-            <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="  --color-text-primary: #000000;
-            "></scale-loading-spinner>
+            <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000";></scale-loading-spinner>
         </div>
         </div>
 
@@ -180,6 +214,7 @@
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
