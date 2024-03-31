@@ -193,12 +193,12 @@
                 Your browser does not support the video tag.
             </video>
             <div class="playback-controls">
-
-                <scale-slider id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue="false"></scale-slider>
-                    <div @click="togglePlayPause" style="display: inline-block; cursor:pointer; margin-top: 23px">
-                        <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
-                        <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
-                    </div>
+            
+                <scale-slider showValue="false" id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" ></scale-slider>
+                <div @click="togglePlayPause" style="display: inline-block; cursor:pointer; margin-top: 23px">
+                    <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
+                    <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
+                </div>
             </div>
 
         </div>
