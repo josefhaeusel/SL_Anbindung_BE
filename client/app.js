@@ -8,6 +8,15 @@ Next Steps:
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
 
 */
+/*
+import { defineCustomElements } from '@telekom/scale-components/loader';
+import '@telekom/scale-components/dist/scale-components/scale-components.css';
+
+defineCustomElements();
+
+const app = Vue.createApp({});
+app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-');
+app.mount('#app');*/
 
 //Global Audio Players and Buffers
 let logoPlayer
@@ -44,6 +53,9 @@ function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const playButton = document.getElementById("playButton");
     const pauseButton = document.getElementById("pauseButton");
     const audioSlider = document.getElementById("audio-playbar");
+    const video = document.getElementById('myVideo');
+    playButton.addEventListener('click', () => {
+    });
 
     playButton.addEventListener("click", function() {
             const normSliderPosition = parseFloat(audioSlider.value);
@@ -62,12 +74,19 @@ function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
 
             updateProgressbar(audioPlayer, audioSlider, currentPosition);
 
+            video.play();
             Tone.Transport.start();
 
             audioPlayer.onstop = function() {
                 Tone.Transport.stop();
             };
         })
+
+    pauseButton.addEventListener("click", function() {
+        console.log("Pause Button pressed");
+        Tone.Transport.stop();
+        video.pause();
+    })
 
 }
 
@@ -273,7 +292,6 @@ async function dropzoneHandlerVideo(file) {
 
 async function videoPlayerHandling(url) {
     const video = document.getElementById('myVideo');
-    const playButton = document.getElementById('playButton');
 
     // Access the <source> elements within the <video>
     const videoSources = video.getElementsByTagName('source')
@@ -300,9 +318,7 @@ async function videoPlayerHandling(url) {
 
     await extractAudioBuffer(videoSource.src);
 
-    playButton.addEventListener('click', () => {
-        video.play();
-    });
+
 
     async function extractAudioBuffer() {
         // Now, video.currentSrc will reflect the updated source URL

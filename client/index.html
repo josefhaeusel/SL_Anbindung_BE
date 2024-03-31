@@ -149,17 +149,6 @@
     border-radius: 20px;
 }
 
-#layer2 scale-icon-action-play {
-    margin-top: 1em;
-    --size: 200px;
-}
-
-#layer2 scale-icon-action-pause {
-    margin-top: 1em;
-    border-radius: 20px;
-}
-
-
 #layer2 scale-textarea {
     margin-top: 1em;
 }
@@ -197,8 +186,8 @@
                 </video>
                 <div class="playback-controls">
                     <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar";></scale-slider>
-                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074"/>
-                    <!--scale-icon-action-pause id="pauseButton" accessibility-title="pause"  fill="#E20074"/-->
+                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074">                  
+                    <scale-icon-action-pause id="pauseButton" accessibility-title="pause" size="40" fill="#E20074">
                 </div>
 
             </div>
@@ -207,7 +196,6 @@
             <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000";></scale-loading-spinner>
         </div>
         </div>
-
     </div>
 
 
