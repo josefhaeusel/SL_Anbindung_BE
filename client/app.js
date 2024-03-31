@@ -1,9 +1,12 @@
 /*
 
 Next Steps:
--App komplett in VueJS übertragen
-    -Checken, ob es Sinn macht verschiedene Layer zu steuern.
+-Soundlogo Choice Hinzufügen
 -Audio Transition mit Filtern
+-Interface (ich: timestamp, download button, key auswahl, evtl. erste page besser)
+(Vincent: .pngs für waveform und soundlogo)
+
+Rendering:
 -FFmpeg trennt audio von video
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
 
@@ -36,7 +39,7 @@ const app = Vue.createApp({
                 this.isLoadingKey = false;
             }
         },
-        
+
         togglePlayPause(){
             this.isPlaying = !this.isPlaying;
         },
