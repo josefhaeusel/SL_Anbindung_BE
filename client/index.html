@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/@telekom/scale-components/dist/scale-components/scale-components.css"/>
     <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
     <script type="module" src="assets/@telekom/scale-components/dist/scale-components/scale-components.esm.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -135,7 +136,7 @@
     width: 888px; /* This width should be the same as the video width */
     align-items: center;
     justify-content: space-between; /* This will place the button at the end */
-    margin-top: 20px; /* Spacing between the video player and the controls */
+    margin: 20px; /* Spacing between the video player and the controls */
 }
 
 #layer2 scale-slider {
@@ -162,6 +163,8 @@
 </head>
 <body>
 
+<div id="app">
+    <!-- First Layer: Upload Area -->
     <div id="layer1" class="layer">
     <div class="container">
         <div class="title">Soundlogo Tool</div>
@@ -186,10 +189,9 @@
                 </video>
                 <div class="playback-controls">
                     <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar";></scale-slider>
-                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074">                  
-                    <scale-icon-action-pause id="pauseButton" accessibility-title="pause" size="40" fill="#E20074">
+                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074"></scale-icon-action-play>                  
+                    <scale-icon-action-pause id="pauseButton" accessibility-title="pause" size="40" fill="#E20074"></scale-icon-action-pause> 
                 </div>
-
             </div>
 
             <scale-textarea id="keyDisplay" label="Key" value="" readonly></scale-textarea>
@@ -198,7 +200,7 @@
         </div>
     </div>
 
-
+</div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>

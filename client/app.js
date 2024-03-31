@@ -54,10 +54,11 @@ function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
     const pauseButton = document.getElementById("pauseButton");
     const audioSlider = document.getElementById("audio-playbar");
     const video = document.getElementById('myVideo');
-    playButton.addEventListener('click', () => {
-    });
 
     playButton.addEventListener("click", function() {
+
+            console.log("Play Button pressed");
+
             const normSliderPosition = parseFloat(audioSlider.value);
             const audioDuration = audioPlayer.buffer.duration;
             let currentPosition;
@@ -74,19 +75,26 @@ function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
 
             updateProgressbar(audioPlayer, audioSlider, currentPosition);
 
+            video.currentTime = currentPosition;
             video.play();
             Tone.Transport.start();
 
             audioPlayer.onstop = function() {
-                Tone.Transport.stop();
+                stopTransports()
             };
         })
 
     pauseButton.addEventListener("click", function() {
-        console.log("Pause Button pressed");
-        Tone.Transport.stop();
-        video.pause();
+        stopTransports()
     })
+
+    function stopTransports(){
+        Tone.Transport.stop();
+        Tone.Transport.cancel()
+        audioPlayer.stop();
+        logoPlayer.stop();
+        video.pause();
+    }
 
 }
 
@@ -95,12 +103,12 @@ function scheduleAudio(audioPlayer, ampEnvelope, audioDuration, currentPosition)
     const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition);
 
     if (secondsTillEnvStart >= 0){
-        Tone.Transport.scheduleOnce((time) => {
+        Tone.Transport.schedule((time) => {
             audioPlayer.start(time, currentPosition);
             ampEnvelope.triggerAttack(time);
             console.log("Go Audio!");
         });
-        Tone.Transport.scheduleOnce((time) => {
+        Tone.Transport.schedule((time) => {
             ampEnvelope.triggerRelease(time, time);
             console.log("Go Envelope!");
         }, secondsTillEnvStart);
@@ -114,7 +122,7 @@ function scheduleLogoSound(logoPlayer, audioDuration, currentPosition) {
 
     if (secondsTillLogoStart >= 0) {
 
-        Tone.Transport.scheduleOnce((time) => {
+        Tone.Transport.schedule((time) => {
             logoPlayer.start(time);
             console.log("Go Logo!");
         }, `+${secondsTillLogoStart}`);
