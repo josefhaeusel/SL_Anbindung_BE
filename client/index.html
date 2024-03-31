@@ -166,13 +166,16 @@
 <div id="app"> 
 
     <!-- First Layer: Upload Area -->
-    <div id="layer1" class="layer">
+
+
+    
+    <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
     <div class="container">
 
         <div class="title">Soundlogo Tool</div>
         <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>
         <div class="upload-area">
-            <input type="file" id="fileInput" accept="video/mp4,video/mov,video/h264"/>
+            <input type="file" id="fileInput" @change="handleFileUpload" accept="video/mp4,video/mov,video/h264"/>
             <span class="upload-instructions">Upload a Video or Drop the File Here</span>
         </div>
         <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >Upload a Video</scale-button>
@@ -180,36 +183,37 @@
     </div>
     </div>
 
-        <!-- Second Layer: Video, Controls, and Key Display -->
-        <div id="layer2" class="layer" style="display: none">
-            <div class="title">Soundlogo Tool</div>
-            <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
-            <div class="video-controls">
-                <video id="myVideo" width="888" height="576" muted style="margin-top: 30px">
-                    <source type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="playback-controls">
+    <!-- Second Layer: Video, Controls, and Key Display -->
+    <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
+        <div class="title">Soundlogo Tool</div>
+        <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
+        <div class="video-controls">
+            <video id="myVideo" width="888" height="576" muted style="margin-top: 30px">
+                <source type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="playback-controls">
 
-                    <scale-slider id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue="false"></scale-slider>
-                        <div @click="togglePlayPause" style="display: inline-block; cursor:pointer; margin-top: 23px">
-                            <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
-                            <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
-                        </div>
-                </div>
-
+                <scale-slider id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue="false"></scale-slider>
+                    <div @click="togglePlayPause" style="display: inline-block; cursor:pointer; margin-top: 23px">
+                        <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
+                        <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
+                    </div>
             </div>
 
-            <scale-textarea id="keyDisplay" label="Key" value="" readonly></scale-textarea>
-            <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000"></scale-loading-spinner>
         </div>
-        </div>
+
+        <scale-textarea v-if="!isLoadingKey" id="keyDisplay" label="Key" :value="key" readonly></scale-textarea>
+        <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000"></scale-loading-spinner>
+    </div>
+    </div>
     </div>
 
 </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
     <script src="app.js"></script>
     
 </body>

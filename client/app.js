@@ -1,8 +1,8 @@
 /*
 
 Next Steps:
--Audio-Video Player vereinheitlichen
--INTERFACE
+-App komplett in VueJS übertragen
+    -Checken, ob es Sinn macht verschiedene Layer zu steuern.
 -Audio Transition mit Filtern
 -FFmpeg trennt audio von video
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
@@ -18,10 +18,25 @@ const app = Vue.createApp({
             playbackPosition: 0.0,
             sliderValue: 0.0,
             audioDuration: 0.0,
+
+            isLoadingKey: false,
+            key: "",
+            currentLayer: "layer1",
+            
         }
     },
 
     methods: {
+        async handleFileUpload(event){
+            const file = event.target.files[0];
+            if (file) {
+                this.currentLayer = "layer2";
+                this.isLoadingKey = true;
+                this.key = await dropzoneHandlerVideo(file);
+                this.isLoadingKey = false;
+            }
+        },
+        
         togglePlayPause(){
             this.isPlaying = !this.isPlaying;
         },
@@ -92,8 +107,6 @@ async function setup() {
 
     videoPlayer = document.getElementById('myVideo');
     Tone.context.createMediaElementSource(videoPlayer);
-
-    makeFileDropzone();
 
     envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
@@ -243,32 +256,7 @@ async function updateLogoBuffer(key){
 }
 
 
-function makeFileDropzone(){
-
-    document.getElementById('fileInput').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            dropzoneHandlerVideo(file)
-            const filepath = file.name;
-            console.log("Dropped File:",filepath);
-        }
-    });
-
-
-}
-
 async function dropzoneHandlerVideo(file) {
-
-    const spinner = document.getElementById('keyLoadingSpinner');
-    const display = document.getElementById('keyDisplay');
-    //Clear Display
-    display.style.display = 'none'
-    display.value = ''
-    //Activate Loadbutton
-    spinner.style.display = 'block';
-
-    document.getElementById('layer1').style.display = 'none';
-    document.getElementById('layer2').style.display = 'flex';
 
     const url = URL.createObjectURL(file);
     await videoPlayerHandling(url)
@@ -277,13 +265,11 @@ async function dropzoneHandlerVideo(file) {
     formData.append('file', file);
 
     const key = await uploadVideo_API(formData);
-    //await updateLogoBuffer(key);
 
-    //Deactivate Loadbutton
-    spinner.style.display = 'none';
-    //Show Result
-    display.value = key;
-    display.style.display = 'block'
+    //TODO await updateLogoBuffer(key);
+
+    return key
+
 
     async function uploadVideo_API() {
         try {
@@ -295,7 +281,6 @@ async function dropzoneHandlerVideo(file) {
             const data = await response.json();
             const key = data.analysis.likely_key;
     
-            console.log('Analysis Result:', data);
             console.log('Key:', key);
     
             return key
@@ -338,8 +323,6 @@ async function videoPlayerHandling(url) {
 
 
     async function extractAudioBuffer() {
-        // Now, video.currentSrc will reflect the updated source URL
-        console.log("video.src:", videoSource.src);
 
         try {
             const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource.src);
