@@ -163,6 +163,7 @@
 </head>
 <body>
 
+<div id="app"> 
 
     <!-- First Layer: Upload Area -->
     <div id="layer1" class="layer">
@@ -177,39 +178,39 @@
             <input type="file" id="fileInput" accept="video/mp4,video/mov,video/h264"/>
             <span class="upload-instructions">Upload a Video or Drop the File Here</span>
         </div>
-        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px ;" >Upload a Video</scale-button>
+        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >Upload a Video</scale-button>
         <div class="format-info">Allowed Formats: MPEG-4, MOV, H264</div>
     </div>
     </div>
 
         <!-- Second Layer: Video, Controls, and Key Display -->
-        <div id="layer2" class="layer" style="display: none;">
+        <div id="layer2" class="layer" style="display: none">
             <div class="title">Soundlogo Tool</div>
             <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
             <div class="video-controls">
-                <video id="myVideo" width="888" height="576" muted style="margin-top: 30px;">
+                <video id="myVideo" width="888" height="576" muted style="margin-top: 30px">
                     <source type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 <div class="playback-controls">
-<div id="app"> 
-                    <scale-slider id="playbarSlider"@mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue=false></scale-slider>
+
+                    <scale-slider id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue=false></scale-slider>
                         <div @click="togglePlayPause" style="display: inline-block; cursor:pointer">
                             <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
                             <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
                         </div>
-</div>
+
                 </div>
 
             </div>
 
             <scale-textarea id="keyDisplay" label="Key" value="" readonly></scale-textarea>
-            <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000";></scale-loading-spinner>
+            <scale-loading-spinner id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000"></scale-loading-spinner>
         </div>
         </div>
     </div>
 
-
+</div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>

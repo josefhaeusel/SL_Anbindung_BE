@@ -9,6 +9,7 @@ Next Steps:
 
 */
 
+//--- VueJS Part
 const app = Vue.createApp({
 
     data() { 
@@ -26,17 +27,16 @@ const app = Vue.createApp({
         },
         startPlayback(){
             this.audioDuration = audioPlayer.buffer.duration;
-            this.sliderToPosition();
             startTransports(this.playbackPosition, this.audioDuration);
             this.updateProgressbar(this.playbackPosition);
         },
         stopPlayback(){
-            stopTransports()
-            console.log("Stop Playing")
+            stopTransports();
+            this.sliderToPosition();
         },
         setPosition(event){
             this.sliderValue = event.target.value;
-            this.sliderToPosition()
+            this.sliderToPosition();
         },
         sliderToPosition(){
             if (this.sliderValue < 1 && this.sliderValue > 0){
@@ -48,19 +48,23 @@ const app = Vue.createApp({
         },
         updateProgressbar() {
             // Accessing the slider with `this.$refs.audioSlider`
-            const audioSlider = document.getElementById("playbarSlider")    
+            const playbar = document.getElementById("playbarSlider")    
             // Ensure audioSlider is rendered and exists
-            if (audioSlider) {
+            if (playbar) {
                 const timeNow = Tone.now();
     
                 Tone.Transport.scheduleRepeat((time) => {
                     const progress = (((time-timeNow)+this.playbackPosition) / audioPlayer.buffer.duration);
                     // Here, you might need to directly manipulate the DOM element
                     // associated with the Vue component, depending on the component structure
-                    audioSlider.value = progress;
+                    playbar.value = progress;
                     this.sliderValue = progress;
-                    console.log("Slider Value",this.sliderValue)
-                }, 0.01);
+
+                    if (this.isPlaying==true&&this.sliderValue>1){
+                        this.isPlaying = false;
+                    }
+
+                }, 0.005);
             }
         },
     }
@@ -110,37 +114,6 @@ function startTransports(currentPosition, audioDuration){
         stopTransports()
     }
 }
-
-/*function startTransports(currentPosition, audioDuration){
-
-    //Als Key definieren
-    const audioSlider = document.getElementById("audio-playbar");
-
-    console.log("Play Button pressed");
-
-    const normSliderPosition = parseFloat(audioSlider.value);
-    const audioDuration = audioPlayer.buffer.duration;
-    let currentPosition;
-
-    if (normSliderPosition < 1){
-        currentPosition = audioDuration * normSliderPosition;
-        currentPosition = forceStartBeforeLogo(audioDuration, currentPosition)
-    } else{
-        currentPosition = 0
-    }
-
-    scheduleAudio(audioDuration, currentPosition);
-    scheduleLogoSound(audioDuration, currentPosition);
-    //updateProgressbar(audioSlider, currentPosition);
-
-    videoPlayer.currentTime = currentPosition;
-    videoPlayer.play();
-    Tone.Transport.start();
-
-    audioPlayer.onstop = function() {
-        stopTransports()
-    }
-}*/
 
 function stopTransports(){
     Tone.Transport.stop();
