@@ -8,21 +8,74 @@ Next Steps:
 -Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
 
 */
-/*
-import { defineCustomElements } from '@telekom/scale-components/loader';
-import '@telekom/scale-components/dist/scale-components/scale-components.css';
 
-defineCustomElements();
+const app = Vue.createApp({
 
-const app = Vue.createApp({});
-app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-');
-app.mount('#app');*/
+    data() { 
+        return  {
+            isPlaying: false,
+            playbackPosition: 0.0,
+            sliderValue: 0.0,
+            audioDuration: 0.0,
+        }
+    },
+
+    methods: {
+        togglePlayPause(){
+            this.isPlaying = !this.isPlaying;
+        },
+        startPlayback(){
+            this.audioDuration = audioPlayer.buffer.duration;
+            this.sliderToPosition();
+            startTransports(this.playbackPosition, this.audioDuration);
+            this.updateProgressbar(this.playbackPosition);
+        },
+        stopPlayback(){
+            stopTransports()
+            console.log("Stop Playing")
+        },
+        setPosition(event){
+            this.sliderValue = event.target.value;
+            this.sliderToPosition()
+        },
+        sliderToPosition(){
+            if (this.sliderValue < 1 && this.sliderValue > 0){
+                this.playbackPosition = this.audioDuration * this.sliderValue;
+                this.playbackPosition = forceStartBeforeLogo(this.audioDuration, this.playbackPosition)
+            } else{
+                this.playbackPosition = 0
+            }
+        },
+        updateProgressbar() {
+            // Accessing the slider with `this.$refs.audioSlider`
+            const audioSlider = document.getElementById("playbarSlider")    
+            // Ensure audioSlider is rendered and exists
+            if (audioSlider) {
+                const timeNow = Tone.now();
+    
+                Tone.Transport.scheduleRepeat((time) => {
+                    const progress = (((time-timeNow)+this.playbackPosition) / audioPlayer.buffer.duration);
+                    // Here, you might need to directly manipulate the DOM element
+                    // associated with the Vue component, depending on the component structure
+                    audioSlider.value = progress;
+                    this.sliderValue = progress;
+                    console.log("Slider Value",this.sliderValue)
+                }, 0.01);
+            }
+        },
+    }
+})
+
+app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-')
+app.mount('#app')
+
 
 //Global Audio Players and Buffers
 let logoPlayer
 let logoBuffers
 let audioPlayer
-//let audioBuffer
+let envelope
+let videoPlayer
 
 async function setup() {
 
@@ -33,90 +86,89 @@ async function setup() {
 
     }
 
-    const video = document.getElementById('myVideo');
-    Tone.context.createMediaElementSource(video);
+    videoPlayer = document.getElementById('myVideo');
+    Tone.context.createMediaElementSource(videoPlayer);
 
     makeFileDropzone();
 
-    const envelope = await ampEnvelope();
+    envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
     await loadLogoBuffers();
     logoPlayer = await loadLogoPlayer();
-
-   // await videoPlayerHandling();
-
-    playbackHandler(audioPlayer, envelope, logoPlayer);
 }
 
+function startTransports(currentPosition, audioDuration){
 
-function playbackHandler(audioPlayer, ampEnvelope, logoPlayer) {
-    const playButton = document.getElementById("playButton");
-    const pauseButton = document.getElementById("pauseButton");
-    const audioSlider = document.getElementById("audio-playbar");
-    const video = document.getElementById('myVideo');
+    scheduleAudio(audioDuration, currentPosition);
+    scheduleLogoSound(audioDuration, currentPosition);
 
-    playButton.addEventListener("click", function() {
+    videoPlayer.currentTime = currentPosition;
+    videoPlayer.play();
+    Tone.Transport.start();
 
-            console.log("Play Button pressed");
-
-            const normSliderPosition = parseFloat(audioSlider.value);
-            const audioDuration = audioPlayer.buffer.duration;
-            let currentPosition;
-
-            if (normSliderPosition < 1){
-                currentPosition = audioDuration * normSliderPosition;
-                currentPosition = forceStartBeforeLogo(audioDuration, currentPosition)
-            } else{
-                currentPosition = 0
-            }
-
-            scheduleAudio(audioPlayer, ampEnvelope, audioDuration, currentPosition);
-            scheduleLogoSound(logoPlayer, audioDuration, currentPosition);
-
-            updateProgressbar(audioPlayer, audioSlider, currentPosition);
-
-            video.currentTime = currentPosition;
-            video.play();
-            Tone.Transport.start();
-
-            audioPlayer.onstop = function() {
-                stopTransports()
-            };
-        })
-
-    pauseButton.addEventListener("click", function() {
+    audioPlayer.onstop = function() {
         stopTransports()
-    })
+    }
+}
 
-    function stopTransports(){
-        Tone.Transport.stop();
-        Tone.Transport.cancel()
-        audioPlayer.stop();
-        logoPlayer.stop();
-        video.pause();
+/*function startTransports(currentPosition, audioDuration){
+
+    //Als Key definieren
+    const audioSlider = document.getElementById("audio-playbar");
+
+    console.log("Play Button pressed");
+
+    const normSliderPosition = parseFloat(audioSlider.value);
+    const audioDuration = audioPlayer.buffer.duration;
+    let currentPosition;
+
+    if (normSliderPosition < 1){
+        currentPosition = audioDuration * normSliderPosition;
+        currentPosition = forceStartBeforeLogo(audioDuration, currentPosition)
+    } else{
+        currentPosition = 0
     }
 
+    scheduleAudio(audioDuration, currentPosition);
+    scheduleLogoSound(audioDuration, currentPosition);
+    //updateProgressbar(audioSlider, currentPosition);
+
+    videoPlayer.currentTime = currentPosition;
+    videoPlayer.play();
+    Tone.Transport.start();
+
+    audioPlayer.onstop = function() {
+        stopTransports()
+    }
+}*/
+
+function stopTransports(){
+    Tone.Transport.stop();
+    Tone.Transport.cancel()
+    audioPlayer.stop();
+    logoPlayer.stop();
+    videoPlayer.pause();
 }
 
-function scheduleAudio(audioPlayer, ampEnvelope, audioDuration, currentPosition){
+function scheduleAudio(audioDuration, currentPosition){
 
     const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition);
 
     if (secondsTillEnvStart >= 0){
         Tone.Transport.schedule((time) => {
             audioPlayer.start(time, currentPosition);
-            ampEnvelope.triggerAttack(time);
+            envelope.triggerAttack(time);
             console.log("Go Audio!");
         });
         Tone.Transport.schedule((time) => {
-            ampEnvelope.triggerRelease(time, time);
+            envelope.triggerRelease(time, time);
             console.log("Go Envelope!");
         }, secondsTillEnvStart);
     }
 
 }
 
-function scheduleLogoSound(logoPlayer, audioDuration, currentPosition) {
+function scheduleLogoSound(audioDuration, currentPosition) {
 
     const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition);
 
@@ -155,17 +207,6 @@ function forceStartBeforeLogo(audioDuration, currentPosition){
     else{
         return currentPosition
     }
-}
-
-function updateProgressbar(audioPlayer, audioSlider, currentPosition){
-
-    const timeNow = Tone.now();
-
-    Tone.Transport.scheduleRepeat(function(time) {
-    const progress = (((time-timeNow)+currentPosition) / audioPlayer.buffer.duration);
-    audioSlider.value = progress;
-}, 0.01)
-
 }
 
 async function loadLogoBuffers(){
@@ -231,10 +272,6 @@ async function updateLogoBuffer(key){
 
 function makeFileDropzone(){
 
-    /*document.getElementById('dropzone').addEventListener('click', function() {
-        document.getElementById('fileInput').click();
-    });*/
-
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -299,10 +336,9 @@ async function dropzoneHandlerVideo(file) {
 }
 
 async function videoPlayerHandling(url) {
-    const video = document.getElementById('myVideo');
 
     // Access the <source> elements within the <video>
-    const videoSources = video.getElementsByTagName('source')
+    const videoSources = videoPlayer.getElementsByTagName('source')
     let videoSource;
 
     if (videoSources.length > 0) {
@@ -320,7 +356,7 @@ async function videoPlayerHandling(url) {
 
     videoSource.src = url;
     
-    await video.load();
+    await videoPlayer.load();
 
     console.log("Video Source Updated", videoSource.src)
 

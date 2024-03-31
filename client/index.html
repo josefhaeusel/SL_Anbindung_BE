@@ -163,10 +163,14 @@
 </head>
 <body>
 
-<div id="app">
+
     <!-- First Layer: Upload Area -->
     <div id="layer1" class="layer">
     <div class="container">
+
+
+
+
         <div class="title">Soundlogo Tool</div>
         <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>
         <div class="upload-area">
@@ -188,10 +192,15 @@
                     Your browser does not support the video tag.
                 </video>
                 <div class="playback-controls">
-                    <scale-slider value="0.0" step="0.001" max="1.0" showValue=false id="audio-playbar";></scale-slider>
-                    <scale-icon-action-play id="playButton" accessibility-title="play" size= "40"  fill="#E20074"></scale-icon-action-play>                  
-                    <scale-icon-action-pause id="pauseButton" accessibility-title="pause" size="40" fill="#E20074"></scale-icon-action-pause> 
+<div id="app"> 
+                    <scale-slider id="playbarSlider"@mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" showValue=false></scale-slider>
+                        <div @click="togglePlayPause" style="display: inline-block; cursor:pointer">
+                            <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
+                            <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
+                        </div>
+</div>
                 </div>
+
             </div>
 
             <scale-textarea id="keyDisplay" label="Key" value="" readonly></scale-textarea>
@@ -200,7 +209,7 @@
         </div>
     </div>
 
-</div>
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
