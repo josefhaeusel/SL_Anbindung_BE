@@ -108,8 +108,7 @@ async function setup() {
 
     }
 
-    videoPlayer = document.getElementById('myVideo');
-    Tone.context.createMediaElementSource(videoPlayer);
+    videoPlayer = videojs('myVideo')
 
     envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
@@ -122,7 +121,7 @@ function startTransports(currentPosition, audioDuration){
     scheduleAudio(audioDuration, currentPosition);
     scheduleLogoSound(audioDuration, currentPosition);
 
-    videoPlayer.currentTime = currentPosition;
+    videoPlayer.setCurrentTime = currentPosition;
     videoPlayer.play();
     Tone.Transport.start();
 
@@ -299,7 +298,7 @@ async function dropzoneHandlerVideo(file) {
 async function videoPlayerHandling(url) {
 
     // Access the <source> elements within the <video>
-    const videoSources = videoPlayer.getElementsByTagName('source')
+    /*const videoSources = videoPlayer.getElementsByTagName('source')
     let videoSource;
 
     if (videoSources.length > 0) {
@@ -313,22 +312,21 @@ async function videoPlayerHandling(url) {
     if (oldObjectUrl && oldObjectUrl.startsWith('blob:')) {
         // Revoke the old blob URL
         URL.revokeObjectURL(oldObjectUrl);
-    }
+    }*/
 
-    videoSource.src = url;
+    videoPlayer.src({
+        type: 'video/mp4',
+        src: url
+    });
     
     await videoPlayer.load();
 
-    console.log("Video Source Updated", videoSource.src)
+    await extractAudioBuffer(url);
 
-    await extractAudioBuffer(videoSource.src);
-
-
-
-    async function extractAudioBuffer() {
+    async function extractAudioBuffer(url) {
 
         try {
-            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(videoSource.src);
+            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
             console.log("Audio buffer loaded:", audioBuffer);
 
             audioPlayer.buffer = audioBuffer;
