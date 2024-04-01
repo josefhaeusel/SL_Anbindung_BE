@@ -29,6 +29,11 @@ const app = Vue.createApp({
         }
     },
 
+    mounted(){
+        this.$refs.myVideo.addEventListener('play', this.startPlayback);
+        this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
+    },
+
     methods: {
         async handleFileUpload(event){
             const file = event.target.files[0];
@@ -39,51 +44,13 @@ const app = Vue.createApp({
                 this.isLoadingKey = false;
             }
         },
-
-        togglePlayPause(){
-            this.isPlaying = !this.isPlaying;
-        },
         startPlayback(){
             this.audioDuration = audioPlayer.buffer.duration;
+            this.playbackPosition = videoPlayer.currentTime();
             startTransports(this.playbackPosition, this.audioDuration);
-            this.updateProgressbar(this.playbackPosition);
         },
         stopPlayback(){
             stopTransports();
-            this.sliderToPosition();
-        },
-        setPosition(event){
-            this.sliderValue = event.target.value;
-            this.sliderToPosition();
-        },
-        sliderToPosition(){
-            if (this.sliderValue < 1 && this.sliderValue > 0){
-                this.playbackPosition = this.audioDuration * this.sliderValue;
-                this.playbackPosition = forceStartBeforeLogo(this.audioDuration, this.playbackPosition)
-            } else{
-                this.playbackPosition = 0
-            }
-        },
-        updateProgressbar() {
-            // Accessing the slider with `this.$refs.audioSlider`
-            const playbar = document.getElementById("playbarSlider")    
-            // Ensure audioSlider is rendered and exists
-            if (playbar) {
-                const timeNow = Tone.now();
-    
-                Tone.Transport.scheduleRepeat((time) => {
-                    const progress = (((time-timeNow)+this.playbackPosition) / audioPlayer.buffer.duration);
-                    // Here, you might need to directly manipulate the DOM element
-                    // associated with the Vue component, depending on the component structure
-                    playbar.value = progress;
-                    this.sliderValue = progress;
-
-                    if (this.isPlaying==true&&this.sliderValue>1){
-                        this.isPlaying = false;
-                    }
-
-                }, 0.005);
-            }
         },
     }
 })
@@ -296,23 +263,6 @@ async function dropzoneHandlerVideo(file) {
 }
 
 async function videoPlayerHandling(url) {
-
-    // Access the <source> elements within the <video>
-    /*const videoSources = videoPlayer.getElementsByTagName('source')
-    let videoSource;
-
-    if (videoSources.length > 0) {
-        videoSource = videoSources[0];
-    }
-
-    console.log("Video Source Old", videoSource.src)
-    console.log("New Video URL", url)
-
-    const oldObjectUrl = videoSource.src;
-    if (oldObjectUrl && oldObjectUrl.startsWith('blob:')) {
-        // Revoke the old blob URL
-        URL.revokeObjectURL(oldObjectUrl);
-    }*/
 
     videoPlayer.src({
         type: 'video/mp4',

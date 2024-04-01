@@ -237,27 +237,15 @@
         <div class="title">Soundlogo Tool</div>
         <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
         <div class="video-controls">
-            <video id="myVideo" class="video-js vjs-theme-forest" data-setup='{"width": 1000, "font-family": "TeleNeo"}'
+            <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" data-setup='{"width": 1000, "font-family": "TeleNeo"}'
             controls
-            muted
-            >
+            muted>
                 <p class="vjs-no-js">
                     To view this video please enable JavaScript, and consider upgrading to a
                     web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank"
-                      >supports HTML5 video</a
-                    >
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
                   </p>
             </video>
-            <div class="playback-controls">
-            
-                <scale-slider showValue="false" id="playbarSlider" @mousedown="stopPlayback" @mouseup=setPosition value="0.00" step="0.001" decimals="3" max="1.0" ></scale-slider>
-                <div @click="togglePlayPause" style="display: inline-block; cursor:pointer; margin-top: 23px">
-                    <scale-icon-action-play v-if="!isPlaying"  @click="startPlayback"size= "40"  fill="#E20074"></scale-icon-action-play>                  
-                    <scale-icon-action-pause v-if="isPlaying" @click="stopPlayback" size="40" fill="#E20074"></scale-icon-action-pause>
-                </div>
-            </div>
-
         </div>
 
         <scale-textarea v-if="!isLoadingKey" id="keyDisplay" label="Key" :value="key" readonly></scale-textarea>
