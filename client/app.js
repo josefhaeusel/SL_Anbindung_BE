@@ -30,7 +30,7 @@ const app = Vue.createApp({
                 { id: '1', key: '' },
                 { id: '2', key: '' }
               ],
-            selectedKey: {id:'0',key:''},
+            selectedKey: {id:'1',key:''},
             
         }
     },
@@ -316,7 +316,7 @@ function keyToScale(key){
     const subdominant = keyArray[subdominant_id];
     const dominant = keyArray[dominant_id];
 
-    const scale = [key, subdominant, dominant]
+    const scale = [subdominant, key, dominant]
     console.log("Scale", scale)
 
     return scale

@@ -18,7 +18,7 @@
             flex-direction: column;
             align-items: center;
             font-family: 'TeleNeo', sans-serif;
-            background: #F2F2F2;
+            background: #FFFFFF;
         }
 
         .title, .description {
@@ -184,7 +184,7 @@
     height: auto;
     right: 0; /* Align to the right edge of the container */
     width: auto; /* Adjust width as needed */
-    transform: translateX(300px);
+    transform: translateX(270px);
 }
 
 .key-label {
@@ -196,7 +196,7 @@
 .waveform {
     width: 100%; /* Full width of the container */
     height: 100%;
-    background: url('waveform.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space without being cut off */
+    background: url('assets/waveform.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space without being cut off */
     position: absolute;
     left: 0;
 }
@@ -204,7 +204,7 @@
 .soundlogo {
     width: 100px; /* Set a fixed width for the soundlogo */
     height: 100%;
-    background: url('soundlogo.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space */
+    background: url('assets/soundlogo.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space */
     position: absolute;
     right: 0;
 }
@@ -250,6 +250,7 @@
             <input type="file" id="fileInput" @change="handleFileUpload" accept="video/mp4,video/mov,video/h264"/>
             <span class="upload-instructions">Upload a Video or Drop the File Here</span>
         </div>
+        
         <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >
             <scale-icon-action-upload-to-cloud></scale-icon-action-upload-to-cloud> Upload a Video</scale-button>
         <div class="format-info">Allowed Formats: MPEG-4, MOV, H264</div>
@@ -283,11 +284,18 @@
             <transition name="fade">
                 <div class="key-label"v-if="!isLoadingKey">Soundlogo Key:</div>
             </transition>
-            <transition name="fade">
-                <scale-segmented-button v-if="!isLoadingKey" id="keyDisplay" v-model="selectedKey" >
-                    <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id" @click="updateLogoKey(item.id)">{{item.key}}</option>
-                </scale-segmented-button>
-            </transition>
+                <scale-tooltip v-if="!isLoadingKey" placement="bottom" style="--font-size: 12"> 
+                    <span slot="content">
+                            <scale-icon-content-heart size="12" selected></scale-icon-content-heart>
+                            Recommended
+                    </span>
+                        <transition name="fade">
+                            <scale-segmented-button v-if="!isLoadingKey" id="keyDisplay" v-model="selectedKey" size="medium" >
+                                <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id" @click="updateLogoKey(item.id)">{{item.key}}</option>
+                            </scale-segmented-button>
+                        </transition>
+                </scale-tooltip>
+
         </div>
     </div>
     </div>
