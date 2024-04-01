@@ -13,18 +13,24 @@ Rendering:
 */
 
 //--- VueJS Part
+
 const app = Vue.createApp({
 
     data() { 
         return  {
-            isPlaying: false,
+            currentLayer: "layer1",
+
             playbackPosition: 0.0,
             sliderValue: 0.0,
             audioDuration: 0.0,
 
-            isLoadingKey: false,
-            key: "",
-            currentLayer: "layer1",
+            isLoadingKey: true,
+            soundlogoKeys: [
+                { id: '0', key: '' },
+                { id: '1', key: '' },
+                { id: '2', key: '' }
+              ],
+            selectedKey: {id:'0',key:''},
             
         }
     },
@@ -39,8 +45,11 @@ const app = Vue.createApp({
             const file = event.target.files[0];
             if (file) {
                 this.currentLayer = "layer2";
-                this.isLoadingKey = true;
-                this.key = await dropzoneHandlerVideo(file);
+                const keys = await dropzoneHandlerVideo(file);
+                for (let x = 0; x < this.soundlogoKeys.length; x++){
+                    this.soundlogoKeys[x].key = keys[x];
+                }
+                console.log(this.soundlogoKeys);
                 this.isLoadingKey = false;
             }
         },
@@ -52,6 +61,12 @@ const app = Vue.createApp({
         stopPlayback(){
             stopTransports();
         },
+        updateLogoKey(id){
+            this.selectedKey.id = id;
+            this.selectedKey.key = this.soundlogoKeys[id]
+            console.log("Selected Key", this.selectedKey.key)
+            //updateLogoBuffer(this.selectedKey.key )
+        }
     }
 })
 
@@ -218,9 +233,8 @@ async function updateMainAudioBuffer(filepath){
 }
 
 async function updateLogoBuffer(key){
-    const tonality = logoKeyMap[key];
-    console.log("Updated Logo Buffer Key:", tonality);
-    const logoBuffer = logoBuffers.get(tonality);
+    console.log("Updated Logo Buffer Key:", key);
+    const logoBuffer = logoBuffers.get(key);
     logoPlayer.buffer = logoBuffer;
 }
 
@@ -233,11 +247,14 @@ async function dropzoneHandlerVideo(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const key = await uploadVideo_API(formData);
-
+    let key = await uploadVideo_API(formData);
+    key = logoKeyMap[key];
+    
+    console.log('Key:', key);
+    const scale = keyToScale(key)
     //TODO await updateLogoBuffer(key);
 
-    return key
+    return scale
 
 
     async function uploadVideo_API() {
@@ -249,8 +266,6 @@ async function dropzoneHandlerVideo(file) {
 
             const data = await response.json();
             const key = data.analysis.likely_key;
-    
-            console.log('Key:', key);
     
             return key
     
@@ -286,6 +301,28 @@ async function videoPlayerHandling(url) {
     }
 }
 
+function keyToScale(key){
+    const keyArray = ['C','C#','D','E','F','F#','G','G#','A','A#','B']
+    let keyIndex
+    for (x = 0; x < keyArray.length; x++){
+        if(key === keyArray[x]){
+            keyIndex=x
+        }
+    };
+
+    const subdominant_id = ((keyIndex+5)%12);
+    const dominant_id = ((keyIndex+7)%12);
+
+    const subdominant = keyArray[subdominant_id];
+    const dominant = keyArray[dominant_id];
+
+    const scale = [key, subdominant, dominant]
+    console.log("Scale", scale)
+
+    return scale
+
+}
+
 const logoKeyMap = {
 
     'A minor': 'C',
@@ -315,5 +352,6 @@ const logoKeyMap = {
     'G# major': 'G#',
 
 }
+
 
 setup();

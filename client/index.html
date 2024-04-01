@@ -119,44 +119,12 @@
     z-index: 10; /* Ensure it's above other content */
 }
 
-#layer2 video {
-    /*max-width: 900px; /* Max width for video */
-    /*height: auto; /* Auto height for aspect ratio */
-    border-radius: 4px; /* Rounded corners */
-}
-
 .video-controls {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.playback-controls {
-    display: flex;
-    width: 888px; /* This width should be the same as the video width */
-    align-items: center;
-    justify-content: space-between; /* This will place the button at the end */
-    margin: 20px; /* Spacing between the video player and the controls */
-}
-
-#layer2 scale-slider {
-    flex-grow: 1;
-    margin-right: 1em; /* Add space between slider and button */
-    --width: 888px
-}
-
-#layer2 scale-button {
-    margin-top: 1em;
-    border-radius: 20px;
-}
-
-#layer2 scale-textarea {
-    margin-top: 1em;
-}
-
-#layer2 scale-loading-spinner {
-    margin-top: 1em;
-}
 .video-js.vjs-theme-forest .vjs-play-progress {background-color: #E20074} 
   .video-js.vjs-theme-forest .vjs-playback-rate{display: none}
   .vjs-big-play-button{background-color: #E20074}
@@ -199,12 +167,67 @@
     .video-js.vjs-theme-forest .vjs-mouse-display {
         display: block;
     }
+    .video-timeline-container {
+    width: 900px;
+    height: 50px; /* Adjust as needed */
+    position: relative;
+    margin: 20px auto; /* Center container */
+    overflow: hidden; /* Ensures that all content fits inside the container */
+}
 
+.key-container {
+    display: flex;
+    align-items: center; /* Center items vertically */
+    justify-content: flex-start; /* Align items to the start of the container */
+    gap: 10px; /* Add some space between the label and the button */
+    position: relative;
+    height: auto;
+    right: 0; /* Align to the right edge of the container */
+    width: auto; /* Adjust width as needed */
+    transform: translateX(300px);
+}
 
+.key-label {
+    font-size: 20px; /* Set label font size */
+    font-weight: bold; /* Set label font weight */
+    color: #000; /* Set label color to black */
+}
 
+.waveform {
+    width: 100%; /* Full width of the container */
+    height: 100%;
+    background: url('waveform.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space without being cut off */
+    position: absolute;
+    left: 0;
+}
 
+.soundlogo {
+    width: 100px; /* Set a fixed width for the soundlogo */
+    height: 100%;
+    background: url('soundlogo.png') no-repeat center center / 100% 100%; /* Adjust background size to fill space */
+    position: absolute;
+    right: 0;
+}
+#layer2 scale-loading-spinner{
+    position: absolute;
+    height:100%;
+    right: 0;
+    z-index: 2;
+    --color-text-primary: #000000;
+}
 
-
+.fade-enter-from,
+.fade-leave-to{
+ opacity: 0;
+}
+.fade-enter-to,
+.fade-leave-from{
+ opacity: 1;
+}
+.fade-enter-active,
+.fade-leave-active{
+ transition: opacity 0.8s ease-in-out;
+}
 
     </style>
 </head>
@@ -227,7 +250,8 @@
             <input type="file" id="fileInput" @change="handleFileUpload" accept="video/mp4,video/mov,video/h264"/>
             <span class="upload-instructions">Upload a Video or Drop the File Here</span>
         </div>
-        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >Upload a Video</scale-button>
+        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >
+            <scale-icon-action-upload-to-cloud></scale-icon-action-upload-to-cloud> Upload a Video</scale-button>
         <div class="format-info">Allowed Formats: MPEG-4, MOV, H264</div>
     </div>
     </div>
@@ -237,7 +261,7 @@
         <div class="title">Soundlogo Tool</div>
         <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.</div>    
         <div class="video-controls">
-            <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" data-setup='{"width": 1000, "font-family": "TeleNeo"}'
+            <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" data-setup='{"width": 1000, "font-family": "TeleNeo"}' style="border-radius: 10px"
             controls
             muted>
                 <p class="vjs-no-js">
@@ -248,14 +272,27 @@
             </video>
         </div>
 
-        <scale-textarea v-if="!isLoadingKey" id="keyDisplay" label="Key" :value="key" readonly></scale-textarea>
-        <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" text="Loading Key..." size="large" style="--color-text-primary: #000000"></scale-loading-spinner>
+        <div class="video-timeline-container">
+            <div class="waveform"></div>
+            <transition name="fade">
+                <div class="soundlogo" v-if="!isLoadingKey"></div>
+            </transition>
+            <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"></scale-loading-spinner>
+        </div>
+        <div class="key-container">
+            <transition name="fade">
+                <div class="key-label"v-if="!isLoadingKey">Soundlogo Key:</div>
+            </transition>
+            <transition name="fade">
+                <scale-segmented-button v-if="!isLoadingKey" id="keyDisplay" v-model="selectedKey" >
+                    <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id" @click="updateLogoKey(item.id)">{{item.key}}</option>
+                </scale-segmented-button>
+            </transition>
+        </div>
     </div>
     </div>
     </div>
-
 </div>
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
