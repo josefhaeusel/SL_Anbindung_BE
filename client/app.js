@@ -1,6 +1,7 @@
 /*
 
 Next Steps:
+-Ending Varianten im Timing rausfinden
 -Soundlogo Choice Hinzufügen
 -Audio Transition mit Filtern
 -Interface (ich: timestamp, download button, key auswahl, evtl. erste page besser)
