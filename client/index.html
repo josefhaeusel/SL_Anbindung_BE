@@ -133,14 +133,14 @@
   .video-js.vjs-theme-forest .vjs-fullscreen-control{display:none}
   .video-js.vjs-theme-forest .vjs-picture-in-picture-control{display: none;}
     .video-js.vjs-theme-forest  .vjs-big-play-button {
-    background-image: url('assets/icons/play/default.png'); /* Path to your custom icon */
+    background-image: url('assets/icons/play_nb/default.png'); /* Path to your custom icon */
     background-repeat: no-repeat;
     background-position: center; /* Center the icon */
     background-size: contain;
     width: 80px;
     height: 80px;
     }
-    .video-js.vjs-theme-forest .vjs-big-play-button:hover {background-image: url('assets/icons/play/selected.png')}
+    .video-js.vjs-theme-forest .vjs-big-play-button:hover {background-image: url('assets/icons/play_nb/selected.png')}
     .video-js.vjs-theme-forest .vjs-play-control .vjs-icon-placeholder::before {
         content: none !important;
         display: none
@@ -292,7 +292,6 @@
             <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"></scale-loading-spinner>
         </div>
         <div class="key-container">
-
 
             <transition name="fade">
             <scale-button v-if="!isLoadingKey"class="download-video-button" @click="downloadVideo" style="left:0" >
