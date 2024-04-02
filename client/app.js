@@ -66,7 +66,11 @@ const app = Vue.createApp({
             this.selectedKey.key = this.soundlogoKeys[id]
             console.log("Selected Key", this.selectedKey.key)
             //updateLogoBuffer(this.selectedKey.key )
-        }
+        },
+        downloadVideo(){},
+        downloadAudio(){},
+
+
     }
 })
 
@@ -302,7 +306,7 @@ async function videoPlayerHandling(url) {
 }
 
 function keyToScale(key){
-    const keyArray = ['C','C#','D','E','F','F#','G','G#','A','A#','B']
+    const keyArray = ['C','C#','D', 'D#','E','F','F#','G','G#','A','A#','B']
     let keyIndex
     for (x = 0; x < keyArray.length; x++){
         if(key === keyArray[x]){
@@ -310,8 +314,8 @@ function keyToScale(key){
         }
     };
 
-    const subdominant_id = ((keyIndex+5)%12);
-    const dominant_id = ((keyIndex+7)%12);
+    const subdominant_id = ((keyIndex+5)%keyArray.length);
+    const dominant_id = ((keyIndex+7)%keyArray.length);
 
     const subdominant = keyArray[subdominant_id];
     const dominant = keyArray[dominant_id];
