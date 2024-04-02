@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { ChordRetrievalAiModule } from './chord_retrieval_ai/chord_retrieval_ai.module';
+import { AudioVideoService } from './audio-video/audio-video.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { ChordRetrievalAiModule } from './chord_retrieval_ai/chord_retrieval_ai.
       rootPath: join(__dirname, '..', 'client'),
     }),],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AudioVideoService],
 })
 export class AppModule {}
