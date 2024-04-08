@@ -80,7 +80,7 @@ export class AudioVideoService {
         .addInput(inputAudioPath)
         .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
         .audioCodec(audioCodec.codec_name)
-        .format('mp4')
+        .format(inputVideoPathExt.replace('.', ''))
         .on('error', (error) => {
           this.logger.error('error:', error);
 
