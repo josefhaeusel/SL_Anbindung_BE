@@ -2,10 +2,11 @@
 
 Next Steps:
 -Ending Varianten im Timing rausfinden
--Soundlogo Choice Hinzufügen
+-12 Tonarten (nächste Woche)
 -Audio Transition mit Filtern
--Interface (ich: timestamp, download button, key auswahl, evtl. erste page besser)
-(Vincent: .pngs für waveform und soundlogo)
+-Pop-up "Soundlogo bei Sekunde X angebunden"
+-Cue-Point für Anbindung
+-Vuetify
 
 Rendering:
 -FFmpeg trennt audio von video
@@ -20,10 +21,12 @@ const app = Vue.createApp({
     data() { 
         return  {
             currentLayer: "layer1",
+            showModal: false,
 
-            playbackPosition: 0.0,
-            sliderValue: 0.0,
-            audioDuration: 0.0,
+            playbackPosition: 0,
+            sliderValue: 0,
+            audioDuration: 0,
+            soundlogoPosition: 0,
 
             isLoadingKey: true,
             soundlogoKeys: [
@@ -42,6 +45,10 @@ const app = Vue.createApp({
     },
 
     methods: {
+        setModal(show){
+            this.showModal = show
+        },
+
         async handleFileUpload(event){
             const file = event.target.files[0];
             if (file) {
@@ -50,12 +57,17 @@ const app = Vue.createApp({
                 for (let x = 0; x < this.soundlogoKeys.length; x++){
                     this.soundlogoKeys[x].key = keys[x];
                 }
+                this.updateLogoKey(id='1');
                 console.log(this.soundlogoKeys);
                 this.isLoadingKey = false;
+
+                this.audioDuration = audioPlayer.buffer.duration;
+                this.soundlogoPosition = this.audioDuration - 6;
+
+                this.setModal(true)
             }
         },
         startPlayback(){
-            this.audioDuration = audioPlayer.buffer.duration;
             this.playbackPosition = videoPlayer.currentTime();
             startTransports(this.playbackPosition, this.audioDuration);
         },
@@ -64,8 +76,8 @@ const app = Vue.createApp({
         },
         updateLogoKey(id){
             this.selectedKey.id = id;
-            this.selectedKey.key = this.soundlogoKeys[id]
-            console.log("Selected Key", this.selectedKey.key)
+            this.selectedKey.key = this.soundlogoKeys[id].key;
+            console.log("Selected Key", this.selectedKey.key);
             //updateLogoBuffer(this.selectedKey.key )
         },
         downloadVideo(){},

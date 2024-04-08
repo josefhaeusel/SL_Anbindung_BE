@@ -333,13 +333,21 @@
                             Recommended
                     </span>
                         <transition name="fade">
-                            <scale-segmented-button v-if="!isLoadingKey" id="keyDisplay" v-model="selectedKey" size="medium" >
+                            <scale-segmented-button v-if="!isLoadingKey" id="keyDisplay" size="medium" >
                                 <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id" @click="updateLogoKey(item.id)">{{item.key}}</option>
                             </scale-segmented-button>
                         </transition>
                 </scale-tooltip>
 
         </div>
+
+        <scale-modal heading="Soundlogo Added" size="large" ref="modal" :opened="showModal">
+            <p>The Telekom Soundlogo was successfully added at {{ soundlogoPosition.toFixed(2) }} seconds in the key {{ selectedKey.key }}-Major. You may consider the alternative key choices {{ soundlogoKeys[0].key }}-Major and {{ soundlogoKeys[2].key }}-Major.</p>
+            <scale-button slot="action" @click="setModal(false)">
+                View Result
+            </scale-button>
+        </scale-modal>
+        
         <!--div class="download-container">
             <scale-button class="download-audio-button" @click="downloadAudio" style="padding: 10px 50px; margin: 20px" >
                 <scale-icon-action-download></scale-icon-action-download> Download Audio </scale-button>
