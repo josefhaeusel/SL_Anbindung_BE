@@ -8,13 +8,14 @@ import * as path from 'path';
 export class AudioVideoService {
   private readonly logger = new Logger(AudioVideoService.name);
 
-  public split(inputPath: string): Promise<string> {
-    const [inputPathName, inputPathExt] = inputPath.split('.');
-    const videoOutputPath = `${inputPathName}-video.${inputPathExt}`;
-    const audioOutputPath = `${inputPathName}-audio.${inputPathExt}`.replace(
-      `${path.sep}video${path.sep}`,
-      `${path.sep}audio${path.sep}`,
-    );
+  public async split(inputPath: string): Promise<string> {
+    const inputPathParsed = path.parse(inputPath);
+
+    const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
+    const inputPathExt = inputPathParsed.ext;
+
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt);
+    const audioOutputPath = this._getAudioPath(inputPathName, inputPathExt);
 
     return new Promise((resolve, reject) => {
       ffmpeg(inputPath)
@@ -34,6 +35,93 @@ export class AudioVideoService {
           reject(error);
         })
         .run();
+    });
+  }
+
+  public async join(
+    inputVideoPath: string,
+    inputAudioPath: string,
+  ): Promise<string> {
+    this.logger.debug(`inputVideoPath: ${inputVideoPath}`);
+    this.logger.debug(`inputAudioPath: ${inputAudioPath}`);
+
+    const inputVideoPathParsed = path.parse(inputVideoPath);
+
+    const inputVideoPathName = path.join(
+      inputVideoPathParsed.dir,
+      inputVideoPathParsed.name,
+    );
+    const inputVideoPathExt = inputVideoPathParsed.ext;
+
+    const inputAudioPathParsed = path.parse(inputAudioPath);
+
+    const inputAudioPathName = path.join(
+      inputAudioPathParsed.dir,
+      inputAudioPathParsed.name,
+    );
+    const inputAudioPathExt = inputAudioPathParsed.ext;
+
+    const videoOutputPath = this._getVideoPath(
+      inputVideoPathName,
+      inputVideoPathExt,
+    );
+    const audioOutputPath = this._getAudioPath(
+      inputVideoPathName,
+      inputVideoPathExt,
+    );
+
+    const audioCodec = await this._getAudioCodecSettings(audioOutputPath);
+    // this.logger.debug('audioCodec:');
+    // this.logger.debug(audioCodec);
+
+    return new Promise((resolve, reject) => {
+      ffmpeg()
+        .addInput(videoOutputPath)
+        .addInput(inputAudioPath)
+        .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
+        .audioCodec(audioCodec.codec_name)
+        .format('mp4')
+        .on('error', (error) => {
+          this.logger.error('error:', error);
+
+          reject(error);
+        })
+        .on('end', () => {
+          this.logger.debug('Joining done');
+
+          resolve(inputVideoPath);
+        })
+        .saveToFile(inputVideoPath);
+    });
+  }
+
+  private _getVideoPath(inputPathName: string, inputPathExt: string) {
+    return `${inputPathName}-video.${inputPathExt}`;
+  }
+
+  private _getAudioPath(inputPathName: string, inputPathExt: string) {
+    return `${inputPathName}-audio.${inputPathExt}`.replace(
+      `${path.sep}video${path.sep}`,
+      `${path.sep}audio${path.sep}`,
+    );
+  }
+
+  private _getAudioCodecSettings(videoPath: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(
+        videoPath,
+        ['-show_streams', '-select_streams', 'a'],
+        (err, metadata) => {
+          if (err) {
+            reject(err);
+          } else {
+            const audioStream = metadata.streams.find(
+              (stream) => stream.codec_type === 'audio',
+            );
+            resolve(audioStream);
+          }
+        },
+      );
     });
   }
 }

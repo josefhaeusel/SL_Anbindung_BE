@@ -4,13 +4,19 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChordRetrievalAiService } from './chord_retrieval_ai.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
+import { Session } from 'express-session';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AudioVideoService } from '../audio-video/audio-video.service';
+
+export interface ISession extends Session {
+  tempVideoFilePath?: string;
+}
 
 @Controller('chord-retrieval-ai')
 export class ChordRetrievalAiController {
@@ -23,7 +29,8 @@ export class ChordRetrievalAiController {
   @UseInterceptors(FileInterceptor('file'))
   async videoHandler(
     @UploadedFile() file: Express.Multer.File,
-    @Res() res: Response,
+    @Req() request: Request,
+    @Res() response: Response,
   ) {
     try {
       // Generate temporary filename for back-end Analysis
@@ -36,25 +43,28 @@ export class ChordRetrievalAiController {
       // Write the video buffer to new file
       fs.writeFileSync(tempVideoFilePath, file.buffer);
 
-      //Service für Audio / Video Splitting
-      //...
-      let analysisResult
-      try{
+      // Service für Audio / Video Splitting
+      // ...
+      let analysisResult;
+      try {
         const tempAudioFilePath =
-        await this.audioVideoService.split(tempVideoFilePath);
+          await this.audioVideoService.split(tempVideoFilePath);
 
-        analysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
+        analysisResult =
+          await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
       } catch (error) {
-        analysisResult = await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
-
+        analysisResult =
+          await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
       }
 
-      //Optional: Löschen (für Video wohl erst nach rendering relevant)
+      // Optional: Löschen (für Video wohl erst nach rendering relevant)
       fs.unlinkSync(tempVideoFilePath);
 
-      res.json(analysisResult);
+      (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
+
+      response.json(analysisResult);
     } catch (error) {
-      res.status(500).send(error.message);
+      response.status(500).send(error.message);
     }
   }
 
@@ -62,7 +72,8 @@ export class ChordRetrievalAiController {
   @UseInterceptors(FileInterceptor('file'))
   async audioHandler(
     @UploadedFile() file: Express.Multer.File,
-    @Res() res: Response,
+    @Req() request: Request,
+    @Res() response: Response,
   ) {
     try {
       // Generate temporary filename for back-end Analysis
@@ -75,17 +86,22 @@ export class ChordRetrievalAiController {
       // Write the audio buffer to new file
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
-      //Service für Audio / Video Merging
+      // Service für Audio / Video Merging
       let renderedResult;
 
-      //Optional: Löschen 
+      const tempVideoFilePath = (request.session as ISession).tempVideoFilePath;
+
+      renderedResult = await this.audioVideoService.join(
+        tempVideoFilePath,
+        tempAudioFilePath,
+      );
+
+      // Optional: Löschen
       fs.unlinkSync(tempAudioFilePath);
 
-      res.json({ renderedResult: renderedResult });
+      response.json({ renderedResult: renderedResult });
     } catch (error) {
-      res.status(500).send(error.message);
+      response.status(500).send(error.message);
     }
   }
-
-
 }
