@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+# uploaded files
+/temp_uploads/audio/*
+/temp_uploads/video/*
+
 # Logs
 logs
 *.log
