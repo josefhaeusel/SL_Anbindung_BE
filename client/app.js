@@ -143,10 +143,6 @@ async function renderAudio(audioDuration){
         // Create an object URL for the Blob
         const url = URL.createObjectURL(wavBlob);
 
-        // Set the object URL as the source for the <audio> element
-        const audioPlayer = document.getElementById('audioPlayer');
-        audioPlayer.src = url;
-
         // Create a download link
         const link = document.createElement('a');
         link.href = url;
