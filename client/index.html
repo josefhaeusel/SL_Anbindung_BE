@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="assets/@telekom/scale-components/dist/scale-components/scale-components.css"/>
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link href="https://unpkg.com/@videojs/themes@1/dist/forest/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.5.14/dist/vuetify.min.css    ">
     <script type="module" src="assets/@telekom/scale-components/dist/scale-components/scale-components.esm.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.5.14/dist/vuetify.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
@@ -140,29 +142,37 @@
     align-items: center;
 }
 
-.vjs-marker
-{
-  position:absolute;
-  background:#E20074;
-  width:10px;
-  height:150%;
-  z-index:30;
-}
+.vjs-marker {
+            position: absolute;
+            background: #E20074;
+            width: 10px; /* Adjust width for a more dot-like appearance */
+            height: 10px; /* Equal height and width for a circular shape */
+            border-radius: 50%; /* Fully rounded corners for a smooth dot appearance */
+            z-index: 30;
+            top: 50%; /* Center vertically relative to its position */
+            transform: translateY(-50%); /* Centering adjustment */
+        }
 
 .vjs-marker:hover span 
 {
-  opacity:0;
+  opacity:1;
 }
 
-.vjs-marker span
-{
-  position:absolute;
-  opacity:0;
-  margin-left:-20px;
-  z-index:90;
-  background:rgba(0,0,0,.8);
-  font-family: "TeleNeo";
-}
+.vjs-marker span {
+            position: absolute;
+            opacity: 0;
+            margin-left: -55px;
+            z-index: 90;
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFFFFF; /* Text color for readability */
+            padding: 5px 10px; /* Padding for text content */
+            border-radius: 4px; /* Rounded corners for the tooltip */
+            font-family: "TeleNeo", sans-serif; /* Consistent font family */
+            font-size: 20px; /* Adjusted font size for readability */
+            transition: opacity 0.3s; /* Smooth transition for hover effect */
+            top: 30px; /* Adjust position to not overlap the marker */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
 
 
 
@@ -257,6 +267,15 @@
     position: absolute;
     right: 0;
 }
+.download-audio-button{
+    left:0;margin-right: 200px; --background-secondary: #FFFFFF;
+                --background-secondary-hover: var(--telekom-color-primary-hovered);
+                --background-secondary-active: #E20074;
+                --color-secondary: #E20074;
+                --border-secondary: #E20074;
+                --background-secondary-hover: #E20074;
+
+}
 #layer2 scale-loading-spinner{
     margin-top: 15px;
     position: absolute;
@@ -300,8 +319,9 @@
             <div class="format-info">Allowed Formats: MPEG-4, MOV, H264</div>
         </div>
         
-        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="padding: 10px 50px; margin: 20px" >
-            <scale-icon-action-upload-to-cloud></scale-icon-action-upload-to-cloud> Upload a Video</scale-button>
+        <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()" style="margin: 20px" >
+            <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
+            Upload a Video</scale-button>
     </div>
     </div>
 
@@ -342,14 +362,7 @@
 
             <scale-button class="download-video-button" @click="downloadVideo" style="left:0" >
                 <scale-icon-action-download></scale-icon-action-download> Download Result </scale-button>
-                <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio" style="left:0;margin-right: 200px; --background-secondary: #FFFFFF;
-                --background-secondary-hover: var(--telekom-color-primary-hovered);
-                --background-secondary-active: #E20074;
-                --color-secondary: #E20074;
-                --border-secondary: #E20074;
-                --background-secondary-hover: #E20074;
-
-                "  >
+                <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio">
                     <scale-icon-action-download></scale-icon-action-download> Audio Only </scale-button>
                 <div class="key-label">Soundlogo Key:</div>
             
@@ -367,20 +380,20 @@
     </transition>
 
 
-        <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal">
-            <p>The Telekom Soundlogo was successfully added at {{ soundlogoPosition.toFixed(2) }} seconds in the key {{ selectedKey.key }}-Major. You may consider the alternative key choices {{ soundlogoKeys[0].key }}-Major and {{ soundlogoKeys[2].key }}-Major.</p>
-            <scale-button slot="action" @click="setModal(false)">
-                View Result
-            </scale-button>
-        </scale-modal>
-        
-        <!--div class="download-container">
-            <scale-button class="download-audio-button" @click="downloadAudio" style="padding: 10px 50px; margin: 20px" >
-                <scale-icon-action-download></scale-icon-action-download> Download Audio </scale-button>
-            <scale-button class="download-video-button" @click="downloadVideo" style="padding: 10px 50px; margin: 20px" >
-                <scale-icon-action-download></scale-icon-action-download> Download Video </scale-button>
+    <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal" style="
+    --background-window: #FFFFFF; /* White background */
+    --color-window: #000000; /* Black text */
+    --font-size-heading: 30px; /* Bigger font size for heading */
+    --color-close-button: #E20074;
+    --color-close-button-hover: var(--telekom-color-primary-hovered);
+    ">
+        <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{ soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
+        <scale-button slot="action" @click="setModal(false)">
+            View Result
+        </scale-button>
+    </scale-modal>
 
-        </div-->
+    <!--audio v-if="testRender" id="audioPlayer" controls></audio-->
 
     </div>
     </div>

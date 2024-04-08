@@ -4,8 +4,6 @@ Next Steps:
 -Ending Varianten im Timing rausfinden
 -12 Tonarten (nächste Woche)
 -Audio Transition mit Filtern
--Pop-up "Soundlogo bei Sekunde X angebunden"
--Cue-Point für Anbindung
 -Vuetify
 
 Rendering:
@@ -15,6 +13,9 @@ Rendering:
 */
 
 //--- VueJS Part
+
+const { createVuetify } = Vuetify
+const vuetify = createVuetify()
 
 const app = Vue.createApp({
 
@@ -35,6 +36,8 @@ const app = Vue.createApp({
                 { id: '2', key: '' }
               ],
             selectedKey: {id:'1',key:''},
+
+            testRender: false
             
         }
     },
@@ -83,20 +86,23 @@ const app = Vue.createApp({
             //updateLogoBuffer(this.selectedKey.key )
         },
         downloadVideo(){},
-        downloadAudio(){},
-
+        downloadAudio(){
+            renderAudio(this.audioDuration);
+            this.testRender = true;
+        },
 
     }
 })
 
 app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-')
-app.mount('#app')
+app.use(vuetify).mount('#app')
 
 
 //Global Audio Players and Buffers
 let logoPlayer
 let logoBuffers
 let audioPlayer
+let audioBuffer
 let envelope
 let videoPlayer
 
@@ -111,20 +117,115 @@ async function setup() {
 
     videoPlayer = videojs('myVideo');
 
+    await setupAudioNodes(Tone.getContext());
+}
+
+async function setupAudioNodes(context){
     envelope = await ampEnvelope();
-    audioPlayer = await loadAudioplayer(envelope);
+    audioPlayer = await loadAudioplayer(context,envelope);
     await loadLogoBuffers();
-    logoPlayer = await loadLogoPlayer();
+    logoPlayer = await loadLogoPlayer(context);
+}
+
+async function renderAudio(audioDuration){
+    await Tone.Offline(async ({ transport }) => {
+        await setupAudioNodes(transport.context);
+        audioPlayer.buffer = audioBuffer;
+        scheduleAudio(audioDuration, 0, transport);
+        scheduleLogoSound(audioDuration, 0, transport);
+        transport.start();
+    }, audioDuration).then((buffer) => {
+
+        console.log(buffer);
+        // Convert the buffer to a WAV Blob
+        const wavBlob = convertToWav(buffer);
+
+        // Create an object URL for the Blob
+        const url = URL.createObjectURL(wavBlob);
+
+        // Set the object URL as the source for the <audio> element
+        const audioPlayer = document.getElementById('audioPlayer');
+        audioPlayer.src = url;
+
+        // Create a download link
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'soundlogoAnbindung.wav';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+
+    await setupAudioNodes(Tone.getContext());
+}
+
+// Simple WAV encoder function
+// This is a basic example and might need adjustments based on your specific needs
+function convertToWav(buffer) {
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; // PCM
+    const subChunk1Size = 16; // for PCM
+    const subChunk2Size = numChannels * buffer.length * 2; // 2 bytes per sample
+    const chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
+
+    let offset = 0;
+    const dataSize = 36 + subChunk2Size;
+    const bufferArray = new ArrayBuffer(dataSize);
+    const view = new DataView(bufferArray);
+
+    // RIFF header
+    writeString(view, offset, 'RIFF'); offset += 4;
+    view.setUint32(offset, dataSize - 8, true); offset += 4;
+    writeString(view, offset, 'WAVE'); offset += 4;
+
+    // fmt sub-chunk
+    writeString(view, offset, 'fmt '); offset += 4;
+    view.setUint32(offset, subChunk1Size, true); offset += 4;
+    view.setUint16(offset, format, true); offset += 2;
+    view.setUint16(offset, numChannels, true); offset += 2;
+    view.setUint32(offset, sampleRate, true); offset += 4;
+    view.setUint32(offset, sampleRate * numChannels * 2, true); offset += 4;
+    view.setUint16(offset, numChannels * 2, true); offset += 2;
+    view.setUint16(offset, 16, true); offset += 2;
+
+    // data sub-chunk
+    writeString(view, offset, 'data'); offset += 4;
+    view.setUint32(offset, subChunk2Size, true); offset += 4;
+
+    // Write PCM samples
+    for (let i = 0; i < buffer.length; i++) {
+        for (let channel = 0; channel < numChannels; channel++) {
+            let sample = buffer.getChannelData(channel)[i] * 0x7FFF;
+            if (offset + 2 > dataSize) {
+                console.error('Offset exceeds buffer size:', offset);
+                break; // Prevent writing beyond the buffer size
+            }
+            view.setInt16(offset, sample, true);
+            offset += 2;
+        }
+    }
+
+    return new Blob([bufferArray], { type: 'audio/wav' });
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
 }
 
 function startTransports(currentPosition, audioDuration){
 
-    scheduleAudio(audioDuration, currentPosition);
-    scheduleLogoSound(audioDuration, currentPosition);
+    const transport = Tone.Transport
+
+    scheduleAudio(audioDuration, currentPosition, transport);
+    scheduleLogoSound(audioDuration, currentPosition, transport);
 
     videoPlayer.setCurrentTime = currentPosition;
     videoPlayer.play();
-    Tone.Transport.start();
+    transport.start();
 
     audioPlayer.onstop = function() {
         stopTransports()
@@ -139,17 +240,17 @@ function stopTransports(){
     videoPlayer.pause();
 }
 
-function scheduleAudio(audioDuration, currentPosition){
+function scheduleAudio(audioDuration, currentPosition, transport){
 
     const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition);
 
     if (secondsTillEnvStart >= 0){
-        Tone.Transport.schedule((time) => {
+        transport.schedule((time) => {
             audioPlayer.start(time, currentPosition);
             envelope.triggerAttack(time);
             console.log("Go Audio!");
         });
-        Tone.Transport.schedule((time) => {
+        transport.schedule((time) => {
             envelope.triggerRelease(time, time);
             console.log("Go Envelope!");
         }, secondsTillEnvStart);
@@ -157,13 +258,13 @@ function scheduleAudio(audioDuration, currentPosition){
 
 }
 
-function scheduleLogoSound(audioDuration, currentPosition) {
+function scheduleLogoSound(audioDuration, currentPosition, transport) {
 
     const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition);
 
     if (secondsTillLogoStart >= 0) {
 
-        Tone.Transport.schedule((time) => {
+        transport.schedule((time) => {
             logoPlayer.start(time);
             console.log("Go Logo!");
         }, `+${secondsTillLogoStart}`);
@@ -205,10 +306,10 @@ async function loadLogoBuffers(){
         })
     }
 
-async function loadLogoPlayer(tonality = 'A') {
+async function loadLogoPlayer(Context, tonality = 'A') {
 
     const logoBuffer = logoBuffers.get('A');
-    const newLogoPlayer = new Tone.Player(logoBuffer);
+    const newLogoPlayer = new Tone.Player({url:logoBuffer, context: Context});
 
     newLogoPlayer.toDestination()
 
@@ -216,10 +317,10 @@ async function loadLogoPlayer(tonality = 'A') {
 
 }
 
-async function loadAudioplayer(Env, Filter, Filepath) {
+async function loadAudioplayer(Context, Env, Filter, Filepath) {
 
     console.log("Loaded Audio:", Filepath)
-    const newAudioPlayer = new Tone.Player(Filepath);
+    const newAudioPlayer = new Tone.Player({url: audioBuffer, context: Context});
 
     if (Env) {
         newAudioPlayer.connect(Env);
@@ -310,7 +411,7 @@ async function videoPlayerHandling(url) {
     async function extractAudioBuffer(url) {
 
         try {
-            const audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
+            audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
             console.log("Audio buffer loaded:", audioBuffer);
 
             audioPlayer.buffer = audioBuffer;
