@@ -38,11 +38,16 @@ export class ChordRetrievalAiController {
 
       //Service für Audio / Video Splitting
       //...
-      const tempAudioFilePath =
+      let analysisResult
+      try{
+        const tempAudioFilePath =
         await this.audioVideoService.split(tempVideoFilePath);
 
-      const analysisResult =
-        await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
+        analysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
+      } catch (error) {
+        analysisResult = await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
+
+      }
 
       //Optional: Löschen (für Video wohl erst nach rendering relevant)
       fs.unlinkSync(tempVideoFilePath);
@@ -52,4 +57,34 @@ export class ChordRetrievalAiController {
       res.status(500).send(error.message);
     }
   }
+
+  @Post('uploadRenderedAudio')
+  @UseInterceptors(FileInterceptor('file'))
+  async audioHandler(
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+  ) {
+    try {
+      // Generate temporary filename for back-end Analysis
+      const tempAudioFilePath = path.join(
+        __dirname,
+        '../../temp_uploads/audio',
+        file.originalname,
+      );
+
+      // Write the audio buffer to new file
+      fs.writeFileSync(tempAudioFilePath, file.buffer);
+
+      //Service für Audio / Video Merging
+
+      //Optional: Löschen 
+      fs.unlinkSync(tempAudioFilePath);
+
+      res.json();
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+
 }

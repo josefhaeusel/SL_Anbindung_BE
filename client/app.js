@@ -85,7 +85,7 @@ const app = Vue.createApp({
         },
         async downloadVideo(){
             const renderedBuffer = await renderAudio(this.audioDuration);
-            const response = await uploadRenderedAudio_API(buffer);
+            const response = await uploadRenderedAudio_API(renderedBuffer);
         },
         async downloadAudio(){
             const renderedBuffer = await renderAudio(this.audioDuration);
@@ -131,7 +131,7 @@ async function setupAudioNodes(context){
 async function renderAudio(audioDuration){
     const renderedBuffer = await Tone.Offline(async ({ transport }) => {
         await setupAudioNodes(transport.context);
-        audioPlayer.buffer = audioBuffer;
+        audioPlayer.buffer = await audioBuffer;
         scheduleAudio(audioDuration, 0, transport);
         scheduleLogoSound(audioDuration, 0, transport);
         transport.start();
