@@ -64,6 +64,8 @@ const app = Vue.createApp({
                 this.audioDuration = audioPlayer.buffer.duration;
                 this.soundlogoPosition = this.audioDuration - 6;
 
+                setVideoMarker(this.soundlogoPosition);
+
                 this.setModal(true)
             }
         },
@@ -107,7 +109,7 @@ async function setup() {
 
     }
 
-    videoPlayer = videojs('myVideo')
+    videoPlayer = videojs('myVideo');
 
     envelope = await ampEnvelope();
     audioPlayer = await loadAudioplayer(envelope);
@@ -315,6 +317,28 @@ async function videoPlayerHandling(url) {
         } catch (error) {
             console.error("Failed to load audio buffer:", error);
         }
+    }
+}
+function setVideoMarker(soundlogoPosition){
+    var markers = [
+        {time:soundlogoPosition,label:'Soundlogo'},
+    ];
+
+    var total = videoPlayer.duration();
+    var p = videoPlayer.controlBar.progressControl.children_[0].el_;
+
+    for(var i=0;i<markers.length;i++) {
+        var left = (markers[i].time / total * 100) + '%';
+        var time = markers[i].time;
+        var el = document.createElement('div');
+        el.className = 'vjs-marker';
+        el.style.left = left;
+        el.setAttribute('data-time', time);
+        el.innerHTML = '<span>' + markers[i].label + '</span>';
+        el.addEventListener('click', function() {
+            videoPlayer.currentTime(this.getAttribute('data-time')); 
+        });
+        p.appendChild(el);
     }
 }
 

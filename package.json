@@ -29,7 +29,8 @@
     "@telekom/scale-components": "^3.0.0-beta.150",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "videojs-marker-plugin": "^1.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
