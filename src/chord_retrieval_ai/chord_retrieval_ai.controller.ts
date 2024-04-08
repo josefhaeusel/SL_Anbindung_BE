@@ -76,11 +76,12 @@ export class ChordRetrievalAiController {
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
       //Service für Audio / Video Merging
+      let renderedResult;
 
       //Optional: Löschen 
       fs.unlinkSync(tempAudioFilePath);
 
-      res.json();
+      res.json({ renderedResult: renderedResult });
     } catch (error) {
       res.status(500).send(error.message);
     }
