@@ -36,8 +36,6 @@ const app = Vue.createApp({
                 { id: '2', key: '' }
               ],
             selectedKey: {id:'1',key:''},
-
-            testRender: false
             
         }
     },
@@ -85,10 +83,13 @@ const app = Vue.createApp({
             console.log("Selected Key", this.selectedKey.key);
             //updateLogoBuffer(this.selectedKey.key )
         },
-        downloadVideo(){},
-        downloadAudio(){
-            renderAudio(this.audioDuration);
-            this.testRender = true;
+        async downloadVideo(){
+            const renderedBuffer = await renderAudio(this.audioDuration);
+            const response = await uploadRenderedAudio_API(buffer);
+        },
+        async downloadAudio(){
+            const renderedBuffer = await renderAudio(this.audioDuration);
+            downloadAudio(renderedBuffer);
         },
 
     }
@@ -128,32 +129,37 @@ async function setupAudioNodes(context){
 }
 
 async function renderAudio(audioDuration){
-    await Tone.Offline(async ({ transport }) => {
+    const renderedBuffer = await Tone.Offline(async ({ transport }) => {
         await setupAudioNodes(transport.context);
         audioPlayer.buffer = audioBuffer;
         scheduleAudio(audioDuration, 0, transport);
         scheduleLogoSound(audioDuration, 0, transport);
         transport.start();
-    }, audioDuration).then((buffer) => {
+    }, audioDuration)
 
-        console.log(buffer);
-        // Convert the buffer to a WAV Blob
-        const wavBlob = convertToWav(buffer);
+    console.log(renderedBuffer)
 
-        // Create an object URL for the Blob
-        const url = URL.createObjectURL(wavBlob);
-
-        // Create a download link
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'soundlogoAnbindung.wav';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-
-
+    //Reinitialize regular Tone.Context
     await setupAudioNodes(Tone.getContext());
+
+    return renderedBuffer
+
+}
+
+function downloadAudio(buffer){
+    // Convert the buffer to a WAV Blob
+    const wavBlob = convertToWav(buffer);
+
+    // Create an object URL for the Blob
+    const url = URL.createObjectURL(wavBlob);
+
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'soundlogoAnbindung.wav';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // Simple WAV encoder function
@@ -195,7 +201,6 @@ function convertToWav(buffer) {
         for (let channel = 0; channel < numChannels; channel++) {
             let sample = buffer.getChannelData(channel)[i] * 0x7FFF;
             if (offset + 2 > dataSize) {
-                console.error('Offset exceeds buffer size:', offset);
                 break; // Prevent writing beyond the buffer size
             }
             view.setInt16(offset, sample, true);
@@ -354,6 +359,42 @@ async function updateLogoBuffer(key){
     logoPlayer.buffer = logoBuffer;
 }
 
+
+async function uploadRenderedAudio_API(buffer){
+
+    const formData = await audioToWavFile(buffer);
+
+    try {
+        const response = await fetch('/chord-retrieval-ai/uploadRenderedAudio', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+        console.log('Audio uploaded successfully:', data);
+    } catch (error) {
+        console.error('Error uploading audio:', error);
+    }
+    
+
+    function audioToWavFile(buffer){
+        // Convert the buffer to a WAV Blob
+        const wavBlob = convertToWav(buffer);
+    
+        // Convert the Blob to a File
+        const audioFile = new File([wavBlob], 'soundlogoAnbindung.wav', { type: 'audio/wav' });
+    
+        // Create a FormData instance
+        const formData = new FormData();
+    
+        // Append the File to FormData
+        formData.append('file', audioFile);
+    
+        // Send the FormData to your backend
+        return formData
+    }
+    
+}
 
 async function dropzoneHandlerVideo(file) {
 

@@ -260,6 +260,14 @@
         display: block;
     }
 
+.scale-modal{
+    --background-window: #FFFFFF; /* White background */
+    --color-window: #000000; /* Black text */
+    --font-size-heading: 30px; /* Bigger font size for heading */
+    --color-close-button: #E20074;
+    --color-close-button-hover: var(--telekom-color-primary-hovered);
+}
+
 .soundlogo {
     width: 100px; /* Set a fixed width for the soundlogo */
     height: 100%;
@@ -345,14 +353,6 @@
             <scale-divider></scale-divider>
         </div>
         
-
-        <!--div class="video-timeline-container">
-            <div class="waveform"></div>
-            <transition name="fade">
-                <div class="soundlogo" v-if="!isLoadingKey"></div>
-            </transition>
-        </div-->
-
         <div class="key-container"v-if="isLoadingKey" >
             <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large" text="Adding Soundlogo..." > </scale-loading-spinner>
         </div>
@@ -380,20 +380,12 @@
     </transition>
 
 
-    <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal" style="
-    --background-window: #FFFFFF; /* White background */
-    --color-window: #000000; /* Black text */
-    --font-size-heading: 30px; /* Bigger font size for heading */
-    --color-close-button: #E20074;
-    --color-close-button-hover: var(--telekom-color-primary-hovered);
-    ">
+    <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal" class="scale-modal">
         <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{ soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
         <scale-button slot="action" @click="setModal(false)">
             View Result
         </scale-button>
     </scale-modal>
-
-    <!--audio v-if="testRender" id="audioPlayer" controls></audio-->
 
     </div>
     </div>
