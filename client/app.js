@@ -1,6 +1,8 @@
 /*
 
 Next Steps:
+-Download-Funktion in API einbauen (Ralf)
+-Download Funktion und Loading Circle for Download 
 -Ending Varianten im Timing rausfinden
 -12 Tonarten (nächste Woche)
 -Audio Transition mit Filtern
@@ -21,6 +23,7 @@ const app = Vue.createApp({
 
     data() { 
         return  {
+
             currentLayer: "layer1",
             showModal: false,
 
@@ -29,12 +32,14 @@ const app = Vue.createApp({
             audioDuration: 0,
             soundlogoPosition: 0,
 
+            isLoadingResult: false,
             isLoadingKey: true,
             soundlogoKeys: [
                 { id: '0', key: '' },
                 { id: '1', key: '' },
                 { id: '2', key: '' }
               ],
+              
             selectedKey: {id:'1',key:''},
             
         }
@@ -84,12 +89,18 @@ const app = Vue.createApp({
             //updateLogoBuffer(this.selectedKey.key )
         },
         async downloadVideo(){
+            this.isLoadingResult = true;
             const renderedBuffer = await renderAudio(this.audioDuration);
-            const response = await uploadRenderedAudio_API(renderedBuffer);
+            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer);
+            await downloadVideo(videoFilepath);
+            this.isLoadingResult = false;
         },
         async downloadAudio(){
+            this.isLoadingResult = true;
             const renderedBuffer = await renderAudio(this.audioDuration);
             downloadAudio(renderedBuffer);
+            this.isLoadingResult = false;
+
         },
 
     }
@@ -160,6 +171,10 @@ function downloadAudio(buffer){
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function downloadVideo(filepath){
+
 }
 
 // Simple WAV encoder function

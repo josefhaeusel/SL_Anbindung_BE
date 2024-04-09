@@ -292,6 +292,10 @@
     --color-text-primary: #000000;
 }
 
+.result-loading-spinner {
+    margin-left: 10px; /* Place it right beside the buttons */
+}
+
 .fade-enter-from,
 .fade-leave-to{
  opacity: 0;
@@ -360,11 +364,12 @@
         <transition name="fade">
         <div class="key-container"v-if="!isLoadingKey" >
 
-            <scale-button class="download-video-button" @click="downloadVideo" style="left:0" >
+            <scale-button class="download-video-button" @click="downloadVideo" style="left:0">
                 <scale-icon-action-download></scale-icon-action-download> Download Result </scale-button>
-                <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio">
+            <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio">
                     <scale-icon-action-download></scale-icon-action-download> Audio Only </scale-button>
-                <div class="key-label">Soundlogo Key:</div>
+
+            <div class="key-label">Soundlogo Key:</div>
             
                 <scale-tooltip placement="bottom" style="--font-size: 12"> 
                     <span slot="content">
@@ -379,6 +384,8 @@
         </div>
     </transition>
 
+    <div class="key-container"v-if="isLoadingResult" >
+    </div>
 
     <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal" class="scale-modal">
         <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{ soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
