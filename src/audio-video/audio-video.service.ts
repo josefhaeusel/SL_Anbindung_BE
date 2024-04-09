@@ -41,6 +41,7 @@ export class AudioVideoService {
   public async join(
     inputVideoPath: string,
     inputAudioPath: string,
+    basenameOnly = false,
   ): Promise<string> {
     this.logger.debug(`inputVideoPath: ${inputVideoPath}`);
     this.logger.debug(`inputAudioPath: ${inputAudioPath}`);
@@ -89,7 +90,9 @@ export class AudioVideoService {
         .on('end', () => {
           this.logger.debug('Joining done');
 
-          resolve(inputVideoPath);
+          resolve(
+            basenameOnly ? path.basename(inputVideoPath) : inputVideoPath,
+          );
         })
         .saveToFile(inputVideoPath);
     });

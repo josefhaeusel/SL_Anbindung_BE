@@ -94,6 +94,7 @@ export class ChordRetrievalAiController {
       renderedResult = await this.audioVideoService.join(
         tempVideoFilePath,
         tempAudioFilePath,
+        true,
       );
 
       // Optional: Löschen
