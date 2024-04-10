@@ -387,6 +387,9 @@ async function uploadRenderedAudio_API(buffer){
 
         const data = await response.json();
         console.log('Audio uploaded successfully:', data);
+
+        await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
+
     } catch (error) {
         console.error('Error uploading audio:', error);
     }
@@ -408,7 +411,20 @@ async function uploadRenderedAudio_API(buffer){
         // Send the FormData to your backend
         return formData
     }
-    
+
+    function downloadFile(url, filename) {
+        fetch(url)
+          .then(response => response.blob())
+          .then(blob => {
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = filename;
+              document.body.appendChild(link); // Append to the body to trigger the download
+              link.click();
+              document.body.removeChild(link); // Optionally remove the link from the DOM
+          })
+          .catch(console.error);
+    }
 }
 
 async function dropzoneHandlerVideo(file) {
