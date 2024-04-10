@@ -13,8 +13,8 @@ if len(sys.argv) > 1:
     y_harmonic, y_percussive = librosa.effects.hpss(y)
     duration = librosa.get_duration(y=y, sr=sr)
 
-    if duration > 12:
-        analysis_start = duration - 12  #  Analyze only the last twelve seconds
+    if duration > 6:
+        analysis_start = duration - 6  #  Analyze only the last X seconds
         analysis = Tonal_Fragment(y_harmonic, sr, analysis_start, duration).get_key_info()
     else:
         analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()

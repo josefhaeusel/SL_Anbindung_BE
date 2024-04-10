@@ -90,18 +90,37 @@ const app = Vue.createApp({
         },
         async downloadVideo(){
             this.isLoadingResult = true;
-            const renderedBuffer = await renderAudio(this.audioDuration);
+            const renderedBuffer = await this.renderAudio();
             const videoFilepath = await uploadRenderedAudio_API(renderedBuffer);
             await downloadVideo(videoFilepath);
             this.isLoadingResult = false;
         },
         async downloadAudio(){
             this.isLoadingResult = true;
-            const renderedBuffer = await renderAudio(this.audioDuration);
+            const renderedBuffer = await this.renderAudio();
             downloadAudio(renderedBuffer);
             this.isLoadingResult = false;
 
         },
+        async renderAudio(){
+            const renderedBuffer = await Tone.Offline(async ({ transport }) => {
+                await setupAudioNodes(transport.context);
+                await extractAudioBuffer(video_url)
+                //await updateLogoBuffer(this.selectedKey.key)
+                
+                scheduleAudio(this.audioDuration, 0, transport);
+                scheduleLogoSound(this.audioDuration, 0, transport);
+                transport.start();
+            }, this.audioDuration)
+        
+            console.log(renderedBuffer)
+        
+            //Reinitialize regular Tone.Context
+            await setupAudioNodes(Tone.getContext());
+        
+            return renderedBuffer
+        
+        }
 
     }
 })
@@ -113,6 +132,7 @@ app.use(vuetify).mount('#app')
 //Global Audio Players and Buffers
 let logoPlayer
 let logoBuffers
+let video_url
 let audioPlayer
 let audioBuffer
 let envelope
@@ -139,23 +159,7 @@ async function setupAudioNodes(context){
     logoPlayer = await loadLogoPlayer(context);
 }
 
-async function renderAudio(audioDuration){
-    const renderedBuffer = await Tone.Offline(async ({ transport }) => {
-        await setupAudioNodes(transport.context);
-        audioPlayer.buffer = await audioBuffer;
-        scheduleAudio(audioDuration, 0, transport);
-        scheduleLogoSound(audioDuration, 0, transport);
-        transport.start();
-    }, audioDuration)
 
-    console.log(renderedBuffer)
-
-    //Reinitialize regular Tone.Context
-    await setupAudioNodes(Tone.getContext());
-
-    return renderedBuffer
-
-}
 
 function downloadAudio(buffer){
     // Convert the buffer to a WAV Blob
@@ -429,8 +433,9 @@ async function uploadRenderedAudio_API(buffer){
 
 async function dropzoneHandlerVideo(file) {
 
-    const url = URL.createObjectURL(file);
-    await videoPlayerHandling(url)
+    video_url = URL.createObjectURL(file);
+    
+    await videoPlayerHandling(video_url)
 
     const formData = new FormData();
     formData.append('file', file);
@@ -476,18 +481,21 @@ async function videoPlayerHandling(url) {
 
     await extractAudioBuffer(url);
 
-    async function extractAudioBuffer(url) {
+    
+}
 
-        try {
-            audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
-            console.log("Audio buffer loaded:", audioBuffer);
+async function extractAudioBuffer(url) {
 
-            audioPlayer.buffer = audioBuffer;
-        } catch (error) {
-            console.error("Failed to load audio buffer:", error);
-        }
+    try {
+        audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
+        console.log("Audio buffer loaded:", audioBuffer);
+
+        audioPlayer.buffer = audioBuffer;
+    } catch (error) {
+        console.error("Failed to load audio buffer:", error);
     }
 }
+
 function setVideoMarker(soundlogoPosition){
     var markers = [
         {time:soundlogoPosition,label:'Soundlogo'},
