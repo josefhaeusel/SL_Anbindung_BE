@@ -49,14 +49,18 @@ def matchVideoFrames(videoPath, templatePath, method):
 
             result = cv2.matchTemplate(frame2, template, method)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            detected = False
 
             if method == cv2.TM_SQDIFF_NORMED:
                 match_found = (min_val <= (1-threshold))
-                print("MIN_VAL",min_val)
+                detection_value = min_val
 
             else:
                 match_found = (max_val >= threshold)
-                print("MAX_VAL",max_val)
+                detection_value = max_val
+
+            print("Logo Detection Accuracy", detection_value)
+
 
             if match_found:
                 if method == cv2.TM_SQDIFF_NORMED:
@@ -66,12 +70,21 @@ def matchVideoFrames(videoPath, templatePath, method):
 
                 bottom_right = (location[0] + w, location[1] + h)
                 cv2.rectangle(frame, location, bottom_right, 255, 5)
-                cv2.imshow('Detected', frame)
+                message = f"Logo Frame Matched. Accuracy: {detection_value*100:.2f}%"
+
+                cv2.putText(frame, message, (location[0], bottom_right[1]+50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
+
+                detected = True
                 print("DETECTED")
 
             else:
-                cv2.imshow('Not Detected', frame)
                 print("NOT DETECTED")
+
+            cv2.imshow('Video', frame)
+
+            if detected == True:
+                cv2.waitKey(0)
+
 
             if cv2.waitKey(1) == ord('q'):
                 break
