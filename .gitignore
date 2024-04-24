@@ -21,7 +21,7 @@ lerna-debug.log*
 
 # Tests
 /coverage
-/src/computer_vision/py/testing/*
+/src/computer_vision/py/test/*
 /.nyc_output
 
 # IDEs and editors
