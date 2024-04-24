@@ -287,15 +287,14 @@
 
 
 
-<div id="app"> 
+<div id="app">
+
+    <scale-telekom-header
+        style="position:absolute;width: 100%;left:0;">
+    </scale-telekom-header>
 
     <!-- First Layer: Upload Area -->
 
-    <scale-telekom-header
-    style="position:absolute;width: 100%;left:0;">
-    <!-- … -->
-    </scale-telekom-header>
-    
     <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
     <div class="container">
 
@@ -374,6 +373,6 @@
 
 
     <script src="app.js"></script>
-    
+
 </body>
 </html>

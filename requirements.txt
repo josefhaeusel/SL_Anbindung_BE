@@ -1,3 +1,4 @@
 librosa
 matplotlib
 setuptools
+opencv-python
