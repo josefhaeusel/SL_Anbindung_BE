@@ -501,7 +501,7 @@ async function dropzoneHandlerVideo(file) {
 }
 
 async function videoPlayerHandling(url, file) {
-    // Determine the MIME type based on the file extension
+
     let type = '';
     console.log(file)
     if (file.endsWith('.mp4')) {
@@ -514,16 +514,13 @@ async function videoPlayerHandling(url, file) {
         throw new Error('Unsupported video format');
     }
 
-    // Set the video player source with the appropriate MIME type
     videoPlayer.src({
         type: type,
         src: url
     });
 
-    // Load the video in the player
     await videoPlayer.load();
 
-    // Extract the audio buffer for further processing
     await extractAudioBuffer(url);
 }
 
