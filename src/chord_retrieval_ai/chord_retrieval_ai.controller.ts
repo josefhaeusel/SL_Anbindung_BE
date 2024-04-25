@@ -13,6 +13,7 @@ import { Session } from 'express-session';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AudioVideoService } from '../audio-video/audio-video.service';
+import { ComputerVisionService } from '../computer_vision/computer_vision.service';
 
 export interface ISession extends Session {
   tempVideoFilePath?: string;
@@ -23,6 +24,7 @@ export class ChordRetrievalAiController {
   constructor(
     private readonly chordRetrievalAiService: ChordRetrievalAiService,
     private readonly audioVideoService: AudioVideoService,
+    private readonly computerVisionService: ComputerVisionService,
   ) {}
 
   @Post('uploadVideo')
@@ -45,17 +47,24 @@ export class ChordRetrievalAiController {
 
       // Service für Audio / Video Splitting
       // ...
-      let analysisResult;
-      try {
-        const tempAudioFilePath =
-          await this.audioVideoService.split(tempVideoFilePath);
+      let analysisResult = { audioAnalysis: {}, videoAnalysis: {}};
+      let audioAnalysisResult;
+      let videoAnalysisResult;
 
-        analysisResult =
+      try {
+        const tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
+
+        audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
       } catch (error) {
-        analysisResult =
+        audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
       }
+
+      videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
+
+      analysisResult.audioAnalysis = audioAnalysisResult;
+      analysisResult.videoAnalysis = videoAnalysisResult;
 
       // Optional: Löschen (für Video wohl erst nach rendering relevant)
       fs.unlinkSync(tempVideoFilePath);

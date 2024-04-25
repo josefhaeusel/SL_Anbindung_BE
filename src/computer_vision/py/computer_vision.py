@@ -6,14 +6,14 @@ class ComputerVision:
     def __init__(self, videoPath):
 
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        self.templatePath = f'{script_dir}/template.png'
+        self.templatePath = f'{script_dir}/template1.png'
         self.template = cv2.imread(self.templatePath, 0)
         self.videoPath = videoPath
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs = self.getVideoProperties()
-        print(self.duration_secs, self.total_frames, self.fps)
+        #print(self.duration_secs, self.total_frames, self.fps)
         self.current_frame = self.total_frames - 1
-        self.endDetectionFrame = self.total_frames - (7*self.fps)
+        self.endDetectionFrame = self.total_frames - (5*self.fps)
         #self.setVideoBeforeEnd()
         self.methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
             cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
@@ -25,7 +25,7 @@ class ComputerVision:
 
         if frame.shape[0] == 3840 and frame.shape[1] == 2160 or frame.shape[1] == 3840 and frame.shape[0] == 2160:
             frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-            print(f"Resized image from UHD to {frame.shape}")
+            #print(f"Resized image from UHD to {frame.shape}")
         
         return frame
 
@@ -48,7 +48,7 @@ class ComputerVision:
         start_frame = int(start_time * self.fps)
         self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
-    def matchVideoFrames(self, showVideoPlayer = False, method_id = 1):
+    def matchVideoFrames(self, showVideoPlayer = False):
 
         h, w = self.template.shape
         threshold = 0.95
@@ -73,10 +73,10 @@ class ComputerVision:
                     match_found = (max_val >= threshold)
                     detection_value = max_val
 
-                print("Logo Detection Accuracy", detection_value)
+                #print("Logo Detection Accuracy", detection_value)
 
                 if match_found:
-                    print("DETECTED")
+                    #print("DETECTED")
                     self.detectedTime = self.getCurrentTime()
 
                     if showVideoPlayer:
@@ -95,12 +95,14 @@ class ComputerVision:
                         isDetecting = False
                     
                 else:
-                    print("NOT DETECTED")
+                    None
+                    #print("NOT DETECTED")
+                
 
                 if showVideoPlayer:   
                     cv2.imshow('Video', frame)
                     if match_found == True:
-                        cv2.waitKey(1000)
+                        cv2.waitKey(500)
 
                     if cv2.waitKey(1) == ord('q'):
                         isDetecting = False
@@ -108,13 +110,15 @@ class ComputerVision:
                 self.current_frame -= 1
 
             except Exception as e:
-                print("Exception:", str(e))
+                #print("Exception:", str(e))
                 isDetecting = False
 
         self.video.release()
         cv2.destroyAllWindows()
         
         if self.detectedTime is not None:
-            return self.detectedTime
+            analysis = {"logo_time": self.detectedTime}
+            return analysis
         else:
-            return "No logo detected"
+            analysis = {"logo_time": None}
+            return analysis

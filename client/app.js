@@ -458,8 +458,9 @@ async function dropzoneHandlerVideo(file) {
             });
 
             const data = await response.json();
-            console.log("ANALYSIS RESUT",data)
-            const key = data.analysis.likely_key;
+            console.log("ANALYSIS RESULT",data)
+            const key = data.audioAnalysis.analysis.likely_key;
+            const logoStart = data.videoAnalysis.logo_start;
     
             return key
     
