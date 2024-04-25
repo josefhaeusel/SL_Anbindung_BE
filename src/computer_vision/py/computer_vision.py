@@ -10,7 +10,7 @@ class ComputerVision:
         self.template = cv2.imread(self.templatePath, 0)
         self.videoPath = videoPath
         self.video = cv2.VideoCapture(self.videoPath)
-        self.fps, self.total_frames, self.duration_secs = self.getVideoProperties()
+        self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
         #print(self.duration_secs, self.total_frames, self.fps)
         self.current_frame = self.total_frames - 1
         self.endDetectionFrame = self.total_frames - (5*self.fps)
@@ -39,8 +39,10 @@ class ComputerVision:
         fps = self.video.get(cv2.CAP_PROP_FPS)
         total_frames = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
         duration_secs = total_frames / fps
+        frame_width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        return fps, total_frames, duration_secs
+        return fps, total_frames, duration_secs, frame_width, frame_height
 
     def setVideoBeforeEnd(self, secondsBeforeEnd=5):
 
@@ -117,8 +119,10 @@ class ComputerVision:
         cv2.destroyAllWindows()
         
         if self.detectedTime is not None:
-            analysis = {"logo_time": self.detectedTime}
-            return analysis
+            response = {"logo_start": self.detectedTime}
+            return response
         else:
-            analysis = {"logo_time": None}
-            return analysis
+            response = {"logo_start": "None",
+                        "videoResolution": [self.frame_width, self.frame_height]
+                        }
+            return response

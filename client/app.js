@@ -59,7 +59,12 @@ const app = Vue.createApp({
             const file = event.target.files[0];
             if (file) {
                 this.currentLayer = "layer2";
-                const keys = await dropzoneHandlerVideo(file);
+                const analysis = await dropzoneHandlerVideo(file);
+                this.audioDuration = audioPlayer.buffer.duration;
+
+                const keys = analysis.keys
+                this.videoData = analysis.videoAnalysis
+                this.videoAnalysisHandler()
                 for (let x = 0; x < this.soundlogoKeys.length; x++){
                     this.soundlogoKeys[x].key = keys[x];
                 }
@@ -67,17 +72,26 @@ const app = Vue.createApp({
                 console.log(this.soundlogoKeys);
                 this.isLoadingKey = false;
 
-                this.audioDuration = audioPlayer.buffer.duration;
-                this.soundlogoPosition = this.audioDuration - 6;
 
                 setVideoMarker(this.soundlogoPosition);
 
                 this.setModal(true)
             }
         },
+        videoAnalysisHandler(){
+            if (this.videoData.logo_start == "None"){
+                this.soundlogoPosition = this.audioDuration - 6;
+                //TO DO Interface Logic
+
+            }
+            else {
+                this.soundlogoPosition = this.videoData.logo_start - 4.25
+            }
+        },
+
         startPlayback(){
             this.playbackPosition = videoPlayer.currentTime();
-            startTransports(this.playbackPosition, this.audioDuration);
+            startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
         },
         stopPlayback(){
             stopTransports();
@@ -236,12 +250,12 @@ function writeString(view, offset, string) {
     }
 }
 
-function startTransports(currentPosition, audioDuration){
+function startTransports(currentPosition, audioDuration, logoStart){
 
     const transport = Tone.Transport
 
-    scheduleAudio(audioDuration, currentPosition, transport);
-    scheduleLogoSound(audioDuration, currentPosition, transport);
+    scheduleAudio(audioDuration, currentPosition, logoStart, transport);
+    scheduleLogoSound(audioDuration, currentPosition,logoStart, transport);
 
     videoPlayer.setCurrentTime = currentPosition;
     videoPlayer.play();
@@ -260,9 +274,9 @@ function stopTransports(){
     videoPlayer.pause();
 }
 
-function scheduleAudio(audioDuration, currentPosition, transport){
+function scheduleAudio(audioDuration, currentPosition, logoStart, transport){
 
-    const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition);
+    const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition, logoStart);
 
     if (secondsTillEnvStart >= 0){
         transport.schedule((time) => {
@@ -278,9 +292,9 @@ function scheduleAudio(audioDuration, currentPosition, transport){
 
 }
 
-function scheduleLogoSound(audioDuration, currentPosition, transport) {
+function scheduleLogoSound(audioDuration, currentPosition, logoStart, transport) {
 
-    const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition);
+    const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition, logoStart);
 
     if (secondsTillLogoStart >= 0) {
 
@@ -294,15 +308,13 @@ function scheduleLogoSound(audioDuration, currentPosition, transport) {
     }
 }
 
-function calculateLogoScheduleTime(audioDuration, currentPosition) {
-    const logoStartPosition = audioDuration - 6;
-    const secondsTillStart = logoStartPosition - currentPosition;
+function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
+    const secondsTillStart = logoStart - currentPosition;
     return secondsTillStart;
 }
 
-function calculateEnvScheduleTime(audioDuration, currentPosition) {
-    const logoStartPosition = audioDuration - 5;
-    const secondsTillStart = logoStartPosition - currentPosition;
+function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
+    const secondsTillStart = (logoStart+1) - currentPosition;
     return secondsTillStart;
 }
 
@@ -435,19 +447,22 @@ async function dropzoneHandlerVideo(file) {
 
     video_url = URL.createObjectURL(file);
     
-    await videoPlayerHandling(video_url)
+    await videoPlayerHandling(video_url);
 
     const formData = new FormData();
     formData.append('file', file);
 
-    let key = await uploadVideo_API(formData);
-    key = logoKeyMap[key];
-    
+    analysis = await uploadVideo_API(formData);
+    let likely_key = analysis.audioAnalysis.analysis.likely_key
+    key = logoKeyMap[likely_key];
+
     console.log('Key:', key);
-    const scale = keyToScale(key)
+    const scale = keyToScale(key);
     //TODO await updateLogoBuffer(key);
 
-    return scale
+    const videoAnalysis = analysis.videoAnalysis.analysis
+
+    return {'keys':scale, 'videoAnalysis': videoAnalysis}
 
 
     async function uploadVideo_API() {
@@ -459,10 +474,8 @@ async function dropzoneHandlerVideo(file) {
 
             const data = await response.json();
             console.log("ANALYSIS RESULT",data)
-            const key = data.audioAnalysis.analysis.likely_key;
-            const logoStart = data.videoAnalysis.logo_start;
     
-            return key
+            return data
     
         }
         catch (error) {
