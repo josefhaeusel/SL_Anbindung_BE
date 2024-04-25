@@ -12,9 +12,12 @@ class ComputerVision:
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs = self.getVideoProperties()
         print(self.duration_secs, self.total_frames, self.fps)
-        self.setVideoBeforeEnd()
+        self.current_frame = self.total_frames - 1
+        self.endDetectionFrame = self.total_frames - (7*self.fps)
+        #self.setVideoBeforeEnd()
         self.methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
             cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
+        self.method = self.methods[1]
         
         self.detectedTime = None
 
@@ -49,18 +52,20 @@ class ComputerVision:
 
         h, w = self.template.shape
         threshold = 0.95
-        method = self.methods[method_id]
         isDetecting = True
-        while(isDetecting):
+        self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+
+        while(isDetecting) and self.current_frame > self.endDetectionFrame:
             try:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                 ret, frame = self.video.read()
                 frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
                 self.resizeUHDtoHD(frame2)
 
-                result = cv2.matchTemplate(frame2, self.template, method)
+                result = cv2.matchTemplate(frame2, self.template, self.method)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-                if method == cv2.TM_SQDIFF_NORMED:
+                if self.method == cv2.TM_SQDIFF_NORMED:
                     match_found = (min_val <= (1-threshold))
                     detection_value = min_val
 
@@ -75,11 +80,12 @@ class ComputerVision:
                     self.detectedTime = self.getCurrentTime()
 
                     if showVideoPlayer:
-                        if method == cv2.TM_SQDIFF_NORMED:
+                        #Draw Analysis Rectangle
+                        if self.method == cv2.TM_SQDIFF_NORMED:
                             location = min_loc
                         else:
                             location = max_loc
-
+                        
                         bottom_right = (location[0] + w, location[1] + h)
                         cv2.rectangle(frame, location, bottom_right, 255, 5)
                         message = f"Logo Frame Matched. Accuracy: {detection_value*100:.2f}%"
@@ -98,6 +104,8 @@ class ComputerVision:
 
                     if cv2.waitKey(1) == ord('q'):
                         isDetecting = False
+                
+                self.current_frame -= 1
 
             except Exception as e:
                 print("Exception:", str(e))
