@@ -1,7 +1,7 @@
 /*
 
 Next Steps:
--
+-Resoluations und Formate checken
 -Ending Varianten im Timing rausfinden
 -12 Tonarten
 
@@ -462,7 +462,7 @@ async function dropzoneHandlerVideo(file) {
 
     video_url = URL.createObjectURL(file);
     
-    await videoPlayerHandling(video_url);
+    await videoPlayerHandling(video_url, file.name);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -500,19 +500,33 @@ async function dropzoneHandlerVideo(file) {
     }
 }
 
-async function videoPlayerHandling(url) {
+async function videoPlayerHandling(url, file) {
+    // Determine the MIME type based on the file extension
+    let type = '';
+    console.log(file)
+    if (file.endsWith('.mp4')) {
+        type = 'video/mp4';
+    } else if (file.endsWith('.ogg')) {
+        type = 'video/ogg';
+    } else if (file.endsWith('.webm')){
+        type = 'video/webm';
+    } else {
+        throw new Error('Unsupported video format');
+    }
 
+    // Set the video player source with the appropriate MIME type
     videoPlayer.src({
-        type: 'video/mp4',
+        type: type,
         src: url
     });
-    
+
+    // Load the video in the player
     await videoPlayer.load();
 
+    // Extract the audio buffer for further processing
     await extractAudioBuffer(url);
-
-    
 }
+
 
 async function extractAudioBuffer(url) {
 
