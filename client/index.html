@@ -359,12 +359,22 @@
         </div>
     </transition>
 
-    <scale-modal heading="Soundlogo Added" size="default" ref="modal" :opened="showModal" class="scale-modal">
+    <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal" style="z-index:100">
+        <p><scale-icon-alert-warning size="15"></scale-icon-alert-warning>
+            {{ logoDetectionMessage }}</p>
+        <scale-button slot="action" @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
+            Proceed
+        </scale-button>
+    </scale-modal>
+
+    <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
         <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{ soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
-        <scale-button slot="action" @click="setModal(false)">
+        <scale-button slot="action" @click="this.showModal=false;">
             View Result
         </scale-button>
     </scale-modal>
+
+    
 
     </div>
     </div>

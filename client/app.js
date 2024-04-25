@@ -1,17 +1,11 @@
 /*
 
 Next Steps:
--Download-Funktion in API einbauen (Ralf)
--Download Funktion und Loading Circle for Download 
+-
 -Ending Varianten im Timing rausfinden
--12 Tonarten (nächste Woche)
--Audio Transition mit Filtern
--Vuetify
+-12 Tonarten
 
 Rendering:
--FFmpeg trennt audio von video
--Aufnahme- / Rendermöglichkeit des Audios finden (Offline Buffer Tone.JS)
-
 */
 
 //--- VueJS Part
@@ -26,11 +20,14 @@ const app = Vue.createApp({
 
             currentLayer: "layer1",
             showModal: false,
+            showWarningModal: false,
 
             playbackPosition: 0,
             sliderValue: 0,
             audioDuration: 0,
             soundlogoPosition: 0,
+
+            logoDetectionMessage: "",
 
             isLoadingResult: false,
             isLoadingKey: true,
@@ -54,6 +51,9 @@ const app = Vue.createApp({
         setModal(show){
             this.showModal = show
         },
+        setWarningModal(show){
+            this.showWarningModal = show
+        },
 
         async handleFileUpload(event){
             const file = event.target.files[0];
@@ -64,28 +64,43 @@ const app = Vue.createApp({
 
                 const keys = analysis.keys
                 this.videoData = analysis.videoAnalysis
-                this.videoAnalysisHandler()
                 for (let x = 0; x < this.soundlogoKeys.length; x++){
                     this.soundlogoKeys[x].key = keys[x];
                 }
                 this.updateLogoKey(id='1');
                 console.log(this.soundlogoKeys);
-                this.isLoadingKey = false;
 
-
+                await this.videoAnalysisHandler()
                 setVideoMarker(this.soundlogoPosition);
 
-                this.setModal(true)
+
+
             }
         },
         videoAnalysisHandler(){
             if (this.videoData.logo_start == "None"){
                 this.soundlogoPosition = this.audioDuration - 6;
-                //TO DO Interface Logic
+                let message
 
+                let width = this.videoData.videoResolution[0]
+                let height = this.videoData.videoResolution[1]
+                if (width == 3840 && height == 2160 || width == 2160 && height == 3840)
+                    {width /= 2;
+                    height /= 2}
+                if (width == 1920 && height == 1080 || width == 1080 && height == 1920)
+                    {message = `The standard Telekom Outro Animation was not detected. If the animation is outdate, consider updating it (Link).\n Do you want to proceed with the risk of falsely timing the Soundlogo?`}
+                else {
+                    message = `The standard Telekom Outro Animation was not detected. This is due to the videos irregular resolution ${height} x ${width}.\nAllowed Resolutions: (FullHD, UHD, 16:9, 9:16, 1:1).\n Do you want to proceed with the risk of falsely timing the Soundlogo?`
+                }
+                //TO DO Interface Logic
+                this.logoDetectionMessage = message;
+                this.showWarningModal = true;
             }
             else {
                 this.soundlogoPosition = this.videoData.logo_start - 4.25
+                this.showModal = true
+                this.isLoadingKey = false;
+
             }
         },
 
