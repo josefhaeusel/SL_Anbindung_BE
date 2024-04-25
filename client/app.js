@@ -458,6 +458,7 @@ async function dropzoneHandlerVideo(file) {
             });
 
             const data = await response.json();
+            console.log("ANALYSIS RESUT",data)
             const key = data.analysis.likely_key;
     
             return key

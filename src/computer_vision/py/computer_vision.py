@@ -2,128 +2,111 @@ import os
 import numpy as np
 import cv2
 
-def resizeUHDtoHD(img):
+class ComputerVision:
+    def __init__(self, videoPath):
 
-    if img.shape[0] == 3840 and img.shape[1] == 2160 or img.shape[1] == 3840 and img.shape[0] == 2160:
-        img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
-        print(f"Resized image from UHD to {img.shape}")
-    
-    return img
-
-def setVideoBeforeEnd(video, secondsBeforeEnd=5):
-    # Get video properties
-    fps = video.get(cv2.CAP_PROP_FPS)  # Frame rate
-    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))  # Total number of frames
-    duration = total_frames / fps  # Total duration in seconds
-
-    # Calculate the start frame
-    start_time = duration - secondsBeforeEnd
-    start_frame = int(start_time * fps)
-    
-    # Set the video position
-    video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-
-script_dir = os.path.dirname(os.path.realpath(__file__))
-imgPath = f'{script_dir}/test/t_uhd_9-16.png'
-templatePath = f'{script_dir}/test/t_hd_16-9_half_cropped.png'
-videos = ["T_outro_hard_cut_16_9_hd_preview.mp4","Telekom_TeacherEnding_Max.mp4"]
-videoPath= f"{script_dir}/test/{videos[0]}"
-
-methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.templatePath = f'{script_dir}/template.png'
+        self.template = cv2.imread(self.templatePath, 0)
+        self.videoPath = videoPath
+        self.video = cv2.VideoCapture(self.videoPath)
+        self.fps, self.total_frames, self.duration_secs = self.getVideoProperties()
+        print(self.duration_secs, self.total_frames, self.fps)
+        self.setVideoBeforeEnd()
+        self.methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
             cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
+        
+        self.detectedTime = None
 
-def matchVideoFrames(videoPath, templatePath, method):
+    def resizeUHDtoHD(self, frame):
 
-    video = cv2.VideoCapture(videoPath)
-    setVideoBeforeEnd(video)
-    template =  cv2.imread(templatePath, 0)
-    h, w = template.shape
-    threshold = 0.95
+        if frame.shape[0] == 3840 and frame.shape[1] == 2160 or frame.shape[1] == 3840 and frame.shape[0] == 2160:
+            frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+            print(f"Resized image from UHD to {frame.shape}")
+        
+        return frame
 
+    def getCurrentTime(self):
+        currentFrame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
+        currentTime = currentFrame / self.fps
 
-    while(True):
-        try:
-            ret, frame = video.read()
-            frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
-            resizeUHDtoHD(frame2)
+        return currentTime
 
-            result = cv2.matchTemplate(frame2, template, method)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-            detected = False
+    def getVideoProperties(self):
+        fps = self.video.get(cv2.CAP_PROP_FPS)
+        total_frames = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
+        duration_secs = total_frames / fps
 
-            if method == cv2.TM_SQDIFF_NORMED:
-                match_found = (min_val <= (1-threshold))
-                detection_value = min_val
+        return fps, total_frames, duration_secs
 
-            else:
-                match_found = (max_val >= threshold)
-                detection_value = max_val
+    def setVideoBeforeEnd(self, secondsBeforeEnd=5):
 
-            print("Logo Detection Accuracy", detection_value)
+        start_time = self.duration_secs - secondsBeforeEnd
+        start_frame = int(start_time * self.fps)
+        self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
+    def matchVideoFrames(self, showVideoPlayer = False, method_id = 1):
 
-            if match_found:
+        h, w = self.template.shape
+        threshold = 0.95
+        method = self.methods[method_id]
+        isDetecting = True
+        while(isDetecting):
+            try:
+                ret, frame = self.video.read()
+                frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
+                self.resizeUHDtoHD(frame2)
+
+                result = cv2.matchTemplate(frame2, self.template, method)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+
                 if method == cv2.TM_SQDIFF_NORMED:
-                    location = min_loc
+                    match_found = (min_val <= (1-threshold))
+                    detection_value = min_val
+
                 else:
-                    location = max_loc
+                    match_found = (max_val >= threshold)
+                    detection_value = max_val
 
-                bottom_right = (location[0] + w, location[1] + h)
-                cv2.rectangle(frame, location, bottom_right, 255, 5)
-                message = f"Logo Frame Matched. Accuracy: {detection_value*100:.2f}%"
+                print("Logo Detection Accuracy", detection_value)
 
-                cv2.putText(frame, message, (location[0], bottom_right[1]+50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
+                if match_found:
+                    print("DETECTED")
+                    self.detectedTime = self.getCurrentTime()
 
-                detected = True
-                print("DETECTED")
+                    if showVideoPlayer:
+                        if method == cv2.TM_SQDIFF_NORMED:
+                            location = min_loc
+                        else:
+                            location = max_loc
 
-            else:
-                print("NOT DETECTED")
+                        bottom_right = (location[0] + w, location[1] + h)
+                        cv2.rectangle(frame, location, bottom_right, 255, 5)
+                        message = f"Logo Frame Matched. Accuracy: {detection_value*100:.2f}%"
 
-            cv2.imshow('Video', frame)
+                        cv2.putText(frame, message, (location[0], bottom_right[1]+50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
+                    else:
+                        isDetecting = False
+                    
+                else:
+                    print("NOT DETECTED")
 
-            if detected == True:
-                cv2.waitKey(0)
+                if showVideoPlayer:   
+                    cv2.imshow('Video', frame)
+                    if match_found == True:
+                        cv2.waitKey(1000)
 
+                    if cv2.waitKey(1) == ord('q'):
+                        isDetecting = False
 
-            if cv2.waitKey(1) == ord('q'):
-                break
-        except Exception as e:
-            print("Exception:", str(e))
-            break
+            except Exception as e:
+                print("Exception:", str(e))
+                isDetecting = False
 
-    video.release()
-    cv2.destroyAllWindows()
-    pass
-
-#for method in methods:
-matchVideoFrames(videoPath, templatePath, methods[1])
-
-
-
-def matchImage(imgPath, templatePath):
-    template =  cv2.imread(templatePath, 0)
-    img = cv2.imread(imgPath)
-    h, w = template.shape
-
-    for method in methods:
-        img2 = img.copy()
-
-        result = cv2.matchTemplate(img2, template, method)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-            location = min_loc
-        else:
-            location = max_loc
-
-        bottom_right = (location[0] + w, location[1] + h)    
-        cv2.rectangle(img2, location, bottom_right, 255, 5)
-        cv2.imshow('Match', img2)
-        cv2.waitKey(0)
+        self.video.release()
         cv2.destroyAllWindows()
-
-def calculateFrameRate():
-    pass
-
-def calculateLogoTime():
-    pass
+        
+        if self.detectedTime is not None:
+            return self.detectedTime
+        else:
+            return "No logo detected"
