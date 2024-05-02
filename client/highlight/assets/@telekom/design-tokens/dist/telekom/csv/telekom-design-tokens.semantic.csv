@@ -1,0 +1,353 @@
+Name;Tier;Category;Type;Value;Value (dark);Description;Is Alias?
+Text & Icon / Standard;Semantic;Color;color;{core.color.black};{core.color.white};Default text color with highest contrast.;Yes
+Text & Icon / Additional;Semantic;Color;color;{core.color.black} / 0.65;{core.color.white} / 0.65;Use in combination with standard text for additional text elements.;Yes
+Text & Icon / Disabled;Semantic;Color;color;{core.color.black} / 0.4;{core.color.white} / 0.3;Only use for disabled text.;Yes
+Text & Icon / Link / Standard;Semantic;Color;color;{core.color.blue.500};{core.color.blue.200};;Yes
+Text & Icon / Link / Hovered;Semantic;Color;color;{core.color.blue.700};{core.color.blue.100};;Yes
+Text & Icon / Link / Visited;Semantic;Color;color;{core.color.violet.600};{core.color.violet.300};;Yes
+Text & Icon / Link / Active;Semantic;Color;color;{core.color.blue.900};{core.color.blue.0};;Yes
+Text & Icon / Primary / Standard;Semantic;Color;color;{core.color.brand.standard};{core.color.brand.standard};;Yes
+Text & Icon / Primary / Hovered;Semantic;Color;color;{core.color.brand.dark};{core.color.brand.light};;Yes
+Text & Icon / Primary / Pressed;Semantic;Color;color;{core.color.brand.darker};{core.color.brand.lighter};;Yes
+Text & Icon / Inverted / Standard;Semantic;Color;color;{core.color.white};{core.color.black};Standard text color inverted to be used on high contrast colors like ui/extra strong;Yes
+Text & Icon / Inverted / Additional;Semantic;Color;color;{core.color.white} / 0.65;{core.color.black} / 0.65;Additional text color inverted to be used on high contrast colors like ui/extra strong;Yes
+Text & Icon / White / Standard;Semantic;Color;color;{core.color.white};{core.color.white};Light text to be used on backgrounds that are dark in all modes (light & dark);Yes
+Text & Icon / White / Additional;Semantic;Color;color;{core.color.white} / 0.65;{core.color.white} / 0.65;Semi-Light text to be used on backgrounds that are dark in all modes (light & dark);Yes
+Text & Icon / Black / Standard;Semantic;Color;color;{core.color.black};{core.color.black};This text color is dark in all modes (light & dark);Yes
+Text & Icon / Black / Additional;Semantic;Color;color;{core.color.black} / 0.65;{core.color.black} / 0.65;This text color is dark in all modes (light & dark);Yes
+Text & Icon / Functional / Informational;Semantic;Color;color;{core.color.blue.500};{core.color.blue.200};;Yes
+Text & Icon / Functional / Success;Semantic;Color;color;{core.color.green.800};{core.color.green.500};;Yes
+Text & Icon / Functional / Danger;Semantic;Color;color;{core.color.red.600};{core.color.red.300};;Yes
+Text & Icon / Functional / Warning;Semantic;Color;color;{core.color.orange.900};{core.color.orange.500};;Yes
+Text & Icon / On Subtle / Informational;Semantic;Color;color;{core.color.blue.500};{core.color.blue.200};;Yes
+Text & Icon / On Subtle / Success;Semantic;Color;color;{core.color.green.900};{core.color.green.300};;Yes
+Text & Icon / On Subtle / Danger;Semantic;Color;color;{core.color.red.700};{core.color.red.200};;Yes
+Text & Icon / On Subtle / Warning;Semantic;Color;color;{core.color.orange.900};{core.color.orange.300};;Yes
+Text & Icon / On Subtle / Violet;Semantic;Color;color;{core.color.violet.600};{core.color.violet.200};;Yes
+Text & Icon / On Subtle / Blue;Semantic;Color;color;{core.color.blue.500};{core.color.blue.200};;Yes
+Text & Icon / On Subtle / Cyan;Semantic;Color;color;#00738A;{core.color.cyan.400};;Yes
+Text & Icon / On Subtle / Teal;Semantic;Color;color;#177364;{core.color.teal.400};;Yes
+Text & Icon / On Subtle / Green;Semantic;Color;color;{core.color.green.900};{core.color.green.300};;Yes
+Text & Icon / On Subtle / Olive;Semantic;Color;color;#557317;{core.color.olive.400};;Yes
+Text & Icon / On Subtle / Brown;Semantic;Color;color;{core.color.brown.800};{core.color.brown.300};;Yes
+Text & Icon / On Subtle / Yellow;Semantic;Color;color;#AC5600;{core.color.yellow.500};;Yes
+Text & Icon / On Subtle / Orange;Semantic;Color;color;{core.color.orange.900};{core.color.orange.300};;Yes
+Text & Icon / On Subtle / Red;Semantic;Color;color;{core.color.red.700};{core.color.red.200};;Yes
+Background / Canvas;Semantic;Color;color;{core.color.grey.0};{core.color.grey.2200};Use as the background for your product (app, website, etc.);Yes
+Background / Canvas Subtle;Semantic;Color;color;{core.color.grey.100};{core.color.grey.2100};Use as the background for your product (app, website, etc.);Yes
+Background / Backdrop;Semantic;Color;color;{core.color.black} / 0.5;{core.color.black} / 0.65;Use to overlay content below dialogs to separate dialog from content below;Yes
+Background / Surface;Semantic;Color;color;{core.color.grey.0};{core.color.grey.1900};Use as the background of elements like cards, headers, bottom bars, etc.;Yes
+Background / Surface Subtle;Semantic;Color;color;{core.color.grey.300};{core.color.grey.1800};Use as the background of elements like cards, headers, bottom bars, etc.;Yes
+Background / Surface Highlight;Semantic;Color;color;{core.color.grey.1800};{core.color.grey.1500};Use as the background of elements that should stand out highlighted sections, footer, etc.;Yes
+Primary / Standard;Semantic;Color;color;{core.color.brand.standard};{core.color.brand.standard};;Yes
+Primary / Hovered;Semantic;Color;color;{core.color.brand.dark};{core.color.brand.dark};;Yes
+Primary / Pressed;Semantic;Color;color;{core.color.brand.darker};{core.color.brand.darker};;Yes
+UI / Base;Semantic;Color;color;{core.color.grey.0};{core.color.grey.2100};;Yes
+UI / Subtle;Semantic;Color;color;{core.color.grey.300};{core.color.grey.1900};;Yes
+UI / Faint;Semantic;Color;color;{core.color.grey.500};{core.color.grey.1600};;Yes
+UI / Regular;Semantic;Color;color;{core.color.grey.1000};{core.color.grey.1300};;Yes
+UI / Strong;Semantic;Color;color;{core.color.grey.1200};{core.color.grey.1000};;Yes
+UI / Extra Strong;Semantic;Color;color;{core.color.grey.1800};{core.color.grey.300};;Yes
+UI / White;Semantic;Color;color;{core.color.grey.0};{core.color.grey.0};;Yes
+UI / Black;Semantic;Color;color;{core.color.grey.2200};{core.color.grey.2200};;Yes
+UI / Disabled;Semantic;Color;color;{core.color.grey.600};{core.color.grey.1700};;Yes
+UI / Border / Standard;Semantic;Color;color;{core.color.black} / 0.44;{core.color.grey.0} / 0.4;;Yes
+UI / Border / Hovered;Semantic;Color;color;{core.color.black} / 0.71;{core.color.grey.0} / 0.54;;Yes
+UI / Border / Pressed;Semantic;Color;color;{core.color.black} / 0.71;{core.color.grey.0} / 0.94;Use this token for borders in pressed or active state;Yes
+UI / Border / Disabled;Semantic;Color;color;{core.color.black} / 0.14;{core.color.grey.0} / 0.21;;Yes
+UI / State Fill / Standard;Semantic;Color;color;{core.color.black} / 0;{core.color.white} / 0;For outlined and ghost elements: The standard fill is invisible / 0% opacity;Yes
+UI / State Fill / Hovered;Semantic;Color;color;{core.color.black} / 0.07;{core.color.white} / 0.14;For outlined and ghost elements: When hovered a light, transparent fill is applied;Yes
+UI / State Fill / Pressed;Semantic;Color;color;{core.color.black} / 0.21;{core.color.white} / 0.27;For outlined and ghost elements: When pressed or active a medium transparent fill is applied;Yes
+UI / State Fill / Hovered Inverted;Semantic;Color;color;{core.color.white} / 0.14;{core.color.black} / 0.07;For outlined and ghost elements: When hovered a light, transparent fill is applied;Yes
+UI / State Fill / Pressed Inverted;Semantic;Color;color;{core.color.white} / 0.21;{core.color.black} / 0.21;For outlined and ghost elements: When pressed or active a medium transparent fill is applied;Yes
+Functional / Focus / Standard;Semantic;Color;color;{core.color.blue.500};{core.color.blue.200};;Yes
+Functional / Focus / Inverted;Semantic;Color;color;{core.color.blue.200};{core.color.blue.500};;Yes
+Functional / Focus / On Dark Background;Semantic;Color;color;{core.color.blue.200};;;Yes
+Functional / Focus / On Light Background;Semantic;Color;color;{core.color.blue.500};;;Yes
+Functional / Informational / Standard;Semantic;Color;color;{core.color.blue.500};{core.color.blue.500};;Yes
+Functional / Informational / Hovered;Semantic;Color;color;{core.color.blue.600};{core.color.blue.400};;Yes
+Functional / Informational / Pressed;Semantic;Color;color;{core.color.blue.700};{core.color.blue.300};;Yes
+Functional / Informational / Subtle;Semantic;Color;color;{core.color.blue.tint};{core.color.blue.shade};;Yes
+Functional / Success / Standard;Semantic;Color;color;{core.color.green.500};{core.color.green.500};;Yes
+Functional / Success / Hovered;Semantic;Color;color;{core.color.green.600};{core.color.green.400};;Yes
+Functional / Success / Pressed;Semantic;Color;color;{core.color.green.700};{core.color.green.300};;Yes
+Functional / Success / Subtle;Semantic;Color;color;{core.color.green.tint};{core.color.green.shade};;Yes
+Functional / Danger / Standard;Semantic;Color;color;{core.color.red.500};{core.color.red.500};;Yes
+Functional / Danger / Hovered;Semantic;Color;color;{core.color.red.600};{core.color.red.400};;Yes
+Functional / Danger / Pressed;Semantic;Color;color;{core.color.red.700};{core.color.red.300};;Yes
+Functional / Danger / Subtle;Semantic;Color;color;{core.color.red.tint};{core.color.red.shade};;Yes
+Functional / Warning / Standard;Semantic;Color;color;{core.color.orange.500};{core.color.orange.500};;Yes
+Functional / Warning / Hovered;Semantic;Color;color;{core.color.orange.600};{core.color.orange.400};;Yes
+Functional / Warning / Pressed;Semantic;Color;color;{core.color.orange.700};{core.color.orange.300};;Yes
+Functional / Warning / Subtle;Semantic;Color;color;{core.color.orange.tint};{core.color.orange.shade};;Yes
+Additional / Violet / 0;Semantic;Color;color;{core.color.violet.0};;tags: additional, violet;Yes
+Additional / Violet / 100;Semantic;Color;color;{core.color.violet.100};;tags: additional, violet;Yes
+Additional / Violet / 200;Semantic;Color;color;{core.color.violet.200};;tags: additional, violet;Yes
+Additional / Violet / 300;Semantic;Color;color;{core.color.violet.300};;tags: additional, violet;Yes
+Additional / Violet / 400;Semantic;Color;color;{core.color.violet.400};;tags: additional, violet;Yes
+Additional / Violet / 500;Semantic;Color;color;{core.color.violet.500};;tags: additional, violet;Yes
+Additional / Violet / 600;Semantic;Color;color;{core.color.violet.600};;tags: additional, violet;Yes
+Additional / Violet / 700;Semantic;Color;color;{core.color.violet.700};;tags: additional, violet;Yes
+Additional / Violet / 800;Semantic;Color;color;{core.color.violet.800};;tags: additional, violet;Yes
+Additional / Violet / 900;Semantic;Color;color;{core.color.violet.900};;tags: additional, violet;Yes
+Additional / Violet / Subtle;Semantic;Color;color;{core.color.violet.tint};{core.color.violet.shade};tags: violet, additional;Yes
+Additional / Blue / 0;Semantic;Color;color;{core.color.blue.0};;tags: additional, blue;Yes
+Additional / Blue / 100;Semantic;Color;color;{core.color.blue.100};;tags: additional, blue;Yes
+Additional / Blue / 200;Semantic;Color;color;{core.color.blue.200};;tags: additional, blue;Yes
+Additional / Blue / 300;Semantic;Color;color;{core.color.blue.300};;tags: additional, blue;Yes
+Additional / Blue / 400;Semantic;Color;color;{core.color.blue.400};;tags: additional, blue;Yes
+Additional / Blue / 500;Semantic;Color;color;{core.color.blue.500};;tags: additional, blue;Yes
+Additional / Blue / 600;Semantic;Color;color;{core.color.blue.600};;tags: additional, blue;Yes
+Additional / Blue / 700;Semantic;Color;color;{core.color.blue.700};;tags: additional, blue;Yes
+Additional / Blue / 800;Semantic;Color;color;{core.color.blue.800};;tags: additional, blue;Yes
+Additional / Blue / 900;Semantic;Color;color;{core.color.blue.900};;tags: additional, blue;Yes
+Additional / Blue / Subtle;Semantic;Color;color;{core.color.blue.tint};{core.color.blue.shade};tags: additional, subtle, blue;Yes
+Additional / Cyan / 0;Semantic;Color;color;{core.color.cyan.0};;tags: additional, cyan;Yes
+Additional / Cyan / 100;Semantic;Color;color;{core.color.cyan.100};;tags: additional, cyan;Yes
+Additional / Cyan / 200;Semantic;Color;color;{core.color.cyan.200};;tags: additional, cyan;Yes
+Additional / Cyan / 300;Semantic;Color;color;{core.color.cyan.300};;tags: additional, cyan;Yes
+Additional / Cyan / 400;Semantic;Color;color;{core.color.cyan.400};;tags: additional, cyan;Yes
+Additional / Cyan / 500;Semantic;Color;color;{core.color.cyan.500};;tags: additional, cyan;Yes
+Additional / Cyan / 600;Semantic;Color;color;{core.color.cyan.600};;tags: additional, cyan;Yes
+Additional / Cyan / 700;Semantic;Color;color;{core.color.cyan.700};;tags: additional, cyan;Yes
+Additional / Cyan / 800;Semantic;Color;color;{core.color.cyan.800};;tags: additional, cyan;Yes
+Additional / Cyan / 900;Semantic;Color;color;{core.color.cyan.900};;tags: additional, cyan;Yes
+Additional / Cyan / Subtle;Semantic;Color;color;{core.color.cyan.tint};{core.color.cyan.shade};tags: additional, subtle, cyan;Yes
+Additional / Teal / 0;Semantic;Color;color;{core.color.teal.0};;tags: additional, teal;Yes
+Additional / Teal / 100;Semantic;Color;color;{core.color.teal.100};;tags: additional, teal;Yes
+Additional / Teal / 200;Semantic;Color;color;{core.color.teal.200};;tags: additional, teal;Yes
+Additional / Teal / 300;Semantic;Color;color;{core.color.teal.300};;tags: additional, teal;Yes
+Additional / Teal / 400;Semantic;Color;color;{core.color.teal.400};;tags: additional, teal;Yes
+Additional / Teal / 500;Semantic;Color;color;{core.color.teal.500};;tags: additional, teal;Yes
+Additional / Teal / 600;Semantic;Color;color;{core.color.teal.600};;tags: additional, teal;Yes
+Additional / Teal / 700;Semantic;Color;color;{core.color.teal.700};;tags: additional, teal;Yes
+Additional / Teal / 800;Semantic;Color;color;{core.color.teal.800};;tags: additional, teal;Yes
+Additional / Teal / 900;Semantic;Color;color;{core.color.teal.900};;tags: additional, teal;Yes
+Additional / Teal / Subtle;Semantic;Color;color;{core.color.teal.tint};{core.color.teal.shade};tags: additional, subtle, teal;Yes
+Additional / Green / 0;Semantic;Color;color;{core.color.green.0};;tags: additional, green;Yes
+Additional / Green / 100;Semantic;Color;color;{core.color.green.100};;tags: additional, green;Yes
+Additional / Green / 200;Semantic;Color;color;{core.color.green.200};;tags: additional, green;Yes
+Additional / Green / 300;Semantic;Color;color;{core.color.green.300};;tags: additional, green;Yes
+Additional / Green / 400;Semantic;Color;color;{core.color.green.400};;tags: additional, green;Yes
+Additional / Green / 500;Semantic;Color;color;{core.color.green.500};;tags: additional, green;Yes
+Additional / Green / 600;Semantic;Color;color;{core.color.green.600};;tags: additional, green;Yes
+Additional / Green / 700;Semantic;Color;color;{core.color.green.700};;tags: additional, green;Yes
+Additional / Green / 800;Semantic;Color;color;{core.color.green.800};;tags: additional, green;Yes
+Additional / Green / 900;Semantic;Color;color;{core.color.green.900};;tags: additional, green;Yes
+Additional / Green / Subtle;Semantic;Color;color;{core.color.green.tint};{core.color.green.shade};tags: green, subtle, additional;Yes
+Additional / Olive / 0;Semantic;Color;color;{core.color.olive.0};;tags: additional, olive;Yes
+Additional / Olive / 100;Semantic;Color;color;{core.color.olive.100};;tags: additional, olive;Yes
+Additional / Olive / 200;Semantic;Color;color;{core.color.olive.200};;tags: additional, olive;Yes
+Additional / Olive / 300;Semantic;Color;color;{core.color.olive.300};;tags: additional, olive;Yes
+Additional / Olive / 400;Semantic;Color;color;{core.color.olive.400};;tags: additional, olive;Yes
+Additional / Olive / 500;Semantic;Color;color;{core.color.olive.500};;tags: additional, olive;Yes
+Additional / Olive / 600;Semantic;Color;color;{core.color.olive.600};;tags: additional, olive;Yes
+Additional / Olive / 700;Semantic;Color;color;{core.color.olive.700};;tags: additional, olive;Yes
+Additional / Olive / 800;Semantic;Color;color;{core.color.olive.800};;tags: additional, olive;Yes
+Additional / Olive / 900;Semantic;Color;color;{core.color.olive.900};;tags: additional, olive;Yes
+Additional / Olive / Subtle;Semantic;Color;color;{core.color.olive.tint};{core.color.olive.shade};tags: additional, subtle, olive;Yes
+Additional / Brown / 0;Semantic;Color;color;{core.color.brown.0};;tags: additional, brown;Yes
+Additional / Brown / 100;Semantic;Color;color;{core.color.brown.100};;tags: additional, brown;Yes
+Additional / Brown / 200;Semantic;Color;color;{core.color.brown.200};;tags: additional, brown;Yes
+Additional / Brown / 300;Semantic;Color;color;{core.color.brown.300};;tags: additional, brown;Yes
+Additional / Brown / 400;Semantic;Color;color;{core.color.brown.400};;tags: additional, brown;Yes
+Additional / Brown / 500;Semantic;Color;color;{core.color.brown.500};;tags: additional, brown;Yes
+Additional / Brown / 600;Semantic;Color;color;{core.color.brown.600};;tags: additional, brown;Yes
+Additional / Brown / 700;Semantic;Color;color;{core.color.brown.700};;tags: additional, brown;Yes
+Additional / Brown / 800;Semantic;Color;color;{core.color.brown.800};;tags: additional, brown;Yes
+Additional / Brown / 900;Semantic;Color;color;{core.color.brown.900};;tags: additional, brown;Yes
+Additional / Brown / Subtle;Semantic;Color;color;{core.color.brown.tint};{core.color.brown.shade};tags: additional, subtle, brown;Yes
+Additional / Yellow / 0;Semantic;Color;color;{core.color.yellow.0};;tags: additional, yellow;Yes
+Additional / Yellow / 100;Semantic;Color;color;{core.color.yellow.100};;tags: additional, yellow;Yes
+Additional / Yellow / 200;Semantic;Color;color;{core.color.yellow.200};;tags: additional, yellow;Yes
+Additional / Yellow / 300;Semantic;Color;color;{core.color.yellow.300};;tags: additional, yellow;Yes
+Additional / Yellow / 400;Semantic;Color;color;{core.color.yellow.400};;tags: additional, yellow;Yes
+Additional / Yellow / 500;Semantic;Color;color;{core.color.yellow.500};;tags: additional, yellow;Yes
+Additional / Yellow / 600;Semantic;Color;color;{core.color.yellow.600};;tags: additional, yellow;Yes
+Additional / Yellow / 700;Semantic;Color;color;{core.color.yellow.700};;tags: additional, yellow;Yes
+Additional / Yellow / 800;Semantic;Color;color;{core.color.yellow.800};;tags: additional, yellow;Yes
+Additional / Yellow / 900;Semantic;Color;color;{core.color.yellow.900};;tags: additional, yellow;Yes
+Additional / Yellow / Subtle;Semantic;Color;color;{core.color.yellow.tint};{core.color.yellow.shade};tags: additional, subtle, yellow;Yes
+Additional / Orange / 0;Semantic;Color;color;{core.color.orange.0};;tags: additional, orange;Yes
+Additional / Orange / 100;Semantic;Color;color;{core.color.orange.100};;tags: additional, orange;Yes
+Additional / Orange / 200;Semantic;Color;color;{core.color.orange.200};;tags: additional, orange;Yes
+Additional / Orange / 300;Semantic;Color;color;{core.color.orange.300};;tags: additional, orange;Yes
+Additional / Orange / 400;Semantic;Color;color;{core.color.orange.400};;tags: additional, orange;Yes
+Additional / Orange / 500;Semantic;Color;color;{core.color.orange.500};;tags: additional, orange;Yes
+Additional / Orange / 600;Semantic;Color;color;{core.color.orange.600};;tags: additional, orange;Yes
+Additional / Orange / 700;Semantic;Color;color;{core.color.orange.700};;tags: additional, orange;Yes
+Additional / Orange / 800;Semantic;Color;color;{core.color.orange.800};;tags: additional, orange;Yes
+Additional / Orange / 900;Semantic;Color;color;{core.color.orange.900};;tags: additional, orange;Yes
+Additional / Orange / Subtle;Semantic;Color;color;{core.color.orange.tint};{core.color.orange.shade};tags: additional, subtle, orange;Yes
+Additional / Red / 0;Semantic;Color;color;{core.color.red.0};;tags: additional, red;Yes
+Additional / Red / 100;Semantic;Color;color;{core.color.red.100};;tags: additional, red;Yes
+Additional / Red / 200;Semantic;Color;color;{core.color.red.200};;tags: additional, red;Yes
+Additional / Red / 300;Semantic;Color;color;{core.color.red.300};;tags: additional, red;Yes
+Additional / Red / 400;Semantic;Color;color;{core.color.red.400};;tags: additional, red;Yes
+Additional / Red / 500;Semantic;Color;color;{core.color.red.500};;tags: additional, red;Yes
+Additional / Red / 600;Semantic;Color;color;{core.color.red.600};;tags: additional, red;Yes
+Additional / Red / 700;Semantic;Color;color;{core.color.red.700};;tags: additional, red;Yes
+Additional / Red / 800;Semantic;Color;color;{core.color.red.800};;tags: additional, red;Yes
+Additional / Red / 900;Semantic;Color;color;{core.color.red.900};;tags: additional, red;Yes
+Additional / Red / Subtle;Semantic;Color;color;{core.color.red.tint};{core.color.red.shade};tags: additional, subtle, red;Yes
+Experimental / Focus / Extra Small;Semantic;Radius;dimension;{core.radius.10.value};;;Yes
+Experimental / Focus / Small;Semantic;Radius;dimension;{core.radius.20.value} + 1px;;;Yes
+Experimental / Focus / Standard;Semantic;Radius;dimension;{core.radius.40.value} + 1px;;;Yes
+Experimental / Focus / Large;Semantic;Radius;dimension;{core.radius.60.value} + 1px;;;Yes
+None;Semantic;Radius;dimension;{core.radius.0.value};;Useful for elements with multiple radius values where some corners should be square;Yes
+Extra Small;Semantic;Radius;dimension;{core.radius.10.value};;;Yes
+Small;Semantic;Radius;dimension;{core.radius.20.value};;Used for small elements like checkboxes, etc.;Yes
+Medium Small;Semantic;Radius;dimension;{core.radius.30.value};;Edge-case, use sparingly;Yes
+Standard;Semantic;Radius;dimension;{core.radius.40.value};;Used for our main ui elements like buttons, etc.;Yes
+Large;Semantic;Radius;dimension;{core.radius.60.value};;Used mainly for containers like cards or dialogs;Yes
+Pill;Semantic;Radius;dimension;{core.radius.900.value};;Used for pill-shaped ui elements;Yes
+Circle;Semantic;Radius;percentage;{core.radius.500.value};;Used for ui elements like radio buttons or things like avatars;Yes
+Experimental / Size 01;Semantic;Size;dimension;{core.dimension.2000.value} + {core.dimension.250.value};;;Yes
+Experimental / Size 02;Semantic;Size;dimension;{core.dimension.3250.value} + {core.dimension.250.value};;;Yes
+Experimental / Size 03;Semantic;Size;dimension;{core.dimension.4000.value} - {core.dimension.500.value};;;Yes
+Experimental / Size 04;Semantic;Size;dimension;{core.dimension.4250.value} + {core.dimension.500.value};;;Yes
+Experimental / Size 05;Semantic;Size;dimension;{core.dimension.5000.value} - {core.dimension.1000.value};;;Yes
+Icon / Extra Small;Semantic;Size;dimension;{core.dimension.1500.value};;;Yes
+Icon / Small;Semantic;Size;dimension;{core.dimension.2000.value};;;Yes
+Icon / Medium;Semantic;Size;dimension;{core.dimension.2250.value};;;Yes
+Icon / Large;Semantic;Size;dimension;{core.dimension.2500.value};;;Yes
+Icon / Extra Large;Semantic;Size;dimension;{core.dimension.3500.value};;;Yes
+Form Element Height / Small;Semantic;Size;dimension;{core.dimension.3000.value};;;Yes
+Form Element Height / Standard;Semantic;Size;dimension;{core.dimension.3375.value};;;Yes
+Generic / Size 01;Semantic;Size;dimension;{core.dimension.500.value};;;Yes
+Generic / Size 02;Semantic;Size;dimension;{core.dimension.750.value};;;Yes
+Generic / Size 03;Semantic;Size;dimension;{core.dimension.1000.value};;;Yes
+Generic / Size 04;Semantic;Size;dimension;{core.dimension.1500.value};;;Yes
+Generic / Size 05;Semantic;Size;dimension;{core.dimension.2000.value};;;Yes
+Generic / Size 06;Semantic;Size;dimension;{core.dimension.2250.value};;;Yes
+Generic / Size 07;Semantic;Size;dimension;{core.dimension.2500.value};;;Yes
+Generic / Size 08;Semantic;Size;dimension;{core.dimension.2750.value};;;Yes
+Generic / Size 09;Semantic;Size;dimension;{core.dimension.3000.value};;;Yes
+Generic / Size 10;Semantic;Size;dimension;{core.dimension.3125.value};;;Yes
+Generic / Size 11;Semantic;Size;dimension;{core.dimension.3250.value};;;Yes
+Generic / Size 12;Semantic;Size;dimension;{core.dimension.3375.value};;;Yes
+Generic / Size 13;Semantic;Size;dimension;{core.dimension.3500.value};;;Yes
+Generic / Size 14;Semantic;Size;dimension;{core.dimension.3625.value};;;Yes
+Generic / Size 15;Semantic;Size;dimension;{core.dimension.3750.value};;;Yes
+Generic / Size 16;Semantic;Size;dimension;{core.dimension.4000.value};;;Yes
+Generic / Size 17;Semantic;Size;dimension;{core.dimension.4125.value};;;Yes
+Generic / Size 18;Semantic;Size;dimension;{core.dimension.4250.value};;;Yes
+Generic / Size 19;Semantic;Size;dimension;{core.dimension.4500.value};;;Yes
+Generic / Size 20;Semantic;Size;dimension;{core.dimension.5000.value};;;Yes
+Generic / Size 21;Semantic;Size;dimension;{core.dimension.5500.value};;;Yes
+Generic / Size 22;Semantic;Size;dimension;{core.dimension.6000.value};;;Yes
+Generic / Size 23;Semantic;Size;dimension;{core.dimension.6250.value};;;Yes
+Generic / Size 24;Semantic;Size;dimension;{core.dimension.6750.value};;;Yes
+Generic / Size 25;Semantic;Size;dimension;{core.dimension.7125.value};;;Yes
+Standard;Semantic;Line Weight;dimension;{core.line-weight.sm.value};;Used for ui elements like inputs, dividers, etc.;Yes
+Highlight;Semantic;Line Weight;dimension;{core.line-weight.md.value};;E.g. use for active menu items.;Yes
+Bold;Semantic;Line Weight;dimension;{core.line-weight.lg.value};;;Yes
+Duration / Instant;Semantic;Motion;time;{core.motion.duration.instant.value};;;Yes
+Duration / Immediate;Semantic;Motion;time;{core.motion.duration.immediate.value};;;Yes
+Duration / Transition;Semantic;Motion;time;{core.motion.duration.fast.value};;;Yes
+Duration / Animation;Semantic;Motion;time;{core.motion.duration.slow.value};;;Yes
+Duration / Animation Deliberate;Semantic;Motion;time;{core.motion.duration.deliberate.value};;;Yes
+Easing / Standard;Semantic;Motion;cubic-bezier;{core.motion.easing.easeInOut.value};;;Yes
+Easing / Enter;Semantic;Motion;cubic-bezier;{core.motion.easing.easeOut.value};;;Yes
+Easing / Leave;Semantic;Motion;cubic-bezier;{core.motion.easing.easeIn.value};;;Yes
+Invisible;Semantic;Opacity;number;{core.opacity.none.value};;;Yes
+Transparent;Semantic;Opacity;number;{core.opacity.low.value};;;Yes
+Semi Transparent;Semantic;Opacity;number;{core.opacity.medium.value};;;Yes
+Translucent;Semantic;Opacity;number;{core.opacity.normal.value};;;Yes
+Semi Translucent;Semantic;Opacity;number;{core.opacity.high.value};;;Yes
+Solid;Semantic;Opacity;number;{core.opacity.full.value};;;Yes
+Raised / Standard;Semantic;Shadow;shadow;{core.shadow.level-4.value};;For bigger interactable elements like cards, etc.;Yes
+Raised / Hover;Semantic;Shadow;shadow;{core.shadow.level-8.value};;For bigger interactable elements like cards, etc.;Yes
+Raised / Pressed;Semantic;Shadow;shadow;{core.shadow.level-2.value};;For bigger interactable elements like cards, etc.;Yes
+Floating / Standard;Semantic;Shadow;shadow;{core.shadow.level-6.value};;For floating elements that mostly stay in a fixed position like a FAB.;Yes
+Floating / Hover;Semantic;Shadow;shadow;{core.shadow.level-12.value};;For floating elements that mostly stay in a fixed position like a FAB.;Yes
+Floating / Pressed;Semantic;Shadow;shadow;{core.shadow.level-4.value};;For floating elements that mostly stay in a fixed position like a FAB.;Yes
+Top;Semantic;Shadow;shadow;{core.shadow.level-8.value};;For fixed elements that overlay the content e.g. sidebars or bottom sheets;Yes
+Overlay;Semantic;Shadow;shadow;{core.shadow.level-12.value};;Highest level e.g. for dialogs or modals;Yes
+Intense;Semantic;Shadow;shadow;{core.shadow.special.intense.value};;Useful for accessibility purposes;Yes
+App Bar / Top / Raised;Semantic;Shadow;shadow;{core.shadow.special.app-bar.top.subtle};;Use for headers, app bar & menus on the top;Yes
+App Bar / Top / Flat;Semantic;Shadow;shadow;{core.shadow.special.app-bar.top.flat};;Use for headers, app bar & menus on the top;Yes
+App Bar / Bottom / Raised;Semantic;Shadow;shadow;{core.shadow.special.app-bar.bottom.subtle};;Use for app navigation and app bars on the bottom;Yes
+App Bar / Bottom / Flat;Semantic;Shadow;shadow;{core.shadow.special.app-bar.bottom.flat};;Use for app navigation and app bars on the bottom;Yes
+Composition / Space 00;Semantic;Spacing;dimension;{core.dimension.none.value};;;Yes
+Composition / Space 01;Semantic;Spacing;dimension;{core.dimension.125.value};;;Yes
+Composition / Space 02;Semantic;Spacing;dimension;{core.dimension.250.value};;;Yes
+Composition / Space 03;Semantic;Spacing;dimension;{core.dimension.500.value};;;Yes
+Composition / Space 04;Semantic;Spacing;dimension;{core.dimension.1000.value};;;Yes
+Composition / Space 05;Semantic;Spacing;dimension;{core.dimension.1500.value};;;Yes
+Composition / Space 06;Semantic;Spacing;dimension;{core.dimension.2000.value};;;Yes
+Composition / Space 07;Semantic;Spacing;dimension;{core.dimension.2250.value};;;Yes
+Composition / Space 08;Semantic;Spacing;dimension;{core.dimension.2500.value};;;Yes
+Composition / Space 09;Semantic;Spacing;dimension;{core.dimension.2750.value};;;Yes
+Composition / Space 10;Semantic;Spacing;dimension;{core.dimension.3000.value};;;Yes
+Composition / Space 11;Semantic;Spacing;dimension;{core.dimension.3125.value};;;Yes
+Composition / Space 12;Semantic;Spacing;dimension;{core.dimension.3250.value};;;Yes
+Composition / Space 13;Semantic;Spacing;dimension;{core.dimension.3375.value};;;Yes
+Composition / Space 14;Semantic;Spacing;dimension;{core.dimension.3500.value};;;Yes
+Composition / Space 15;Semantic;Spacing;dimension;{core.dimension.3625.value};;;Yes
+Composition / Space 16;Semantic;Spacing;dimension;{core.dimension.3750.value};;;Yes
+Composition / Space 17;Semantic;Spacing;dimension;{core.dimension.4000.value};;;Yes
+Composition / Space 18;Semantic;Spacing;dimension;{core.dimension.4125.value};;;Yes
+Composition / Space 19;Semantic;Spacing;dimension;{core.dimension.4250.value};;;Yes
+Composition / Space 20;Semantic;Spacing;dimension;{core.dimension.4375.value};;;Yes
+Composition / Space 21;Semantic;Spacing;dimension;{core.dimension.4500.value};;;Yes
+Baseline / Space 00;Semantic;Spacing;dimension;{core.dimension.none.value};;;Yes
+Baseline / Space 01;Semantic;Spacing;dimension;{core.dimension.500.value};;;Yes
+Baseline / Space 02;Semantic;Spacing;dimension;{core.dimension.1000.value};;;Yes
+Baseline / Space 03;Semantic;Spacing;dimension;{core.dimension.1500.value};;;Yes
+Baseline / Space 04;Semantic;Spacing;dimension;{core.dimension.2000.value};;;Yes
+Baseline / Space 05;Semantic;Spacing;dimension;{core.dimension.2500.value};;;Yes
+Baseline / Space 06;Semantic;Spacing;dimension;{core.dimension.3000.value};;;Yes
+Baseline / Space 07;Semantic;Spacing;dimension;{core.dimension.3500.value};;;Yes
+Baseline / Space 08;Semantic;Spacing;dimension;{core.dimension.4000.value};;;Yes
+Baseline / Space 09;Semantic;Spacing;dimension;{core.dimension.4500.value};;;Yes
+Baseline / Space 10;Semantic;Spacing;dimension;{core.dimension.5000.value};;;Yes
+Baseline / Space 11;Semantic;Spacing;dimension;{core.dimension.5500.value};;;Yes
+Baseline / Space 12;Semantic;Spacing;dimension;{core.dimension.6000.value};;;Yes
+Baseline / Space 13;Semantic;Spacing;dimension;{core.dimension.6500.value};;;Yes
+Baseline / Space 14;Semantic;Spacing;dimension;{core.dimension.7000.value};;;Yes
+Baseline / Space 15;Semantic;Spacing;dimension;{core.dimension.8000.value};;;Yes
+Badge;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.badge} {typography.font-weight.regular} {core.typography.line-spacing.xs} {typography.letter-spacing.standard};;;Yes
+Small;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.small} {typography.font-weight.medium} {core.typography.line-spacing.md} {typography.letter-spacing.standard};;;Yes
+Small Bold;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.small} {typography.font-weight.bold} {core.typography.line-spacing.md} {typography.letter-spacing.standard};;;Yes
+Caption;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.caption} {typography.font-weight.regular} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Caption Bold;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.caption} {typography.font-weight.bold} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Body;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.body} {typography.font-weight.regular} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Body Bold;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.body} {typography.font-weight.bold} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+UI;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.body} {typography.font-weight.medium} {typography.line-spacing.none} {typography.letter-spacing.standard};;;Yes
+UI Bold;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.body} {typography.font-weight.bold} {typography.line-spacing.none} {typography.letter-spacing.standard};;;Yes
+Lead Text;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.callout} {typography.font-weight.regular} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Heading 6;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.body} {typography.font-weight.bold} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Heading 5;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.callout} {typography.font-weight.extra-bold} {typography.line-spacing.standard} {typography.letter-spacing.standard};;;Yes
+Heading 4;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.headline-3} {typography.font-weight.extra-bold} {core.typography.line-spacing.md} {typography.letter-spacing.standard};;;Yes
+Heading 3;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.headline-2} {typography.font-weight.extra-bold} {typography.line-spacing.tight} {typography.letter-spacing.standard};;;Yes
+Heading 2;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.headline-1} {typography.font-weight.extra-bold} {typography.line-spacing.extra-tight} {typography.letter-spacing.standard};;;Yes
+Heading 1;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.title-3} {typography.font-weight.extra-bold} {core.typography.line-spacing.xs} {typography.letter-spacing.standard};;;Yes
+Title 2;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.title-2} {typography.font-weight.extra-bold} {typography.line-spacing.extra-tight} {typography.letter-spacing.standard};;;Yes
+Title 1;Semantic;Text Style;textStyle;{typography.font-family.sans} {typography.font-size.title-1} {typography.font-weight.extra-bold} {typography.line-spacing.extra-tight} {typography.letter-spacing.standard};;;Yes
+Font Size / Badge;Semantic;Typography;dimension;{core.typography.font-scale.1.value};;;Yes
+Font Size / Small;Semantic;Typography;dimension;{core.typography.font-scale.2.value};;;Yes
+Font Size / Caption;Semantic;Typography;dimension;{core.typography.font-scale.3.value};;;Yes
+Font Size / Body;Semantic;Typography;dimension;{core.typography.font-scale.4.value};;;Yes
+Font Size / Callout;Semantic;Typography;dimension;{core.typography.font-scale.6.value};;;Yes
+Font Size / Headline 3;Semantic;Typography;dimension;{core.typography.font-scale.7.value};;;Yes
+Font Size / Headline 2;Semantic;Typography;dimension;{core.typography.font-scale.9.value};;;Yes
+Font Size / Headline 1;Semantic;Typography;dimension;{core.typography.font-scale.11.value};;;Yes
+Font Size / Title 3;Semantic;Typography;dimension;{core.typography.font-scale.13.value};;;Yes
+Font Size / Title 2;Semantic;Typography;dimension;{core.typography.font-scale.15.value};;;Yes
+Font Size / Title 1;Semantic;Typography;dimension;{core.typography.font-scale.16.value};;;Yes
+Font Family / Sans;Semantic;Typography;font;{core.typography.font-family.sans.value};;;Yes
+Font Family / Mono;Semantic;Typography;font;{core.typography.font-family.mono.value};;;Yes
+Font Weight / Thin;Semantic;Typography;number;{core.typography.font-weight.thin.value};;;Yes
+Font Weight / Regular;Semantic;Typography;number;{core.typography.font-weight.regular.value};;;Yes
+Font Weight / Medium;Semantic;Typography;number;{core.typography.font-weight.medium.value};;;Yes
+Font Weight / Bold;Semantic;Typography;number;{core.typography.font-weight.bold.value};;;Yes
+Font Weight / Extra Bold;Semantic;Typography;number;{core.typography.font-weight.extra-bold.value};;;Yes
+Font Weight / Ultra;Semantic;Typography;number;{core.typography.font-weight.ultra.value};;;Yes
+Line Spacing / None;Semantic;Typography;number;{core.typography.line-spacing.none};;Use for single line in ui elements;Yes
+Line Spacing / Extra Tight;Semantic;Typography;number;{core.typography.line-spacing.xxs};;Use for large titles like H1 or H2;Yes
+Line Spacing / Tight;Semantic;Typography;number;{core.typography.line-spacing.sm};;Use for large headlines like H3, etc.;Yes
+Line Spacing / Moderate;Semantic;Typography;number;{core.typography.line-spacing.md};;;Yes
+Line Spacing / Standard;Semantic;Typography;number;{core.typography.line-spacing.lg};;Use for most text elements like normal copy, etc.;Yes
+Line Spacing / Loose;Semantic;Typography;number;{core.typography.line-spacing.xl};;Use for multi line text passages with long lines.;Yes
+Letter Spacing / Standard;Semantic;Typography;number;{core.typography.letter-spacing.none};;;Yes

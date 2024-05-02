@@ -8,13 +8,20 @@ import { AudioVideoService } from './audio-video/audio-video.service';
 import { DownloadController } from './download/download.controller';
 import { DownloadService } from './download/download.service';
 import { ComputerVisionService } from './computer_vision/computer_vision.service';
+import { MusicAiSearchModule } from './music-ai-search/music-ai-search.module';
 
 @Module({
   imports: [
     ChordRetrievalAiModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
-    }),],
+      rootPath: join(__dirname, '..', 'client/soundlogo'),
+      serveRoot: '/soundlogo',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client/highlight'),
+      serveRoot: '/highlight',
+    }),
+    MusicAiSearchModule,],
   controllers: [AppController, DownloadController],
   providers: [AppService, AudioVideoService, DownloadService, ComputerVisionService],
 })
