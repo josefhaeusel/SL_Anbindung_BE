@@ -367,7 +367,7 @@
     </style>
 </head>
 
-<body>
+<body data-mode="light">
 
 
 
@@ -379,10 +379,12 @@
         <!-- First Layer: Upload Area -->
 
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
+
+
             <div class="container">
 
-                <div class="title">Soundlogo Tool</div>
-                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
+                <div class="title">Highlight Scoring Tool</div>
+                <div class="description">Score your video a vast library of Telekom music<br>Keep everything
                     on brand with the help of AI.</div>
                 <div class="upload-area">
                     <input type="file" id="fileInput" @change="handleFileUpload"
@@ -395,7 +397,14 @@
                     style="margin: 20px">
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
+                <scale-text-field ref="searchField" id="searchField" label="Enter Text Prompt"
+                    placeholder="Funky Music for lively Clip" style="display:flex; margin:10px; flex-direction: column;"
+                    @scale-change="getSearchResults"></scale-text-field>
+                <scale-data-grid v-show="searchResults.length != 0" id="music-ai-results" numbered hide-menu :rows="searchResults"></scale-data-grid>
+
+
             </div>
+
         </div>
 
         <!-- Second Layer: Video, Controls, and Key Display -->

@@ -1,14 +1,11 @@
 /*
 
 Next Steps:
--Resoluations und Formate checken
--Ending Varianten im Timing rausfinden
--12 Tonarten
-
-Rendering:
+-
 */
 
 //--- VueJS Part
+
 
 
 const app = Vue.createApp({
@@ -19,6 +16,10 @@ const app = Vue.createApp({
             currentLayer: "layer1",
             showModal: false,
             showWarningModal: false,
+
+            searchPrompt: "",
+            searchResults:[],
+            
 
             playbackPosition: 0,
             sliderValue: 0,
@@ -43,7 +44,24 @@ const app = Vue.createApp({
     mounted() {
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
+        const dataGrid = document.querySelector('#music-ai-results');
+       
+        dataGrid.fields =
+            [
+                {
+                    type: 'text',
+                    label: 'Music Title',
+                    variant: 'h5',
+                    iconPrefix: 'action-play',
+                },
+                {
+                    type: 'text',
+                    label: 'ID',
+                },
+            ];
+        dataGrid.rows = this.searchResults;
     },
+    
 
     methods: {
         setModal(show) {
@@ -52,6 +70,14 @@ const app = Vue.createApp({
         setWarningModal(show) {
             this.showWarningModal = show
         },
+
+        async getSearchResults(event){
+            this.searchPrompt = event.detail.value;
+            this.searchResults = await musicSearchHandler_API(this.searchPrompt);
+            console.log(this.searchResults)
+        },
+
+        showSearchResults(){},
 
         async handleFileUpload(event) {
             const file = event.target.files[0];
@@ -186,7 +212,23 @@ async function setupAudioNodes(context) {
     logoPlayer = await loadLogoPlayer(context);
 }
 
+async function musicSearchHandler_API(prompt){
 
+        const response = await fetch(`/music-ai-search/freeTextSearch/${prompt}`, {
+            method: 'GET',
+        }).then((res) => res.json())
+
+        const searchResults = response.searchResults
+        let formattedResults = []
+
+        for (let i = 0; i<searchResults.length; i++){
+            let result = searchResults[i];
+            formattedResults.push([result.node.title, result.node.id])
+        }
+
+        return formattedResults
+    
+}
 
 function downloadAudio(buffer) {
     // Convert the buffer to a WAV Blob

@@ -9,9 +9,9 @@ export class MusicAiSearchController {
 
     @Get('freeTextSearch/:prompt')
     async freeTextSearch(@Param('prompt') prompt: string) {
-        const searchResult = await this.musicAiSearchService.freeTextSearch(prompt)
-        console.log(searchResult)
-        return {searchResult}
+        let searchResults = await this.musicAiSearchService.freeTextSearch(prompt)
+        searchResults = searchResults.data.freeTextSearch.edges
+        return {searchResults}
     }
 
 }

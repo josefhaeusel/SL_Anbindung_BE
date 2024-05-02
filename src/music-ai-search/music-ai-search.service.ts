@@ -15,7 +15,7 @@ export class MusicAiSearchService {
                     query: /* GraphQL */ `
                 query FreeTextSearchExample($text: String!) {
                     freeTextSearch(
-                    first: 6
+                    first: 3
                     target: { crate: { crateId: "972" } }
                     searchText: $text
                     ) {
