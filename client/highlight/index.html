@@ -384,7 +384,7 @@
             <div class="container">
 
                 <div class="title">Highlight Scoring Tool</div>
-                <div class="description">Score your video a vast library of Telekom music<br>Keep everything
+                <div class="description">Score your video with a vast library of Telekom music<br>Keep everything
                     on brand with the help of AI.</div>
                 <div class="upload-area">
                     <input type="file" id="fileInput" @change="handleFileUpload"
@@ -400,7 +400,7 @@
                 <scale-text-field ref="searchField" id="searchField" label="Enter Text Prompt"
                     placeholder="Funky Music for lively Clip" style="display:flex; margin:10px; flex-direction: column;"
                     @scale-change="getSearchResults"></scale-text-field>
-                <scale-data-grid v-show="searchResults.length != 0" id="music-ai-results" numbered hide-menu :rows="searchResults"></scale-data-grid>
+                <scale-data-grid v-show="searchResults.length != 0" id="music-ai-results" numbered hide-menu :rows="searchResults" style="margin:10px"></scale-data-grid>
 
 
             </div>
@@ -424,12 +424,8 @@
                 </video>
             </div>
 
-            <div class="spinner-container" v-if="isLoadingKey">
-                <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"> </scale-loading-spinner>
-            </div>
-
             <transition name="fade">
-                <div class="controls-container" v-if="!isLoadingKey">
+                <div class="controls-container">
 
                     <div class="left-controls">
                         <scale-button class="download-video-button" @click="downloadVideo" style="left:0">
@@ -439,42 +435,8 @@
 
                     </div>
 
-                    <div class="right-controls">
-                        <div class="key-label">Soundlogo Key:</div>
-                        <scale-tooltip placement="bottom" style="--font-size: 12">
-                            <span slot="content">
-                                <scale-icon-content-heart size="12" selected></scale-icon-content-heart>
-                                Recommended
-                            </span>
-                            <scale-segmented-button id="keyDisplay" style="right:0" size="medium">
-                                <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id"
-                                    @click="updateLogoKey(item.id)">{{item.key}}</option>
-                            </scale-segmented-button>
-                        </scale-tooltip>
-                    </div>
-
                 </div>
             </transition>
-
-            <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
-                style="z-index:100">
-                <p><scale-icon-alert-warning size="15"></scale-icon-alert-warning>
-                    {{ logoDetectionMessage }}</p>
-                <scale-button slot="action"
-                    @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
-                    Proceed
-                </scale-button>
-            </scale-modal>
-
-            <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
-                <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{
-                        soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key
-                        }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key
-                        }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
-                <scale-button slot="action" @click="this.showModal=false;">
-                    View Result
-                </scale-button>
-            </scale-modal>
 
 
 

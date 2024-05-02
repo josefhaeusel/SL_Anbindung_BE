@@ -19,14 +19,9 @@ const app = Vue.createApp({
 
             searchPrompt: "",
             searchResults:[],
-            
 
             playbackPosition: 0,
-            sliderValue: 0,
             audioDuration: 0,
-            soundlogoPosition: 0,
-
-            logoDetectionMessage: "",
 
             isLoadingResult: false,
             isLoadingKey: true,
@@ -83,22 +78,8 @@ const app = Vue.createApp({
             const file = event.target.files[0];
             if (file) {
                 this.currentLayer = "layer2";
-                const analysis = await dropzoneHandlerVideo(file);
+                await dropzoneHandlerVideo(file);
                 this.audioDuration = audioPlayer.buffer.duration;
-
-                const keys = analysis.keys
-                this.videoData = analysis.videoAnalysis
-                for (let x = 0; x < this.soundlogoKeys.length; x++) {
-                    this.soundlogoKeys[x].key = keys[x];
-                }
-                this.updateLogoKey(id = '1');
-                console.log(this.soundlogoKeys);
-
-                await this.videoAnalysisHandler()
-                setVideoMarker(this.soundlogoPosition);
-
-
-
             }
         },
         videoAnalysisHandler() {
@@ -135,25 +116,17 @@ const app = Vue.createApp({
         stopPlayback() {
             stopTransports();
         },
-        updateLogoKey(id) {
-            this.selectedKey.id = id;
-            this.selectedKey.key = this.soundlogoKeys[id].key;
-            console.log("Selected Key", this.selectedKey.key);
-            //updateLogoBuffer(this.selectedKey.key )
-        },
         async downloadVideo() {
-            this.isLoadingResult = true;
+            //this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
             const videoFilepath = await uploadRenderedAudio_API(renderedBuffer);
-            await downloadVideo(videoFilepath);
-            this.isLoadingResult = false;
+            //this.isLoadingResult = false;
         },
         async downloadAudio() {
-            this.isLoadingResult = true;
+            //this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
             downloadAudio(renderedBuffer);
-            this.isLoadingResult = false;
-
+            //this.isLoadingResult = false;
         },
         async renderAudio() {
             const renderedBuffer = await Tone.Offline(async ({ transport }) => {
@@ -162,7 +135,6 @@ const app = Vue.createApp({
                 //await updateLogoBuffer(this.selectedKey.key)
 
                 scheduleAudio(this.audioDuration, 0, transport);
-                scheduleLogoSound(this.audioDuration, 0, transport);
                 transport.start();
             }, this.audioDuration)
 
@@ -183,12 +155,9 @@ app.mount('#app')
 
 
 //Global Audio Players and Buffers
-let logoPlayer
-let logoBuffers
 let video_url
 let audioPlayer
 let audioBuffer
-let envelope
 let videoPlayer
 
 async function setup() {
@@ -197,7 +166,6 @@ async function setup() {
     document.body.onclick = async () => {
         await Tone.start();
         await Tone.context.resume();
-
     }
 
     videoPlayer = videojs('myVideo');
@@ -207,9 +175,7 @@ async function setup() {
 
 async function setupAudioNodes(context) {
     envelope = await ampEnvelope();
-    audioPlayer = await loadAudioplayer(context, envelope);
-    await loadLogoBuffers();
-    logoPlayer = await loadLogoPlayer(context);
+    audioPlayer = await loadAudioplayer(context);
 }
 
 async function musicSearchHandler_API(prompt){
@@ -244,10 +210,6 @@ function downloadAudio(buffer) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
-
-function downloadVideo(filepath) {
-
 }
 
 // Simple WAV encoder function
@@ -310,7 +272,6 @@ function startTransports(currentPosition, audioDuration, logoStart) {
     const transport = Tone.Transport
 
     scheduleAudio(audioDuration, currentPosition, logoStart, transport);
-    scheduleLogoSound(audioDuration, currentPosition, logoStart, transport);
 
     videoPlayer.setCurrentTime = currentPosition;
     videoPlayer.play();
@@ -325,95 +286,28 @@ function stopTransports() {
     Tone.Transport.stop();
     Tone.Transport.cancel()
     audioPlayer.stop();
-    logoPlayer.stop();
     videoPlayer.pause();
 }
 
 function scheduleAudio(audioDuration, currentPosition, logoStart, transport) {
 
-    const secondsTillEnvStart = calculateEnvScheduleTime(audioDuration, currentPosition, logoStart);
 
-    if (secondsTillEnvStart >= 0) {
-        transport.schedule((time) => {
-            audioPlayer.start(time, currentPosition);
-            envelope.triggerAttack(time);
-            console.log("Go Audio!");
-        });
-        transport.schedule((time) => {
-            envelope.triggerRelease(time, time);
-            console.log("Go Envelope!");
-        }, secondsTillEnvStart);
-    }
+    transport.schedule((time) => {
+        audioPlayer.start(time, currentPosition);
+        console.log("Go Audio!");
+    });
+    
 
 }
 
-function scheduleLogoSound(audioDuration, currentPosition, logoStart, transport) {
 
-    const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition, logoStart);
-
-    if (secondsTillLogoStart >= 0) {
-
-        transport.schedule((time) => {
-            logoPlayer.start(time);
-            console.log("Go Logo!");
-        }, `+${secondsTillLogoStart}`);
-
-    } else if (secondsTillLogoStart < 0) {
-        logoPlayer.start(Tone.immediate(), Math.abs(secondsTillLogoStart));
-    }
-}
-
-function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = logoStart - currentPosition;
-    return secondsTillStart;
-}
-
-function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart + 1) - currentPosition;
-    return secondsTillStart;
-}
-
-function forceStartBeforeLogo(audioDuration, currentPosition) {
-    const timeTillStart = calculateLogoScheduleTime(audioDuration, currentPosition);
-    let positionAtLogoStart;
-
-    if (timeTillStart < 0) {
-        positionAtLogoStart = currentPosition + timeTillStart;
-        return positionAtLogoStart
-    }
-    else {
-        return currentPosition
-    }
-}
-
-async function loadLogoBuffers() {
-    logoBuffers = new Tone.ToneAudioBuffers({
-        A: "samples/soundlogos/TLS_A-3.wav",
-        C: "samples/soundlogos/TLS_C-3.wav"
-    })
-}
-
-async function loadLogoPlayer(Context, tonality = 'A') {
-
-    const logoBuffer = logoBuffers.get('A');
-    const newLogoPlayer = new Tone.Player({ url: logoBuffer, context: Context });
-
-    newLogoPlayer.toDestination()
-
-    return newLogoPlayer
-
-}
-
-async function loadAudioplayer(Context, Env, Filter, Filepath) {
+async function loadAudioplayer(Context, Filepath) {
 
     console.log("Loaded Audio:", Filepath)
     const newAudioPlayer = new Tone.Player({ url: audioBuffer, context: Context });
 
-    if (Env) {
-        newAudioPlayer.connect(Env);
-    } else {
-        newAudioPlayer.toDestination();
-    }
+    newAudioPlayer.toDestination();
+    
 
     return newAudioPlayer
 
@@ -439,11 +333,6 @@ async function updateMainAudioBuffer(filepath) {
     audioPlayer.buffer = audioBuffer;
 }
 
-async function updateLogoBuffer(key) {
-    console.log("Updated Logo Buffer Key:", key);
-    const logoBuffer = logoBuffers.get(key);
-    logoPlayer.buffer = logoBuffer;
-}
 
 
 async function uploadRenderedAudio_API(buffer) {
@@ -501,43 +390,8 @@ async function uploadRenderedAudio_API(buffer) {
 async function dropzoneHandlerVideo(file) {
 
     video_url = URL.createObjectURL(file);
-
     await videoPlayerHandling(video_url, file.name);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    analysis = await uploadVideo_API(formData);
-    let likely_key = analysis.audioAnalysis.analysis.likely_key
-    key = logoKeyMap[likely_key];
-
-    console.log('Key:', key);
-    const scale = keyToScale(key);
-    //TODO await updateLogoBuffer(key);
-
-    const videoAnalysis = analysis.videoAnalysis.analysis
-
-    return { 'keys': scale, 'videoAnalysis': videoAnalysis }
-
-
-    async function uploadVideo_API() {
-        try {
-            const response = await fetch('/chord-retrieval-ai/uploadVideo', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const data = await response.json();
-            console.log("ANALYSIS RESULT", data)
-
-            return data
-
-        }
-        catch (error) {
-            display.value = error;
-            console.error('Error:', error);
-        }
-    }
 }
 
 async function videoPlayerHandling(url, file) {
@@ -576,81 +430,5 @@ async function extractAudioBuffer(url) {
         console.error("Failed to load audio buffer:", error);
     }
 }
-
-function setVideoMarker(soundlogoPosition) {
-    var markers = [
-        { time: soundlogoPosition, label: 'Soundlogo' },
-    ];
-
-    var total = videoPlayer.duration();
-    var p = videoPlayer.controlBar.progressControl.children_[0].el_;
-
-    for (var i = 0; i < markers.length; i++) {
-        var left = (markers[i].time / total * 100) + '%';
-        var time = markers[i].time;
-        var el = document.createElement('div');
-        el.className = 'vjs-marker';
-        el.style.left = left;
-        el.setAttribute('data-time', time);
-        el.innerHTML = '<span>' + markers[i].label + '</span>';
-        el.addEventListener('click', function () {
-            videoPlayer.currentTime(this.getAttribute('data-time'));
-        });
-        p.appendChild(el);
-    }
-}
-
-function keyToScale(key) {
-    const keyArray = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    let keyIndex
-    for (x = 0; x < keyArray.length; x++) {
-        if (key === keyArray[x]) {
-            keyIndex = x
-        }
-    };
-
-    const subdominant_id = ((keyIndex + 5) % keyArray.length);
-    const dominant_id = ((keyIndex + 7) % keyArray.length);
-
-    const subdominant = keyArray[subdominant_id];
-    const dominant = keyArray[dominant_id];
-
-    const scale = [subdominant, key, dominant]
-    console.log("Scale", scale)
-
-    return scale
-
-}
-
-const logoKeyMap = {
-
-    'A minor': 'C',
-    'A# minor': 'C#',
-    'B minor': 'D',
-    'C minor': 'E',
-    'C# minor': 'F',
-    'D minor': 'F#',
-    'D# minor': 'G',
-    'E minor': 'G#',
-    'F minor': 'A',
-    'F# minor': 'A#',
-    'G minor': 'B',
-    'G# minor': 'C',
-
-    'A major': 'A',
-    'A# major': 'A#',
-    'B major': 'B',
-    'C major': 'C',
-    'C# major': 'C#',
-    'D major': 'D',
-    'D# major': 'D#',
-    'E major': 'E',
-    'F major': 'F',
-    'F# major': 'F#',
-    'G major': 'G',
-    'G# major': 'G#',
-
-}
-
 
 setup();
