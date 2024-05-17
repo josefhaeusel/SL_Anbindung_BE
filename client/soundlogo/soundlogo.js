@@ -1,6 +1,8 @@
 /*
 
 Next Steps:
+-Loudness: 
+
 -Resoluations und Formate checken
 -Ending Varianten im Timing rausfinden
 -12 Tonarten
@@ -36,6 +38,9 @@ const app = Vue.createApp({
             ],
 
             selectedKey: { id: '1', key: '' },
+            measuredLUFS: 0,
+            desiredMasterLUFS: -20,
+            soundlogoLUFS:-16
 
         }
     },
@@ -60,6 +65,7 @@ const app = Vue.createApp({
                 const analysis = await dropzoneHandlerVideo(file);
                 this.audioDuration = audioPlayer.buffer.duration;
 
+                this.measuredLUFS = analysis.loudness
                 const keys = analysis.keys
                 this.videoData = analysis.videoAnalysis
                 for (let x = 0; x < this.soundlogoKeys.length; x++) {
@@ -68,13 +74,24 @@ const app = Vue.createApp({
                 this.updateLogoKey(id = '1');
                 console.log(this.soundlogoKeys);
 
-                await this.videoAnalysisHandler()
+                this.updateLoudness();
+
+                await this.videoAnalysisHandler();
                 setVideoMarker(this.soundlogoPosition);
-
-
 
             }
         },
+        async updateLoudness(){
+            const soundlogoDb = this.measuredLUFS - this.soundlogoLUFS;
+            logoPlayer.set({volume: soundlogoDb})
+            console.log(logoPlayer.get())
+
+            const masterDb = this.desiredMasterLUFS - this.measuredLUFS;
+            master.set({gain: masterDb})
+            console.log(master.get())
+
+        },
+
         videoAnalysisHandler() {
             if (this.videoData.logo_start == "None") {
                 this.soundlogoPosition = this.audioDuration - 6;
@@ -95,7 +112,7 @@ const app = Vue.createApp({
                 this.showWarningModal = true;
             }
             else {
-                this.soundlogoPosition = this.videoData.logo_start - 4.25
+                this.soundlogoPosition = this.videoData.logo_start - 3.65
                 this.showModal = true
                 this.isLoadingKey = false;
 
@@ -134,9 +151,10 @@ const app = Vue.createApp({
                 await setupAudioNodes(transport.context);
                 await extractAudioBuffer(video_url)
                 //await updateLogoBuffer(this.selectedKey.key)
+                await this.updateLoudness()
 
-                scheduleAudio(this.audioDuration, 0, transport);
-                scheduleLogoSound(this.audioDuration, 0, transport);
+                scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
+                scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
                 transport.start();
             }, this.audioDuration)
 
@@ -164,6 +182,7 @@ let audioPlayer
 let audioBuffer
 let envelope
 let videoPlayer
+let master
 
 async function setup() {
 
@@ -180,10 +199,30 @@ async function setup() {
 }
 
 async function setupAudioNodes(context) {
-    envelope = await ampEnvelope();
-    audioPlayer = await loadAudioplayer(context, envelope);
-    await loadLogoBuffers();
-    logoPlayer = await loadLogoPlayer(context);
+    try {
+        console.log('Setting up audio nodes...');
+
+        // Initialize master gain
+        master = await loadMasterGain(context);
+        console.log('Master gain node initialized:', master);
+
+        // Initialize envelope
+        envelope = await ampEnvelope();
+        console.log('Envelope initialized:', envelope);
+
+        // Initialize audio player
+        audioPlayer = await loadAudioplayer(context, envelope, master);
+        console.log('Audio player initialized:', audioPlayer);
+
+        // Load logo buffers and initialize logo player
+        await loadLogoBuffers();
+        logoPlayer = await loadLogoPlayer(context, master);
+        console.log('Logo player initialized:', logoPlayer);
+
+        console.log('Audio nodes setup complete.');
+    } catch (error) {
+        console.error('Error setting up audio nodes:', error);
+    }
 }
 
 
@@ -344,6 +383,15 @@ function forceStartBeforeLogo(audioDuration, currentPosition) {
     }
 }
 
+async function loadMasterGain(Context) {
+
+    const newMasterGain = new Tone.Gain(0, 'decibels').toDestination();
+    newMasterGain.context = Context;
+
+    return newMasterGain
+
+}
+
 async function loadLogoBuffers() {
     logoBuffers = new Tone.ToneAudioBuffers({
         A: "samples/soundlogos/TLS_A-3.wav",
@@ -351,24 +399,23 @@ async function loadLogoBuffers() {
     })
 }
 
-async function loadLogoPlayer(Context, tonality = 'A') {
+async function loadLogoPlayer(Context, Master,tonality = 'A') {
 
     const logoBuffer = logoBuffers.get('A');
-    const newLogoPlayer = new Tone.Player({ url: logoBuffer, context: Context });
+    const newLogoPlayer = new Tone.Player({ url: logoBuffer, context: Context, volume: 0 });
 
-    newLogoPlayer.toDestination()
+    newLogoPlayer.connect(Master)
 
     return newLogoPlayer
 
 }
 
-async function loadAudioplayer(Context, Env, Filter, Filepath) {
+async function loadAudioplayer(Context, Env, Master) {
 
-    console.log("Loaded Audio:", Filepath)
-    const newAudioPlayer = new Tone.Player({ url: audioBuffer, context: Context });
+    const newAudioPlayer = new Tone.Player({ url: audioBuffer, context: Context, volume: 0 });
 
     if (Env) {
-        newAudioPlayer.connect(Env);
+        newAudioPlayer.chain(Env, Master);
     } else {
         newAudioPlayer.toDestination();
     }
@@ -384,7 +431,7 @@ async function ampEnvelope() {
         sustain: 1.0,
         release: 2.4
 
-    }).toDestination();
+    });
 
     ampEnv.releaseCurve = "cosine";
 
@@ -466,16 +513,19 @@ async function dropzoneHandlerVideo(file) {
     formData.append('file', file);
 
     analysis = await uploadVideo_API(formData);
-    let likely_key = analysis.audioAnalysis.analysis.likely_key
+    const likely_key = analysis.audioAnalysis.analysis.likely_key
     key = logoKeyMap[likely_key];
 
     console.log('Key:', key);
     const scale = keyToScale(key);
     //TODO await updateLogoBuffer(key);
 
+    const loudness = analysis.audioAnalysis.loudness
+    console.log('L/A', loudness, analysis)
+
     const videoAnalysis = analysis.videoAnalysis.analysis
 
-    return { 'keys': scale, 'videoAnalysis': videoAnalysis }
+    return { 'keys': scale, 'videoAnalysis': videoAnalysis, 'loudness': loudness }
 
 
     async function uploadVideo_API() {
@@ -534,6 +584,7 @@ async function extractAudioBuffer(url) {
         console.error("Failed to load audio buffer:", error);
     }
 }
+
 
 function setVideoMarker(soundlogoPosition) {
     var markers = [

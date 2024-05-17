@@ -1,6 +1,8 @@
 import os, sys, json
 import librosa
 from keyfinder import Tonal_Fragment
+import soundfile as sf
+import pyloudnorm as pyln
 
 if len(sys.argv) > 1:
     audio_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
@@ -14,13 +16,19 @@ if len(sys.argv) > 1:
 
     if duration > 6:
         analysis_start = duration - 6  #  Analyze only the last X seconds
-        analysis = Tonal_Fragment(y_harmonic, sr, analysis_start, duration).get_key_info()
+        key_analysis = Tonal_Fragment(y_harmonic, sr, analysis_start, duration).get_key_info()
     else:
-        analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
+        key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
+
+    # Loudness Analysis
+    #data, rate = sf.read(audio_path)
+    meter = pyln.Meter(sr) # create BS.1770 meter
+    loudness = meter.integrated_loudness(y) # measure loudness
 
     analysis = {
         "analyzed_audio": audio_path,
-        "analysis": analysis
+        "analysis": key_analysis,
+        "loudness": loudness
     }
 
     print(json.dumps(analysis))

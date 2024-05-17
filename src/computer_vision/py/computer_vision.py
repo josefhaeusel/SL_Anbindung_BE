@@ -6,15 +6,16 @@ class ComputerVision:
     def __init__(self, videoPath):
 
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        self.templatePath = f'{script_dir}/template1.png'
+        self.templatePath = f'{script_dir}/template4.png'
         self.template = cv2.imread(self.templatePath, 0)
         self.videoPath = videoPath
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
+        self.threshold = 0.95
+
         #print(self.duration_secs, self.total_frames, self.fps)
-        self.current_frame = self.total_frames - 1
         self.endDetectionFrame = self.total_frames - (5*self.fps)
-        #self.setVideoBeforeEnd()
+        self.setVideoBeforeEnd()
         self.methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
             cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
         self.method = self.methods[1]
@@ -44,7 +45,7 @@ class ComputerVision:
 
         return fps, total_frames, duration_secs, frame_width, frame_height
 
-    def setVideoBeforeEnd(self, secondsBeforeEnd=5):
+    def setVideoBeforeEnd(self, secondsBeforeEnd=6):
 
         start_time = self.duration_secs - secondsBeforeEnd
         start_frame = int(start_time * self.fps)
@@ -53,13 +54,12 @@ class ComputerVision:
     def matchVideoFrames(self, showVideoPlayer = False):
 
         h, w = self.template.shape
-        threshold = 0.95
         isDetecting = True
-        self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+        #self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
 
-        while(isDetecting) and self.current_frame > self.endDetectionFrame:
+        while(isDetecting):
             try:
-                self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+                #self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
                 ret, frame = self.video.read()
                 frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
                 self.resizeUHDtoHD(frame2)
@@ -68,14 +68,15 @@ class ComputerVision:
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
                 if self.method == cv2.TM_SQDIFF_NORMED:
-                    match_found = (min_val <= (1-threshold))
+                    match_found = (min_val <= (1-self.threshold))
                     detection_value = min_val
 
                 else:
-                    match_found = (max_val >= threshold)
+                    match_found = (max_val >= self.threshold)
                     detection_value = max_val
 
-                #print("Logo Detection Accuracy", detection_value)
+                if showVideoPlayer: 
+                    print("Logo Detection Accuracy", detection_value)
 
                 if match_found:
                     #print("DETECTED")
@@ -109,7 +110,7 @@ class ComputerVision:
                     if cv2.waitKey(1) == ord('q'):
                         isDetecting = False
                 
-                self.current_frame -= 1
+                #self.current_frame -= 1
 
             except Exception as e:
                 #print("Exception:", str(e))
