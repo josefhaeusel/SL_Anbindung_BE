@@ -32,7 +32,7 @@ const app = Vue.createApp({
 
 
             isLoadingResult: false,
-            isLoadingKey: true,
+            isLoadingKey: false,
             soundlogoKeys: [
                 { id: '0', key: '' },
                 { id: '1', key: '' },
@@ -40,7 +40,7 @@ const app = Vue.createApp({
             ],
 
             selectedKey: { id: '1', key: '' },
-            measuredLUFS: null,
+            measuredLUFS: 0,
             desiredMasterLUFS: -20,
             soundlogoLUFS:-16,
 
@@ -68,10 +68,14 @@ const app = Vue.createApp({
         setWarningModal(show) {
             this.showWarningModal = show
         },
+        formatNumber(value, decimals=2){
+            return value.toFixed(decimals)
+        },
 
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
+                this.isLoadingKey = true;
 
                 this.video_url = URL.createObjectURL(this.video_file);
                 await this.loadVideoPlayer();

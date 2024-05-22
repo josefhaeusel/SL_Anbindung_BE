@@ -3,6 +3,7 @@ import librosa
 from keyfinder import Tonal_Fragment
 import soundfile as sf
 import pyloudnorm as pyln
+import numpy as np
 
 if len(sys.argv) > 1:
     audio_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
@@ -18,7 +19,7 @@ if len(sys.argv) > 1:
     meter = pyln.Meter(sr) # create BS.1770 meter
     loudness = meter.integrated_loudness(y) # measure loudness
 
-    if loudness == "-infinity":
+    if loudness == "-inf" or not np.sum(np.abs(y)) > 0:
 
         audioEmpty = True
         key_analysis = {"likely_key": None, "correlation": None}
