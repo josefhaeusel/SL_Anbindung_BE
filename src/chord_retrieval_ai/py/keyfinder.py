@@ -83,7 +83,6 @@ class Tonal_Fragment(object):
     
     #Added by Josef
     def get_key_info(self):
-        print("Waveform",self.waveform)
         key_info = {
             "likely_key": self.key,
             "correlation": self.bestcorr,

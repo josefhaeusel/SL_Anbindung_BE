@@ -20,6 +20,11 @@ if len(sys.argv) > 1:
 
     if loudness == "-infinity":
 
+        audioEmpty = True
+        key_analysis = {"likely_key": None, "correlation": None}
+        loudness = None
+
+    else:
         audioEmpty = False
 
         if duration > 6:
@@ -28,11 +33,7 @@ if len(sys.argv) > 1:
         else:
             key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
 
-    else:
-        audioEmpty = True
 
-        key_analysis = {"likely_key": None, "correlation": None}
-        loudness = None
 
 
     analysis = {

@@ -449,25 +449,38 @@
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
                 style="z-index:100">
-                <p><scale-icon-alert-warning size="15"></scale-icon-alert-warning>
-                    {{ logoDetectionMessage }}</p>
-                <scale-button slot="action"
+                <scale-icon-alert-warning size="15"></scale-icon-alert-warning>
+                <p v-if="!actionList.fatalAnimationLength">
+                    The official outro animation could not be detected.</p>
+                    <p v-if="!actionList.commonResolution">This could be due to the unconventional video-resolution: {{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</p>
+                    <p v-if="!actionList.fatalAnimationLength">
+                    Make sure to use one of the latest outro animations in the brand-portal.
+                    Do you wish to proceed with the risk of asynchronously timing the soundlogo to the animation?
+                </p>
+                <p v-if="actionList.fatalAnimationLength">
+                    The official outro animation was detected, yet is cut off too early in the end.
+                    To use this tool, make sure to use one of the latest outro animations in the brand-portal at full length.
+                </p>
+
+                <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
                     @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
                     Proceed
                 </scale-button>
             </scale-modal>
 
             <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
-                <p>The <strong>Telekom Soundlogo</strong> was successfully added at <strong>{{
-                        soundlogoPosition.toFixed(2) }} seconds</strong> in the key <strong>{{ selectedKey.key
-                        }}-Major</strong>. You may consider the alternative key choices <strong>{{ soundlogoKeys[0].key
-                        }}-Major</strong> and <strong>{{ soundlogoKeys[2].key }}-Major</strong>.</p>
-                <scale-button slot="action" @click="this.showModal=false;">
+                <p v-if="actionList.success">SUCCESS</p>
+
+                <p v-if="actionList.audioEmpty">AUDIO EMPTY</p>
+
+                <p v-if="!actionList.logoDetected">LOGO NOT DETECTED</p>
+
+                <p v-if="actionList.audioEmpty && !actionList.logoDetected">AUDIO EMPTY & LOGO UNDETECTED</p>
+
+                <scale-button slot="action" @click="this.showModal=false;this.isLoadingKey=false">
                     View Result
                 </scale-button>
             </scale-modal>
-
-
 
         </div>
     </div>

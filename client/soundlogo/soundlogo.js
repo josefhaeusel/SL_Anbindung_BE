@@ -26,8 +26,10 @@ const app = Vue.createApp({
             sliderValue: 0,
             audioDuration: 0,
             soundlogoPosition: 0,
+            
+            animationLength: null,
+            animationMinimumLength: 1.25,
 
-            logoDetectionMessage: "",
 
             isLoadingResult: false,
             isLoadingKey: true,
@@ -38,9 +40,15 @@ const app = Vue.createApp({
             ],
 
             selectedKey: { id: '1', key: '' },
-            measuredLUFS: 0,
+            measuredLUFS: null,
             desiredMasterLUFS: -20,
-            soundlogoLUFS:-16
+            soundlogoLUFS:-16,
+
+            actionList: { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null},
+
+            video_file: null,
+            video_url:"",
+            videoData:{logo_start: null, videoResolution: [null, null]},
 
         }
     },
@@ -59,29 +67,129 @@ const app = Vue.createApp({
         },
 
         async handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
+            this.video_file = event.target.files[0];
+            if (this.video_file) {
                 this.currentLayer = "layer2";
-                const analysis = await dropzoneHandlerVideo(file);
-                this.audioDuration = audioPlayer.buffer.duration;
 
-                this.measuredLUFS = analysis.loudness
-                const keys = analysis.keys
-                this.videoData = analysis.videoAnalysis
-                for (let x = 0; x < this.soundlogoKeys.length; x++) {
-                    this.soundlogoKeys[x].key = keys[x];
-                }
-                this.updateLogoKey(id = '1');
-                console.log(this.soundlogoKeys);
+                this.video_url = URL.createObjectURL(this.video_file);
+                await this.loadVideoPlayer();
+                await this.extractAudioBuffer();
 
-                this.updateLoudness();
+                const analysis = await uploadVideo_API(this.video_file);
+                await this.analysisHandler(analysis);
 
-                await this.videoAnalysisHandler();
-                setVideoMarker(this.soundlogoPosition);
+                this.actionListModal()
 
             }
         },
-        async updateLoudness(){
+        
+        async analysisHandler(analysis) {
+
+            this.videoData = analysis.videoAnalysis.analysis;
+            const audioEmpty = analysis.audioAnalysis.audioEmpty;
+            const likely_key = analysis.audioAnalysis.analysis.likely_key;
+            const loudness = analysis.audioAnalysis.loudness;
+
+            if (audioEmpty == true) {
+                this.actionList.audioEmpty = true
+                this.actionList.success = false
+                await this.setKeys("C major")
+                this.measuredLUFS = -20
+                console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
+                
+            } else {
+                this.measuredLUFS = loudness
+                await this.setKeys(likely_key)
+            }
+            this.setLoudness();
+            
+            if (this.videoData.logo_start == "None"){
+                this.actionList.success = false
+                this.actionList.logoDetected = false;
+            } else {
+                this.actionList.logoDetected = true;
+                this.animationLength = this.audioDuration - this.videoData.logo_start
+
+                if (this.animationLength < this.animationMinimumLength)
+                    {
+                        this.actionList.success = false
+                        this.actionList.fatalAnimationLength = true
+                    }
+            }
+            this.checkResolution();
+            this.setSoundlogoPosition()
+            setVideoMarker(this.soundlogoPosition);
+        },
+        actionListModal(){
+
+            if (this.actionList.logoDetected == true && !this.actionList.fatalAnimationLength){
+                this.showModal = true
+            }  else {
+                this.showWarningModal = true;
+            }
+        
+        },
+
+        async checkResolution() {
+
+                let width = this.videoData.videoResolution[0]
+                let height = this.videoData.videoResolution[1]
+                if (width == 3840 && height == 2160 || width == 2160 && height == 3840 || width == 3840 && height == 3840 || width == 2160 && height == 2160) {
+                    width /= 2;
+                    height /= 2
+                }
+                if (width == 1920 && height == 1080 || width == 1080 && height == 1920 || width == 1920 && height == 1920 || width == 1080 && height == 1080) {
+                    this.actionList.commonResolution = true
+                }
+                else {
+                    this.actionList.commonResolution = false
+                }
+        },
+
+        setSoundlogoPosition(){
+            if (this.actionList.logoDetected == false) {
+                this.soundlogoPosition = this.audioDuration - 6;
+            } else {
+                this.soundlogoPosition = this.videoData.logo_start - 3.6
+            }
+        },
+        async setKeys(keyName){
+            const key = logoKeyMap[keyName];
+            const scale = keyToScale(key);
+            for (let x = 0; x < this.soundlogoKeys.length; x++) {
+                this.soundlogoKeys[x].key = scale[x];
+            }
+            this.updateLogoKey()
+        },
+        updateLogoKey(id='1'){
+            this.selectedKey.id = id;
+            this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id].key;
+            console.log("Selected Key", this.selectedKey.key);
+            //updateLogoBuffer(this.selectedKey.key )
+        },
+        async loadVideoPlayer() {
+
+            let type = '';
+            console.log(this.video_file)
+            if (this.video_file.name.endsWith('.mp4')) {
+                type = 'video/mp4';
+            } else if (this.video_file.name.endsWith('.ogg')) {
+                type = 'video/ogg';
+            } else if (this.video_file.name.endsWith('.webm')) {
+                type = 'video/webm';
+            } else {
+                throw new Error('Unsupported video format');
+            }
+        
+            videoPlayer.src({
+                type: type,
+                src: this.video_url
+            });
+        
+            await videoPlayer.load();
+        },
+        async setLoudness(){
+
             const soundlogoDb = this.measuredLUFS - this.soundlogoLUFS;
             logoPlayer.set({volume: soundlogoDb})
             console.log(logoPlayer.get())
@@ -92,30 +200,16 @@ const app = Vue.createApp({
 
         },
 
-        videoAnalysisHandler() {
-            if (this.videoData.logo_start == "None") {
-                this.soundlogoPosition = this.audioDuration - 6;
-                let message
+        async extractAudioBuffer() {
 
-                let width = this.videoData.videoResolution[0]
-                let height = this.videoData.videoResolution[1]
-                if (width == 3840 && height == 2160 || width == 2160 && height == 3840) {
-                    width /= 2;
-                    height /= 2
-                }
-                if (width == 1920 && height == 1080 || width == 1080 && height == 1920) { message = `The standard Telekom Outro Animation was not detected. If the animation is outdate, consider updating it (Link).\n Do you want to proceed with the risk of falsely timing the Soundlogo?` }
-                else {
-                    message = `The standard Telekom Outro Animation was not detected. This is due to the videos irregular resolution ${height} x ${width}.\nAllowed Resolutions: (FullHD, UHD, 16:9, 9:16, 1:1).\n Do you want to proceed with the risk of falsely timing the Soundlogo?`
-                }
-                //TO DO Interface Logic
-                this.logoDetectionMessage = message;
-                this.showWarningModal = true;
-            }
-            else {
-                this.soundlogoPosition = this.videoData.logo_start - 3.6
-                this.showModal = true
-                this.isLoadingKey = false;
+            try {
+                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url);
+                console.log("Audio buffer loaded:", audioBuffer);
+                audioPlayer.buffer = audioBuffer;
+                this.audioDuration = audioPlayer.buffer.duration;
 
+            } catch (error) {
+                console.error("Failed to load audio buffer:", error);
             }
         },
 
@@ -125,12 +219,6 @@ const app = Vue.createApp({
         },
         stopPlayback() {
             stopTransports();
-        },
-        updateLogoKey(id) {
-            this.selectedKey.id = id;
-            this.selectedKey.key = this.soundlogoKeys[id].key;
-            console.log("Selected Key", this.selectedKey.key);
-            //updateLogoBuffer(this.selectedKey.key )
         },
         async downloadVideo() {
             this.isLoadingResult = true;
@@ -151,7 +239,7 @@ const app = Vue.createApp({
                 await setupAudioNodes(transport.context);
                 await extractAudioBuffer(video_url)
                 //await updateLogoBuffer(this.selectedKey.key)
-                await this.updateLoudness()
+                await this.setLoudness()
 
                 scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
                 scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
@@ -503,99 +591,32 @@ async function uploadRenderedAudio_API(buffer) {
     }
 }
 
-async function dropzoneHandlerVideo(file) {
 
-    video_url = URL.createObjectURL(file);
-
-    await videoPlayerHandling(video_url, file.name);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    analysis = await uploadVideo_API(formData);
-    let audioEmpty = analysis.audioAnalysis.audioEmpty;
-    let likely_key, loudness;
-
-    if (audioEmpty) {
-        likely_key = "C major";
-        loudness = -20;
-        console.log(`Audio Empty. Standardized Values: ${likely_key}, ${loudness} LUFS`);
-
-        //Show in Interface or user think we stupid
-    } else {
-        likely_key = analysis.audioAnalysis.analysis.likely_key;
-        loudness = analysis.audioAnalysis.loudness;
-    }
-
-    key = logoKeyMap[likely_key];
-
-    console.log('Key:', key);
-    const scale = keyToScale(key);
-    //TODO await updateLogoBuffer(key);
-
-    console.log('L/A', loudness, analysis)
-
-    const videoAnalysis = analysis.videoAnalysis.analysis
-
-    return { 'keys': scale, 'videoAnalysis': videoAnalysis, 'loudness': loudness }
-
-
-    async function uploadVideo_API() {
-        try {
-            const response = await fetch('/chord-retrieval-ai/uploadVideo', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const data = await response.json();
-            console.log("ANALYSIS RESULT", data)
-
-            return data
-
-        }
-        catch (error) {
-            display.value = error;
-            console.error('Error:', error);
-        }
-    }
-}
-
-async function videoPlayerHandling(url, file) {
-
-    let type = '';
-    console.log(file)
-    if (file.endsWith('.mp4')) {
-        type = 'video/mp4';
-    } else if (file.endsWith('.ogg')) {
-        type = 'video/ogg';
-    } else if (file.endsWith('.webm')) {
-        type = 'video/webm';
-    } else {
-        throw new Error('Unsupported video format');
-    }
-
-    videoPlayer.src({
-        type: type,
-        src: url
-    });
-
-    await videoPlayer.load();
-
-    await extractAudioBuffer(url);
-}
-
-
-async function extractAudioBuffer(url) {
+async function uploadVideo_API(file) {
 
     try {
-        audioBuffer = await Tone.ToneAudioBuffer.fromUrl(url);
-        console.log("Audio buffer loaded:", audioBuffer);
 
-        audioPlayer.buffer = audioBuffer;
-    } catch (error) {
-        console.error("Failed to load audio buffer:", error);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/chord-retrieval-ai/uploadVideo', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+        console.log("ANALYSIS RESULT", data)
+
+        return data
+
+    }
+    catch (error) {
+        console.error('Error:', error);
     }
 }
+
+
+
 
 
 function setVideoMarker(soundlogoPosition) {
@@ -622,6 +643,7 @@ function setVideoMarker(soundlogoPosition) {
 }
 
 function keyToScale(key) {
+    console.log("KEY TO SCALE", key)
     const keyArray = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     let keyIndex
     for (x = 0; x < keyArray.length; x++) {

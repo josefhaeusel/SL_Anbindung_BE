@@ -113,7 +113,8 @@ class ComputerVision:
         cv2.destroyAllWindows()
 
         if self.detectedTime is not None:
-            response = {"logo_start": self.detectedTime}
+            response = {"logo_start": self.detectedTime,
+                        "videoResolution": [self.frame_width, self.frame_height]}
             return response
         else:
             response = {"logo_start": "None",
