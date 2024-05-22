@@ -469,10 +469,24 @@
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
                         <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
                         <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
-
                 </div>
 
-                <p v-if="actionList.audioEmpty && !actionList.logoDetected">AUDIO EMPTY & LOGO UNDETECTED</p>
+                <div v-if="actionList.audioEmpty && !actionList.logoDetected">
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                    The Soundlogo's timing is set to a <strong>fixed value</strong> at the end. <br>
+                    Synchronicity to the animation is <strong>not guaranteed</strong>. <br>
+                    Your video has <strong>no audio track</strong>. Musical key and loudness have been set to <strong>standardized values</strong>.
+
+
+                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong> (standardized).</li>
+                        <li>Telekom outro animation: <strong>undetected</strong>.</li>
+                        <li>Integrated loudness: <strong>None</strong>.</li>
+                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                        <li><strong>Added Soundlogo</strong> at <strong>{{soundlogoPosition}} seconds</strong> (6s before end).</li>
+                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                </div>
 
                 <scale-button slot="action" @click="this.showModal=false;this.isLoadingKey=false;this.currentLayer = 'layer2'">
                     View Result
