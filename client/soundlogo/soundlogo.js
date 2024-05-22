@@ -44,7 +44,7 @@ const app = Vue.createApp({
             desiredMasterLUFS: -20,
             soundlogoLUFS:-16,
 
-            actionList: { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -56,6 +56,9 @@ const app = Vue.createApp({
     mounted() {
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
+
+
+
     },
 
     methods: {
@@ -69,7 +72,6 @@ const app = Vue.createApp({
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
-                this.currentLayer = "layer2";
 
                 this.video_url = URL.createObjectURL(this.video_file);
                 await this.loadVideoPlayer();
@@ -79,7 +81,7 @@ const app = Vue.createApp({
                 await this.analysisHandler(analysis);
 
                 this.actionListModal()
-
+                console.log("ACTION LIST:",this.actionList)
             }
         },
         
@@ -92,7 +94,6 @@ const app = Vue.createApp({
 
             if (audioEmpty == true) {
                 this.actionList.audioEmpty = true
-                this.actionList.success = false
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
                 console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
@@ -104,7 +105,6 @@ const app = Vue.createApp({
             this.setLoudness();
             
             if (this.videoData.logo_start == "None"){
-                this.actionList.success = false
                 this.actionList.logoDetected = false;
             } else {
                 this.actionList.logoDetected = true;
@@ -112,10 +112,14 @@ const app = Vue.createApp({
 
                 if (this.animationLength < this.animationMinimumLength)
                     {
-                        this.actionList.success = false
                         this.actionList.fatalAnimationLength = true
                     }
             }
+
+            if (this.actionList.logoDetected && !this.actionList.audioEmpty){
+                this.actionList.success = true;
+            }
+
             this.checkResolution();
             this.setSoundlogoPosition()
             setVideoMarker(this.soundlogoPosition);

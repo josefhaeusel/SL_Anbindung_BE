@@ -396,6 +396,89 @@
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
             </div>
+
+            <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
+                style="z-index:100">
+                <p v-if="!actionList.fatalAnimationLength">
+                    The official outro animation could not be detected.
+                    <span v-if="!actionList.commonResolution"><br>This could be due to the unconventional video-resolution: <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
+                </p>
+                    <p v-if="!actionList.fatalAnimationLength">
+                    Make sure to use <a href="https://www.brand-design.telekom.com/asset/tv-ending-0-t-outro-hardcut-de/">one of the latest outro animations in the brand-portal.</a><br>
+                    Do you wish to proceed with the risk of asynchronously timing the soundlogo to the animation?
+                </p>
+                <p v-if="actionList.fatalAnimationLength">
+                    The official outro animation was detected, yet is <strong>cut off too early </strong>in the end.
+                    To access this tool, make sure to use one of the latest outro animations in the brand-portal at full length.
+                </p>
+                <scale-icon-alert-warning size="50" style="margin-bottom:20px"></scale-icon-alert-warning>
+
+                <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
+                    @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
+                    Proceed
+                </scale-button>
+                
+                <scale-button v-if="actionList.fatalAnimationLength" slot="action"
+                    @click="this.showWarningModal=false; this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}">
+                    Return
+                </scale-button>
+
+            </scale-modal>
+
+            <div class="spinner-container" v-if="isLoadingKey">
+                <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"> </scale-loading-spinner>
+            </div>
+
+
+            <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
+                <div v-if="actionList.success">
+                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
+                        <li>Telekom outro animation start: at <strong>{{soundlogoPosition}} seconds</strong>.</li>
+                        <li>Integrated loudness: <strong>{{measuredLUFS}} LUFS</strong>.</li>
+                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                        <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                        <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                </div>
+
+                <div v-if="actionList.audioEmpty && actionList.logoDetected">  
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                        Your video has <strong>no audio track</strong>. Musical key and loudness have been set to <strong>standardized values</strong>.
+                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong> (standardized).</li>
+                        <li>Telekom outro animation start: at <strong>{{soundlogoPosition}} seconds</strong>.</li>
+                        <li>Integrated loudness: None.</li>
+                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                        <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                </div>
+
+                <div v-if="!actionList.logoDetected && !actionList.audioEmpty">
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                            The Soundlogo's timing is set to a <strong>fixed value</strong> at the end. <br>
+                            Synchronicity to the animation is <strong>not guaranteed</strong>.
+                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
+                        <li>Telekom outro animation: <strong>undetected</strong>.</li>
+                        <li>Integrated loudness: <strong>{{measuredLUFS}} LUFS</strong>.</li>
+                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                        <li><strong>Added Soundlogo</strong> at <strong>{{soundlogoPosition}} seconds</strong> (6s before end).</li>
+                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                        <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+
+                </div>
+
+                <p v-if="actionList.audioEmpty && !actionList.logoDetected">AUDIO EMPTY & LOGO UNDETECTED</p>
+
+                <scale-button slot="action" @click="this.showModal=false;this.isLoadingKey=false;this.currentLayer = 'layer2'">
+                    View Result
+                </scale-button>
+            </scale-modal>
+
         </div>
 
         <!-- Second Layer: Video, Controls, and Key Display -->
@@ -413,10 +496,6 @@
                         <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
                     </p>
                 </video>
-            </div>
-
-            <div class="spinner-container" v-if="isLoadingKey">
-                <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"> </scale-loading-spinner>
             </div>
 
             <transition name="fade">
@@ -447,40 +526,7 @@
                 </div>
             </transition>
 
-            <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
-                style="z-index:100">
-                <scale-icon-alert-warning size="15"></scale-icon-alert-warning>
-                <p v-if="!actionList.fatalAnimationLength">
-                    The official outro animation could not be detected.</p>
-                    <p v-if="!actionList.commonResolution">This could be due to the unconventional video-resolution: {{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</p>
-                    <p v-if="!actionList.fatalAnimationLength">
-                    Make sure to use one of the latest outro animations in the brand-portal.
-                    Do you wish to proceed with the risk of asynchronously timing the soundlogo to the animation?
-                </p>
-                <p v-if="actionList.fatalAnimationLength">
-                    The official outro animation was detected, yet is cut off too early in the end.
-                    To use this tool, make sure to use one of the latest outro animations in the brand-portal at full length.
-                </p>
-
-                <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
-                    @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
-                    Proceed
-                </scale-button>
-            </scale-modal>
-
-            <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
-                <p v-if="actionList.success">SUCCESS</p>
-
-                <p v-if="actionList.audioEmpty">AUDIO EMPTY</p>
-
-                <p v-if="!actionList.logoDetected">LOGO NOT DETECTED</p>
-
-                <p v-if="actionList.audioEmpty && !actionList.logoDetected">AUDIO EMPTY & LOGO UNDETECTED</p>
-
-                <scale-button slot="action" @click="this.showModal=false;this.isLoadingKey=false">
-                    View Result
-                </scale-button>
-            </scale-modal>
+            
 
         </div>
     </div>
