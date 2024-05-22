@@ -112,7 +112,7 @@ const app = Vue.createApp({
                 this.showWarningModal = true;
             }
             else {
-                this.soundlogoPosition = this.videoData.logo_start - 3.65
+                this.soundlogoPosition = this.videoData.logo_start - 3.6
                 this.showModal = true
                 this.isLoadingKey = false;
 
@@ -513,14 +513,26 @@ async function dropzoneHandlerVideo(file) {
     formData.append('file', file);
 
     analysis = await uploadVideo_API(formData);
-    const likely_key = analysis.audioAnalysis.analysis.likely_key
+    let audioEmpty = analysis.audioAnalysis.audioEmpty;
+    let likely_key, loudness;
+
+    if (audioEmpty) {
+        likely_key = "C major";
+        loudness = -20;
+        console.log(`Audio Empty. Standardized Values: ${likely_key}, ${loudness} LUFS`);
+
+        //Show in Interface or user think we stupid
+    } else {
+        likely_key = analysis.audioAnalysis.analysis.likely_key;
+        loudness = analysis.audioAnalysis.loudness;
+    }
+
     key = logoKeyMap[likely_key];
 
     console.log('Key:', key);
     const scale = keyToScale(key);
     //TODO await updateLogoBuffer(key);
 
-    const loudness = analysis.audioAnalysis.loudness
     console.log('L/A', loudness, analysis)
 
     const videoAnalysis = analysis.videoAnalysis.analysis

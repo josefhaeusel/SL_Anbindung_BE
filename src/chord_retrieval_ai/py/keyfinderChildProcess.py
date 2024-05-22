@@ -14,21 +14,32 @@ if len(sys.argv) > 1:
     y_harmonic, y_percussive = librosa.effects.hpss(y)
     duration = librosa.get_duration(y=y, sr=sr)
 
-    if duration > 6:
-        analysis_start = duration - 6  #  Analyze only the last X seconds
-        key_analysis = Tonal_Fragment(y_harmonic, sr, analysis_start, duration).get_key_info()
-    else:
-        key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
-
     # Loudness Analysis
-    #data, rate = sf.read(audio_path)
     meter = pyln.Meter(sr) # create BS.1770 meter
     loudness = meter.integrated_loudness(y) # measure loudness
+
+    if loudness == "-infinity":
+
+        audioEmpty = False
+
+        if duration > 6:
+            analysis_start = duration - 6  #  Analyze only the last X seconds
+            key_analysis = Tonal_Fragment(y_harmonic, sr, analysis_start, duration).get_key_info()
+        else:
+            key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
+
+    else:
+        audioEmpty = True
+
+        key_analysis = {"likely_key": None, "correlation": None}
+        loudness = None
+
 
     analysis = {
         "analyzed_audio": audio_path,
         "analysis": key_analysis,
-        "loudness": loudness
+        "loudness": loudness,
+        "audioEmpty": audioEmpty
     }
 
     print(json.dumps(analysis))
