@@ -343,11 +343,13 @@
             white-space: nowrap;
             /* Prevent text inside buttons from wrapping */
             --background-secondary: #FFFFFF;
-            --background-secondary-hover: var(--telekom-color-primary-hovered);
             --background-secondary-active: #E20074;
             --color-secondary: #E20074;
-            --border-secondary: #E20074;
-            --background-secondary-hover: #E20074;
+            --color-secondary-hover: #FFFFFF;
+            --background-secondary-hover: var(--telekom-color-primary-hovered);
+            --border-secondary: var(--telekom-color-primary-standard);
+            --border-secondary-hover: var(--telekom-color-primary-hovered);
+
         }
 
 
@@ -403,11 +405,19 @@
                 <scale-progress-bar
                 v-if="isLoadingAnalysis"
                 :percentage="progressBar.percentage"
+                :hasError="progressBar.error"
                 label="Audiovisual Analysis"
                 :status-description="progressBar.texts[progressBar.phase]"
                 show-status="true"
                 style="align-self:center; width: 50%;"
                 ></scale-progress-bar>
+
+                <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard"
+                    heading= "Something went wrong. Please try uploading again. "
+                    variant="danger"
+                    dismissible
+                    opened
+                ></scale-notification>
 
             </div>
 

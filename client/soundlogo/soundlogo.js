@@ -24,11 +24,12 @@ const app = Vue.createApp({
             showKeys:false,
             progressBar: {
                 phase: 0,
-                phaseValues: [25, 60, 95, 100],
+                phaseValues: [20, 50, 95, 100],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 progressBoost:null,
                 timer: null,
+                error: false,
             },
 
             playbackPosition: 0,
@@ -107,7 +108,17 @@ const app = Vue.createApp({
 
               }
         },
-        triggerProgressBar(){
+        initProgressBar(){
+            this.progressBar={
+                phase: 0,
+                phaseValues: [20, 50, 95, 100],
+                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
+                percentage: 0,
+                progressBoost:null,
+                timer: null,
+                error: false,
+            }
+
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
         updateProgressBar(){
@@ -116,13 +127,13 @@ const app = Vue.createApp({
                 if (percentDifference > 5 && this.progressBar.phase != 2){
                     this.progressBar.percentage += percentDifference/40;}
                 else if (this.progressBar.phase == 2 && !this.progressBar.progressBoost){
-                    this.progressBar.percentage += (percentDifference)/60;
+                    this.progressBar.percentage += (percentDifference)/100;
                 } else {
                     this.progressBar.percentage += 0.5;
                 }
 
                 if (this.progressBar.progressBoost) {
-                    this.progressBar.percentage += 3
+                    this.progressBar.percentage += 5
                 }
 
                 if (this.progressBar.phase==0 && this.progressBar.percentage > this.progressBar.phaseValues[0]) {
@@ -140,30 +151,35 @@ const app = Vue.createApp({
 
 
             },
-        setProgressBarPhase(){},
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
                 this.isLoadingAnalysis = true;
-                this.triggerProgressBar()
+                this.initProgressBar()
 
                 this.video_url = URL.createObjectURL(this.video_file);
                 await this.loadVideoPlayer();
                 await this.extractAudioBuffer();
 
-                const analysis = await uploadVideo_API(this.video_file);
-
+                try {const analysis = await uploadVideo_API(this.video_file);
                 await this.analysisHandler(analysis);
 
                 //this.isLoadingAnalysis = false;
 
                 this.actionListModal()
 
-                console.log("ACTION LIST:",this.actionList)
+                console.log("ACTION LIST:",this.actionList)}
+                catch (error){
+                    console.log("Analysis Error:",error)
+                    this.handleError()
+                }
 
             }
         },
-        
+        handleError(){
+            this.progressBar.error = true
+            "Oops... Something went wrong. Please try uploading again."
+        },
         async analysisHandler(analysis) {
 
             this.videoData = analysis.videoAnalysis.analysis;
@@ -698,6 +714,8 @@ async function uploadVideo_API(file) {
     }
     catch (error) {
         console.error('Error:', error);
+
+        return {error: error}
     }
 }
 
