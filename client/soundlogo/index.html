@@ -64,17 +64,14 @@
         .container {
             width: 80%;
             max-width: 800px;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #FFFFFF;
-            border: none 2px solid #ccc;
-            text-align: center;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px
         }
 
         .upload-area {
             position: relative;
-            margin-top: 30px;
             padding: 40px;
             cursor: pointer;
             background-color: rgba(0, 0, 0, 0.05);
@@ -96,6 +93,12 @@
 
         .upload-area:hover {
             background-color: rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .upload-button {
+            align-self: center;
+
         }
 
         .upload-area input[type="file"] {
@@ -381,9 +384,12 @@
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
             <div class="container">
 
-                <div class="title">Soundlogo Tool</div>
-                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
-                    on brand with the help of AI.</div>
+                <div style="display:flex; flex-direction: column; align-items: center;">
+                    <div class="title">Soundlogo Tool</div>
+                    <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
+                        on brand with the help of AI.</div>
+                </div>
+                
                 <div class="upload-area">
                     <input type="file" id="fileInput" @change="handleFileUpload"
                         accept="video/mp4,video/mov,video/h264" />
@@ -391,10 +397,19 @@
                     <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
                 </div>
 
-                <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()"
-                    style="margin: 20px">
+                <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()">
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
+
+                <scale-progress-bar
+                v-if="isLoadingKey"
+                :percentage="progressBar.percentage"
+                label="Audiovisual Analysis"
+                :status-description="progressBar.texts[progressBar.phase]"
+                show-status="true"
+                style="align-self:center; width: 50%;"
+                ></scale-progress-bar>
+
             </div>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
@@ -414,7 +429,7 @@
                 <scale-icon-alert-warning size="50" style="margin-bottom:20px"></scale-icon-alert-warning>
 
                 <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
-                    @click="this.showWarningModal=false; this.showModal=true; this.isLoadingKey=false;">
+                    @click="this.showWarningModal=false; this.showModal=true">
                     Proceed
                 </scale-button>
                 
@@ -424,11 +439,6 @@
                 </scale-button>
 
             </scale-modal>
-
-            <div class="spinner-container" v-if="isLoadingKey">
-                <scale-loading-spinner v-if="isLoadingKey" id="keyLoadingSpinner" size="large"> </scale-loading-spinner>
-            </div>
-
 
             <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
                 <div v-if="actionList.success">
@@ -487,7 +497,7 @@
                         <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
                 </div>
 
-                <scale-button slot="action" @click="this.showModal=false;this.isLoadingKey=false;this.currentLayer = 'layer2'">
+                <scale-button slot="action" @click="this.showModal=false;this.currentLayer = 'layer2'">
                     View Result
                 </scale-button>
             </scale-modal>
@@ -496,9 +506,11 @@
 
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
-            <div class="title">Soundlogo Tool</div>
-            <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on
-                brand with the help of AI.</div>
+            <div style="display:flex; flex-direction: column; align-items: center;">
+                <div class="title">Soundlogo Tool</div>
+                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on
+                    brand with the help of AI.</div>
+            </div>
             <div class="video-controls">
                 <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
                     data-setup='{"width": 1000, "height":562.5, "font-family": "TeleNeo"}'

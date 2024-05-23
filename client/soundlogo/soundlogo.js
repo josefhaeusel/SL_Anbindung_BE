@@ -21,6 +21,12 @@ const app = Vue.createApp({
             currentLayer: "layer1",
             showModal: false,
             showWarningModal: false,
+            progressBar: {
+                phase: 0,
+                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecing T-Outro Animation..."],
+                percentage: 0,
+                timer: null,
+            },
 
             playbackPosition: 0,
             sliderValue: 0,
@@ -57,8 +63,6 @@ const app = Vue.createApp({
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
 
-
-
     },
 
     methods: {
@@ -71,11 +75,32 @@ const app = Vue.createApp({
         formatNumber(value, decimals=2){
             return value.toFixed(decimals)
         },
+        triggerProgressBar(){
+            this.progressBar.timer = setInterval(this.updateProgressBar, 100)
+        },
+        updateProgressBar(){
+                this.progressBar.phaseValues = [20, 55, 90]
+                let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage
 
+                if (percentDifference > 5 && this.progressBar.phase != 2){
+                    this.progressBar.percentage += percentDifference/40;}
+                else if (this.progressBar.phase == 2){
+                    this.progressBar.percentage += (percentDifference)/40;
+                } else {
+                    this.progressBar.percentage += 0.5;
+                }
+
+                if (this.progressBar.phase==0 && this.progressBar.percentage > this.progressBar.phaseValues[0]) {
+                    this.progressBar.phase = 1
+                } else if (this.progressBar.phase==1 && this.progressBar.percentage > this.progressBar.phaseValues[1]){
+                    this.progressBar.phase = 2
+                }
+            },
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
                 this.isLoadingKey = true;
+                this.triggerProgressBar()
 
                 this.video_url = URL.createObjectURL(this.video_file);
                 await this.loadVideoPlayer();
@@ -83,6 +108,9 @@ const app = Vue.createApp({
 
                 const analysis = await uploadVideo_API(this.video_file);
                 await this.analysisHandler(analysis);
+
+                this.isLoadingKey = false;
+                await clearInterval(this.progressBar.timer)
 
                 this.actionListModal()
                 console.log("ACTION LIST:",this.actionList)
