@@ -21,10 +21,13 @@ const app = Vue.createApp({
             currentLayer: "layer1",
             showModal: false,
             showWarningModal: false,
+            showKeys:false,
             progressBar: {
                 phase: 0,
-                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecing T-Outro Animation..."],
+                phaseValues: [25, 60, 95, 100],
+                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
+                progressBoost:null,
                 timer: null,
             },
 
@@ -36,16 +39,15 @@ const app = Vue.createApp({
             animationLength: null,
             animationMinimumLength: 1.25,
 
-
+            isLoadingAnalysis: false,
             isLoadingResult: false,
-            isLoadingKey: false,
             soundlogoKeys: [
-                { id: '0', key: '' },
-                { id: '1', key: '' },
-                { id: '2', key: '' }
+                { id: '0', key: 'X' },
+                { id: '1', key: 'X' },
+                { id: '2', key: 'X' }
             ],
 
-            selectedKey: { id: '1', key: '' },
+            selectedKey: { id: '1', key: 'X' },
             measuredLUFS: 0,
             desiredMasterLUFS: -20,
             soundlogoLUFS:-16,
@@ -63,6 +65,19 @@ const app = Vue.createApp({
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
 
+        const eventSource = new EventSource('/chord-retrieval-ai/progress');
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.getProgress_API(data.message);
+        };
+
+        // Handle errors
+        eventSource.onerror = (err) => {
+            console.error('EventSource failed:', err);
+            eventSource.close();
+        };
+
     },
 
     methods: {
@@ -75,31 +90,61 @@ const app = Vue.createApp({
         formatNumber(value, decimals=2){
             return value.toFixed(decimals)
         },
+        getProgress_API(message){
+            console.log("Progress message from API:", message)
+            switch (message) {
+                case 'Splitting Audio from Video...':
+                  break;
+                case 'Retrieving Key and Loudness...':
+                    this.progressBar.progressBoost = true
+                    break;
+                case 'Detecting T-Outro Animation...':
+                    this.progressBar.progressBoost = true
+                  break;
+                case 'Done.':
+                    this.progressBar.progressBoost = true
+                  break;
+
+              }
+        },
         triggerProgressBar(){
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
         updateProgressBar(){
-                this.progressBar.phaseValues = [20, 55, 90]
                 let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage
 
                 if (percentDifference > 5 && this.progressBar.phase != 2){
                     this.progressBar.percentage += percentDifference/40;}
-                else if (this.progressBar.phase == 2){
-                    this.progressBar.percentage += (percentDifference)/40;
+                else if (this.progressBar.phase == 2 && !this.progressBar.progressBoost){
+                    this.progressBar.percentage += (percentDifference)/60;
                 } else {
                     this.progressBar.percentage += 0.5;
                 }
 
-                if (this.progressBar.phase==0 && this.progressBar.percentage > this.progressBar.phaseValues[0]) {
-                    this.progressBar.phase = 1
-                } else if (this.progressBar.phase==1 && this.progressBar.percentage > this.progressBar.phaseValues[1]){
-                    this.progressBar.phase = 2
+                if (this.progressBar.progressBoost) {
+                    this.progressBar.percentage += 3
                 }
+
+                if (this.progressBar.phase==0 && this.progressBar.percentage > this.progressBar.phaseValues[0]) {
+                    this.progressBar.progressBoost = false
+                    this.progressBar.phase = 1
+
+                } else if (this.progressBar.phase==1 && this.progressBar.percentage > this.progressBar.phaseValues[1]){
+                    this.progressBar.progressBoost = false
+                    this.progressBar.phase = 2
+                } else if (this.progressBar.phase==2 && this.progressBar.percentage > this.progressBar.phaseValues[2]){
+                    this.progressBar.phase = 3
+                }
+
+                if (this.progressBar.percentage>= 100) {clearInterval(this.progressBar.timer)}
+
+
             },
+        setProgressBarPhase(){},
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
-                this.isLoadingKey = true;
+                this.isLoadingAnalysis = true;
                 this.triggerProgressBar()
 
                 this.video_url = URL.createObjectURL(this.video_file);
@@ -107,13 +152,15 @@ const app = Vue.createApp({
                 await this.extractAudioBuffer();
 
                 const analysis = await uploadVideo_API(this.video_file);
+
                 await this.analysisHandler(analysis);
 
-                this.isLoadingKey = false;
-                await clearInterval(this.progressBar.timer)
+                //this.isLoadingAnalysis = false;
 
                 this.actionListModal()
+
                 console.log("ACTION LIST:",this.actionList)
+
             }
         },
         
@@ -133,6 +180,8 @@ const app = Vue.createApp({
             } else {
                 this.measuredLUFS = loudness
                 await this.setKeys(likely_key)
+                this.showKeys = true
+
             }
             this.setLoudness();
             
@@ -195,6 +244,7 @@ const app = Vue.createApp({
             for (let x = 0; x < this.soundlogoKeys.length; x++) {
                 this.soundlogoKeys[x].key = scale[x];
             }
+            console.log("this.soundlogoKeys",this.soundlogoKeys)
             this.updateLogoKey()
         },
         updateLogoKey(id='1'){
@@ -650,9 +700,6 @@ async function uploadVideo_API(file) {
         console.error('Error:', error);
     }
 }
-
-
-
 
 
 function setVideoMarker(soundlogoPosition) {

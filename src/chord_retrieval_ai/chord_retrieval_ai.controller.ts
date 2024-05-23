@@ -5,6 +5,7 @@ import {
   UploadedFile,
   Res,
   Req,
+  Get,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChordRetrievalAiService } from './chord_retrieval_ai.service';
@@ -27,6 +28,23 @@ export class ChordRetrievalAiController {
     private readonly computerVisionService: ComputerVisionService,
   ) {}
 
+  @Get('progress')
+  progress(@Req() req: Request, @Res() res: Response) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendProgress = (message: string) => {
+      res.write(`data: ${JSON.stringify({ message })}\n\n`);
+    };
+
+    req.on('close', () => {
+      res.end();
+    });
+
+    req.app.set('sendProgress', sendProgress);
+  }
+
   @Post('uploadVideo')
   @UseInterceptors(FileInterceptor('file'))
   async videoHandler(
@@ -34,6 +52,8 @@ export class ChordRetrievalAiController {
     @Req() request: Request,
     @Res() response: Response,
   ) {
+    const sendProgress = request.app.get('sendProgress');
+
     try {
       // Generate temporary filename for back-end Analysis
       const tempVideoFilePath = path.join(
@@ -45,8 +65,10 @@ export class ChordRetrievalAiController {
       // Write the video buffer to new file
       fs.writeFileSync(tempVideoFilePath, file.buffer);
 
+      // Notify client about progress
+      sendProgress('Splitting Audio from Video...');
+
       // Service für Audio / Video Splitting
-      // ...
       let analysisResult = { audioAnalysis: {}, videoAnalysis: {}};
       let audioAnalysisResult;
       let videoAnalysisResult;
@@ -54,6 +76,7 @@ export class ChordRetrievalAiController {
       try {
         const tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
 
+        sendProgress('Retrieving Key and Loudness...');
         audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
       } catch (error) {
@@ -61,6 +84,7 @@ export class ChordRetrievalAiController {
           await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
       }
 
+      sendProgress('Detecting T-Outro Animation...');
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
 
       analysisResult.audioAnalysis = audioAnalysisResult;
@@ -71,6 +95,7 @@ export class ChordRetrievalAiController {
 
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
 
+      sendProgress('Done.');
       response.json(analysisResult);
     } catch (error) {
       response.status(500).send(error.message);

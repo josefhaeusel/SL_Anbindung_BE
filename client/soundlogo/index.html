@@ -219,8 +219,7 @@
             align-items: center;
             /* Center items vertically */
             justify-content: space-between;
-            padding-top: 25px;
-            gap: 10px;
+            margin: 25px;
             /* Add some space between the label and the button */
             position: relative;
             height: auto;
@@ -240,7 +239,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 10px
+            gap: 10px;
         }
 
         .key-label {
@@ -383,7 +382,7 @@
 
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
             <div class="container">
-
+                
                 <div style="display:flex; flex-direction: column; align-items: center;">
                     <div class="title">Soundlogo Tool</div>
                     <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
@@ -402,7 +401,7 @@
                     Upload a Video</scale-button>
 
                 <scale-progress-bar
-                v-if="isLoadingKey"
+                v-if="isLoadingAnalysis"
                 :percentage="progressBar.percentage"
                 label="Audiovisual Analysis"
                 :status-description="progressBar.texts[progressBar.phase]"
@@ -426,8 +425,6 @@
                     The official outro animation was detected, yet is <strong>cut off too early </strong>in the end.
                     To access this tool, make sure to use one of the latest outro animations in the brand-portal at full length.
                 </p>
-                <scale-icon-alert-warning size="50" style="margin-bottom:20px"></scale-icon-alert-warning>
-
                 <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
                     @click="this.showWarningModal=false; this.showModal=true">
                     Proceed
@@ -450,7 +447,7 @@
                         <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
                         <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>
 
                 <div v-if="actionList.audioEmpty && actionList.logoDetected">  
@@ -463,7 +460,7 @@
                     <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
                         <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>
 
                 <div v-if="!actionList.logoDetected && !actionList.audioEmpty">
@@ -478,7 +475,7 @@
                         <li><strong>Added Soundlogo</strong> at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong> (6s before end).</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
                         <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>
 
                 <div v-if="actionList.audioEmpty && !actionList.logoDetected">
@@ -494,18 +491,19 @@
                     <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
                         <li><strong>Added Soundlogo</strong> at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong> (6s before end).</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{desiredMasterLUFS}} LUFS</strong>.</li>
+                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>
 
-                <scale-button slot="action" @click="this.showModal=false;this.currentLayer = 'layer2'">
+                <scale-button slot="action" @click="this.showModal=false;this.isLoadingAnalysis=false;this.currentLayer = 'layer2'">
                     View Result
                 </scale-button>
             </scale-modal>
-
+            
         </div>
 
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
+
             <div style="display:flex; flex-direction: column; align-items: center;">
                 <div class="title">Soundlogo Tool</div>
                 <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on
@@ -524,7 +522,7 @@
             </div>
 
             <transition name="fade">
-                <div class="controls-container" v-if="!isLoadingKey">
+                <div class="controls-container" v-if="!isLoadingAnalysis">
 
                     <div class="left-controls">
                         <scale-button class="download-video-button" @click="downloadVideo" style="left:0">
@@ -541,7 +539,7 @@
                                 <scale-icon-content-heart size="12" selected></scale-icon-content-heart>
                                 Recommended
                             </span>
-                            <scale-segmented-button id="keyDisplay" style="right:0" size="medium">
+                            <scale-segmented-button id="keyDisplay" size="medium">
                                 <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id"
                                     @click="updateLogoKey(item.id)">{{item.key}}</option>
                             </scale-segmented-button>
@@ -551,9 +549,10 @@
                 </div>
             </transition>
 
-            
+
 
         </div>
+        
     </div>
     </div>
     </div>
