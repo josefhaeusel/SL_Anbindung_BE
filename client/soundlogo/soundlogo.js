@@ -1,12 +1,7 @@
 /*
 
 Next Steps:
--Loudness: 
-
--Resoluations und Formate checken
--Ending Varianten im Timing rausfinden
--12 Tonarten
-
+-Pop-Up
 Rendering:
 */
 
@@ -24,7 +19,7 @@ const app = Vue.createApp({
             showKeys:false,
             progressBar: {
                 phase: 0,
-                phaseValues: [20, 50, 95, 100],
+                phaseValues: [20, 50, 90, 100],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 progressBoost:null,
@@ -111,7 +106,7 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [20, 50, 95, 100],
+                phaseValues: [20, 50, 90, 100],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 progressBoost:null,
@@ -121,36 +116,42 @@ const app = Vue.createApp({
 
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
-        updateProgressBar(){
-                let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage
+        updateProgressBar() {
+            let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
+        
 
-                if (percentDifference > 5 && this.progressBar.phase != 2){
-                    this.progressBar.percentage += percentDifference/40;}
-                else if (this.progressBar.phase == 2 && !this.progressBar.progressBoost){
-                    this.progressBar.percentage += (percentDifference)/100;
-                } else {
-                    this.progressBar.percentage += 0.5;
-                }
+            // Asymptotic approach
+            if (this.progressBar.phase != 2) {
+                this.progressBar.percentage += percentDifference * 0.05; 
+            } else if (this.progressBar.phase == 2 && !this.progressBar.progressBoost) {
+                this.progressBar.percentage += percentDifference * 0.01; 
+            } else {
+                this.progressBar.percentage += 0.5;
+            }
+        
+            if (this.progressBar.progressBoost) {
+                this.progressBar.percentage += 5;
+            }
+        
+            if (this.progressBar.phase == 0 && this.progressBar.percentage >= this.progressBar.phaseValues[0]) {
+                this.progressBar.progressBoost = false;
+                this.progressBar.phase = 1;
+            } else if (this.progressBar.phase == 1 && this.progressBar.percentage >= this.progressBar.phaseValues[1]) {
+                this.progressBar.progressBoost = false;
+                this.progressBar.phase = 2;
+            } else if (this.progressBar.phase == 2 && this.progressBar.percentage >= this.progressBar.phaseValues[2]) {
+                this.progressBar.phase = 3;
+            }
+        
+            if (this.progressBar.percentage >= 100) {
+                clearInterval(this.progressBar.timer);
+            }
 
-                if (this.progressBar.progressBoost) {
-                    this.progressBar.percentage += 5
-                }
-
-                if (this.progressBar.phase==0 && this.progressBar.percentage > this.progressBar.phaseValues[0]) {
-                    this.progressBar.progressBoost = false
-                    this.progressBar.phase = 1
-
-                } else if (this.progressBar.phase==1 && this.progressBar.percentage > this.progressBar.phaseValues[1]){
-                    this.progressBar.progressBoost = false
-                    this.progressBar.phase = 2
-                } else if (this.progressBar.phase==2 && this.progressBar.percentage > this.progressBar.phaseValues[2]){
-                    this.progressBar.phase = 3
-                }
-
-                if (this.progressBar.percentage>= 100) {clearInterval(this.progressBar.timer)}
-
-
-            },
+            if (this.progressBar.phase != 0){
+                this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
+            }
+        },
+        
         async handleFileUpload(event) {
             this.video_file = event.target.files[0];
             if (this.video_file) {
@@ -164,7 +165,7 @@ const app = Vue.createApp({
                 try {const analysis = await uploadVideo_API(this.video_file);
                 await this.analysisHandler(analysis);
 
-                //this.isLoadingAnalysis = false;
+                this.isLoadingAnalysis = false;
 
                 this.actionListModal()
 
@@ -226,6 +227,7 @@ const app = Vue.createApp({
             if (this.actionList.logoDetected == true && !this.actionList.fatalAnimationLength){
                 this.showModal = true
             }  else {
+                this.progressBar.error = true
                 this.showWarningModal = true;
             }
         
@@ -339,7 +341,7 @@ const app = Vue.createApp({
         async renderAudio() {
             const renderedBuffer = await Tone.Offline(async ({ transport }) => {
                 await setupAudioNodes(transport.context);
-                await extractAudioBuffer(video_url)
+                await this.extractAudioBuffer()
                 //await updateLogoBuffer(this.selectedKey.key)
                 await this.setLoudness()
 
@@ -764,6 +766,10 @@ function keyToScale(key) {
 
     return scale
 
+}
+
+function clamp(num, lower, upper) {
+    return Math.min(Math.max(num, lower), upper);
 }
 
 const logoKeyMap = {

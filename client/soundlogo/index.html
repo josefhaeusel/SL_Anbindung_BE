@@ -402,45 +402,43 @@
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
 
-                <scale-progress-bar
-                v-if="isLoadingAnalysis"
-                :percentage="progressBar.percentage"
-                :hasError="progressBar.error"
-                label="Audiovisual Analysis"
-                :status-description="progressBar.texts[progressBar.phase]"
-                show-status="true"
-                style="align-self:center; width: 50%;"
-                ></scale-progress-bar>
+                <scale-modal heading="Analyzing..." size="default" :opened="isLoadingAnalysis" class="scale-modal">
 
-                <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard"
-                    heading= "Something went wrong. Please try uploading again. "
-                    variant="danger"
-                    dismissible
-                    opened
-                ></scale-notification>
+                    <scale-progress-bar
+                    :percentage="formatNumber(progressBar.percentage)"
+                    :hasError="progressBar.error"
+                    label="Audiovisual Analysis"
+                    :status-description="progressBar.texts[progressBar.phase]"
+                    show-status="true"
+                    style="align-self:center; width: 50%;"
+                    ></scale-progress-bar>
+
+                    <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard"
+                        heading= "Something went wrong. Please try uploading again. "
+                        variant="danger"
+                        dismissible
+                        opened
+                    ></scale-notification>
+                </scale-modal>
 
             </div>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
                 style="z-index:100">
+                
                 <p v-if="!actionList.fatalAnimationLength">
                     The official outro animation could not be detected.
                     <span v-if="!actionList.commonResolution"><br>This could be due to the unconventional video-resolution: <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
                 </p>
                     <p v-if="!actionList.fatalAnimationLength">
-                    Make sure to use <a href="https://www.brand-design.telekom.com/asset/tv-ending-0-t-outro-hardcut-de/">one of the latest outro animations in the brand-portal.</a><br>
-                    Do you wish to proceed with the risk of asynchronously timing the soundlogo to the animation?
+                    To access this tool, make sure to use <a href="https://www.brand-design.telekom.com/asset/tv-ending-0-t-outro-hardcut-de/">one of the latest outro animations in the brand-portal.</a><br>
                 </p>
                 <p v-if="actionList.fatalAnimationLength">
                     The official outro animation was detected, yet is <strong>cut off too early </strong>in the end.
                     To access this tool, make sure to use one of the latest outro animations in the brand-portal at full length.
                 </p>
-                <scale-button v-if="!actionList.fatalAnimationLength" slot="action"
-                    @click="this.showWarningModal=false; this.showModal=true">
-                    Proceed
-                </scale-button>
                 
-                <scale-button v-if="actionList.fatalAnimationLength" slot="action"
+                <scale-button slot="action"
                     @click="this.showWarningModal=false; this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}">
                     Return
                 </scale-button>
@@ -469,37 +467,6 @@
                         <li>Integrated loudness: <strong>None</strong>.</li>
                     <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
                         <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
-                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
-                </div>
-
-                <div v-if="!actionList.logoDetected && !actionList.audioEmpty">
-                    <h2 style="margin-bottom: 3px;">Understand:</h2>
-                            The Soundlogo's timing is set to a <strong>fixed value</strong> at the end. <br>
-                            Synchronicity to the animation is <strong>not guaranteed</strong>.
-                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
-                        <li>Telekom outro animation: <strong>undetected</strong>.</li>
-                        <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
-                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                        <li><strong>Added Soundlogo</strong> at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong> (6s before end).</li>
-                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
-                </div>
-
-                <div v-if="actionList.audioEmpty && !actionList.logoDetected">
-                    <h2 style="margin-bottom: 3px;">Understand:</h2>
-                    The Soundlogo's timing is set to a <strong>fixed value</strong> at the end. <br>
-                    Synchronicity to the animation is <strong>not guaranteed</strong>. <br>
-                    Your video has <strong>no audio track</strong>. Musical key and loudness have been set to <strong>standardized values</strong>.
-
-                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong> (standardized).</li>
-                        <li>Telekom outro animation: <strong>undetected</strong>.</li>
-                        <li>Integrated loudness: <strong>None</strong>.</li>
-                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                        <li><strong>Added Soundlogo</strong> at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong> (6s before end).</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
                         <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>

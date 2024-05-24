@@ -27,11 +27,6 @@ export class ComputerVisionService {
           }
         });
   
-        pythonProcess.stderr.on('data', (data) => {
-          this.logger.warn('stderr:', data);
-          console.error(`stderr: ${data}`);
-        });
-  
         pythonProcess.on('error', (error) => {
           this.logger.error('error:', error);
           console.error(`error: ${error.message}`);

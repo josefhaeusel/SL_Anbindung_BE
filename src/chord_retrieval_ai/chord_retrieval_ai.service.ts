@@ -22,18 +22,20 @@ export class ChordRetrievalAiService {
           const result = JSON.parse(data.toString());
           resolve(result);
         } catch (error) {
+          this.logger.error('error:', error);
+          console.error(`error: ${error.message}`);
           reject(error);
         }
       });
 
       pythonProcess.stderr.on('data', (data) => {
         this.logger.warn('stderr:', data);
-        // console.error(`stderr: ${data}`);
+        console.error(`stderr: ${data}`);
       });
 
       pythonProcess.on('error', (error) => {
         this.logger.error('error:', error);
-        // console.error(`error: ${error.message}`);
+        console.error(`error: ${error.message}`);
         reject(error);
       });
     });

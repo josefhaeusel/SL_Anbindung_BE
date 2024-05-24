@@ -13,7 +13,6 @@ class Tonal_Fragment(object):
         self.sr = sr
         self.tstart = tstart
         self.tend = tend
-        
         if self.tstart is not None:
             self.tstart = librosa.time_to_samples(self.tstart, sr=self.sr)
         if self.tend is not None:
@@ -48,7 +47,7 @@ class Tonal_Fragment(object):
 
         # names of all major and minor keys
         self.key_dict = {**{keys[i]: self.maj_key_corrs[i] for i in range(12)}, 
-                         **{keys[i+12]: self.min_key_corrs[i] for i in range(12)}}
+                        **{keys[i+12]: self.min_key_corrs[i] for i in range(12)}}
         
         # this attribute represents the key determined by the algorithm
         self.key = max(self.key_dict, key=self.key_dict.get)
@@ -63,7 +62,7 @@ class Tonal_Fragment(object):
             if corr > self.bestcorr*0.9 and corr != self.bestcorr:
                 self.altkey = key
                 self.altbestcorr = corr
-                
+   
     # prints the relative prominence of each pitch class            
     def print_chroma(self):
         self.chroma_max = max(self.chroma_vals)

@@ -82,6 +82,7 @@ export class ChordRetrievalAiController {
       } catch (error) {
         audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
+        console.log("ERROR",error)
       }
 
       sendProgress('Detecting T-Outro Animation...');
