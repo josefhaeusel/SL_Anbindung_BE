@@ -335,6 +335,10 @@
             /* Bigger font size for heading */
             --color-close-button: #E20074;
             --color-close-button-hover: var(--telekom-color-primary-hovered);
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px
         }
 
         .download-audio-button {
@@ -405,18 +409,18 @@
                 <scale-modal heading="Analyzing..." size="default" :opened="isLoadingAnalysis" class="scale-modal">
 
                     <scale-progress-bar
+                    v-show="!progressBar.error"
                     :percentage="formatNumber(progressBar.percentage)"
                     :hasError="progressBar.error"
                     label="Audiovisual Analysis"
                     :status-description="progressBar.texts[progressBar.phase]"
                     show-status="true"
-                    style="align-self:center; width: 50%;"
                     ></scale-progress-bar>
 
-                    <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard"
+                    <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard; margin: 10px"
                         heading= "Something went wrong. Please try uploading again. "
                         variant="danger"
-                        dismissible
+                        dismissible="false"
                         opened
                     ></scale-notification>
                 </scale-modal>
@@ -425,7 +429,7 @@
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
                 style="z-index:100">
-                
+
                 <p v-if="!actionList.fatalAnimationLength">
                     The official outro animation could not be detected.
                     <span v-if="!actionList.commonResolution"><br>This could be due to the unconventional video-resolution: <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
@@ -439,7 +443,7 @@
                 </p>
                 
                 <scale-button slot="action"
-                    @click="this.showWarningModal=false; this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}">
+                    @click="handleReturn()">
                     Return
                 </scale-button>
 
@@ -458,13 +462,31 @@
                         <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
                 </div>
 
-                <div v-if="actionList.audioEmpty && actionList.logoDetected">  
+                <div v-if="!actionList.keyDetected && actionList.logoDetected">  
+                    
+                    <div v-if="actionList.audioEmpty">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
-                        Your video has <strong>no audio track</strong>. Musical key and loudness have been set to <strong>standardized values</strong>.
-                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong> (standardized).</li>
+                        Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been set to <strong>standardized values</strong>.
+                    </div>
+
+                    <div v-if="this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                        <h2 style="margin-bottom: 3px;">Understand:</h2>
+                            Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized values</strong>.
+                    </div>
+
+                    <div v-if="!this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                        <h2 style="margin-bottom: 3px;">Understand:</h2>
+                            Your video ending indicates no musical content. The Soundlogo's musical key have been set to <strong>standardized values</strong>.
+                    </div>
+                    
+                    
+                        <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
                         <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
-                        <li>Integrated loudness: <strong>None</strong>.</li>
+                        <li>Musical key: <strong>None</strong>.</li>
+
+                        <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
+                        <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness: <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
+
                     <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
                         <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
                         <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>

@@ -7,6 +7,8 @@ import soundfile as sf
 import pyloudnorm as pyln
 import numpy as np
 
+#
+
 if len(sys.argv) > 1:
     try:
         audio_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
@@ -40,10 +42,12 @@ if len(sys.argv) > 1:
         if np.isnan(integrated_loudness) or np.isinf(integrated_loudness):
             audioEmpty = True
             analysisSegmentEmpty = True
-            loudness = None
+            integrated_loudness = None
+            segment_loudness = None
             
         elif np.isnan(segment_loudness) or np.isinf(segment_loudness):
             analysisSegmentEmpty = True
+            segment_loudness = None
             audioEmpty = False
         else:
             y_harmonic, y_percussive = librosa.effects.hpss(y_segment)

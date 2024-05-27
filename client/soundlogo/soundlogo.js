@@ -17,6 +17,8 @@ const app = Vue.createApp({
             showModal: false,
             showWarningModal: false,
             showKeys:false,
+            marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
+
             progressBar: {
                 phase: 0,
                 phaseValues: [20, 50, 90, 100],
@@ -48,7 +50,7 @@ const app = Vue.createApp({
             desiredMasterLUFS: -20,
             soundlogoLUFS:-16,
 
-            actionList: {success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -85,6 +87,13 @@ const app = Vue.createApp({
         },
         formatNumber(value, decimals=2){
             return value.toFixed(decimals)
+        },
+        handleReturn(){
+            this.showWarningModal=false;
+            this.isLoadingAnalysis=false;
+            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}
+            
+
         },
         getProgress_API(message){
             console.log("Progress message from API:", message)
@@ -165,9 +174,7 @@ const app = Vue.createApp({
                 try {const analysis = await uploadVideo_API(this.video_file);
                 await this.analysisHandler(analysis);
 
-                this.isLoadingAnalysis = false;
-
-                this.actionListModal()
+                await this.actionListModal()
 
                 console.log("ACTION LIST:",this.actionList)}
                 catch (error){
@@ -185,21 +192,28 @@ const app = Vue.createApp({
 
             this.videoData = analysis.videoAnalysis.analysis;
             const audioEmpty = analysis.audioAnalysis.audioEmpty;
+            this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
 
-            if (audioEmpty == true) {
+            if (audioEmpty) {
                 this.actionList.audioEmpty = true
+
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
                 console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
                 
-            } else {
+            }
+            else if (likely_key == null){
+                await this.setKeys("C major")
+                console.log(`No Key Detected. Standardized Values: ${this.soundlogoKeys[1].key}.`);
+            } else
+            {
+                this.actionList.keyDetected=true
                 this.measuredLUFS = loudness
                 await this.setKeys(likely_key)
-                this.showKeys = true
-
             }
+
             this.setLoudness();
             
             if (this.videoData.logo_start == "None"){
@@ -214,13 +228,13 @@ const app = Vue.createApp({
                     }
             }
 
-            if (this.actionList.logoDetected && !this.actionList.audioEmpty){
+            if (this.actionList.logoDetected && this.actionList.keyDetected){
                 this.actionList.success = true;
             }
 
             this.checkResolution();
             this.setSoundlogoPosition()
-            setVideoMarker(this.soundlogoPosition);
+            this.setVideoMarker();
         },
         actionListModal(){
 
@@ -249,11 +263,45 @@ const app = Vue.createApp({
                 }
         },
 
+        setVideoMarker(){
+
+            if (this.marker.exists){
+                const left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
+
+                this.marker.element.style.left = left
+                this.marker.element.setAttribute('data-time', this.soundlogoPosition);
+
+
+            } else {
+                const markerElement = document.createElement('div');
+                const left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
+
+                this.marker =
+                    { element: markerElement, time: this.soundlogoPosition, label: 'Soundlogo', left: left, exists:true}
+
+                this.marker.left = left;
+
+                this.marker.element.className = 'vjs-marker';
+                this.marker.element.style.left = left;
+                this.marker.element.setAttribute('data-time', this.soundlogoPosition);
+                this.marker.element.innerHTML = '<span>' + this.marker.label + '</span>';
+                this.marker.element.addEventListener('click', () => {
+                    videoPlayer.setCurrentTime = this.soundlogoPosition;
+                });
+
+                const progressControl = videoPlayer.controlBar.progressControl.children_[0].el_;
+                progressControl.appendChild(this.marker.element);
+            }
+
+            
+                
+            },
+
         setSoundlogoPosition(){
             if (this.actionList.logoDetected == false) {
                 this.soundlogoPosition = this.audioDuration - 6;
             } else {
-                this.soundlogoPosition = this.videoData.logo_start - 3.6
+                this.soundlogoPosition = this.videoData.logo_start - 3.55
             }
         },
         async setKeys(keyName){
@@ -722,28 +770,7 @@ async function uploadVideo_API(file) {
 }
 
 
-function setVideoMarker(soundlogoPosition) {
-    var markers = [
-        { time: soundlogoPosition, label: 'Soundlogo' },
-    ];
 
-    var total = videoPlayer.duration();
-    var p = videoPlayer.controlBar.progressControl.children_[0].el_;
-
-    for (var i = 0; i < markers.length; i++) {
-        var left = (markers[i].time / total * 100) + '%';
-        var time = markers[i].time;
-        var el = document.createElement('div');
-        el.className = 'vjs-marker';
-        el.style.left = left;
-        el.setAttribute('data-time', time);
-        el.innerHTML = '<span>' + markers[i].label + '</span>';
-        el.addEventListener('click', function () {
-            videoPlayer.currentTime(this.getAttribute('data-time'));
-        });
-        p.appendChild(el);
-    }
-}
 
 function keyToScale(key) {
     console.log("KEY TO SCALE", key)
