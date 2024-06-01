@@ -1,4 +1,8 @@
+setuptools
+pyloudnorm
+opencv-python
 librosa
 matplotlib
-setuptools
-opencv-python
+soundfile
+ffmpeg
+ffprobe

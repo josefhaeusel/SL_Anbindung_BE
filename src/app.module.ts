@@ -14,11 +14,11 @@ import { MusicAiSearchModule } from './music-ai-search/music-ai-search.module';
   imports: [
     ChordRetrievalAiModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client/soundlogo'),
+      rootPath: join(__dirname, '..', 'frontend/soundlogo'),
       serveRoot: '/soundlogo',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client/highlight'),
+      rootPath: join(__dirname, '..', 'frontend/highlight'),
       serveRoot: '/highlight',
     }),
     MusicAiSearchModule,],

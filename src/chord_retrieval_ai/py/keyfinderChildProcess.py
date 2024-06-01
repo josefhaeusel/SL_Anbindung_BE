@@ -1,13 +1,12 @@
-import os
 import sys
 import json
 import librosa
 from keyfinder import Tonal_Fragment
-import soundfile as sf
 import pyloudnorm as pyln
 import numpy as np
+import matplotlib
+import soundfile
 
-#
 
 if len(sys.argv) > 1:
     try:

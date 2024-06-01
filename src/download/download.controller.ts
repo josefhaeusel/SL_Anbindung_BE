@@ -1,5 +1,6 @@
 import { Controller, Get, Query, Res, StreamableFile } from '@nestjs/common';
 import { DownloadService } from './download.service';
+import { Response } from 'express';
 
 @Controller('download')
 export class DownloadController {

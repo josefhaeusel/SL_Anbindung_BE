@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegPath from 'ffmpeg-static';
 import * as ffprobePath from 'ffprobe-static';
+import * as ffprobe from 'ffprobe-static';
 import * as path from 'path';
 
 @Injectable()
