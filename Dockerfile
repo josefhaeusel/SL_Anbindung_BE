@@ -18,8 +18,13 @@ RUN apt-get update && apt-get install -y python3 python3-pip python3-dev \
     libfreetype6-dev \
     libatlas-base-dev \
     gfortran \
+    libsndfile1-dev \
+    ffmpeg \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a symlink for python3 to python
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Copy the rest of the application code
 COPY . .

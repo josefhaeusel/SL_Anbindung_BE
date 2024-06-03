@@ -143,7 +143,7 @@ export class ChordRetrievalAiController {
 
       response.json({ renderedResult: renderedResult });
     } catch (error) {
-      response.status(500).send(error.message);
+      response.status(500).json({ error: error.message });
     }
   }
 }

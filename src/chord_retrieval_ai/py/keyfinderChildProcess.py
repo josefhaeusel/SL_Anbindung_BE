@@ -4,8 +4,9 @@ import librosa
 from keyfinder import Tonal_Fragment
 import pyloudnorm as pyln
 import numpy as np
+import matplotlib
+import soundfile
 
-#
 
 if len(sys.argv) > 1:
     try:

@@ -2,3 +2,7 @@ setuptools
 pyloudnorm
 opencv-python
 librosa
+matplotlib
+soundfile
+ffmpeg
+ffprobe
