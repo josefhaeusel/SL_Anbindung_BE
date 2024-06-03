@@ -77,7 +77,7 @@ export class ChordRetrievalAiController {
       try {
         tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
       } catch (error) {
-        console.error(error)
+        console.log(error)
       }
       sendProgress('Retrieving Key and Loudness...');
 

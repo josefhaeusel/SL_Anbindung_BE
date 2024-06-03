@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegPath from 'ffmpeg-static';
 import * as ffprobePath from 'ffprobe-static';
-import * as ffprobe from 'ffprobe-static';
 import * as path from 'path';
 import * as fs from 'fs'
 
@@ -168,17 +167,17 @@ export class AudioVideoService {
 
   private _initFfmpeg() {
     const ffprobeFullPath = ffprobePath.path;
+    ffmpeg.setFfmpegPath(ffmpegPath);
 
     //Checken ob ffprobe binary accessible ist
-    fs.chmod(ffprobeFullPath, '755', (err) => {
-      if (err) {
-        this.logger.error('Error setting ffprobe permissions:', err);
-      } else {
+    try {
+    fs.chmod(ffprobeFullPath, '755', () => {
         this.logger.debug('ffprobe permissions set successfully');
-      }
-    });
+        ffmpeg.setFfprobePath(ffprobeFullPath);
+      
+    });} catch (err) {
+      this.logger.error('Error setting ffprobe permissions:', err);
+    }
 
-    ffmpeg.setFfmpegPath(ffmpegPath);
-    ffmpeg.setFfprobePath(ffprobeFullPath);
   }
 }
