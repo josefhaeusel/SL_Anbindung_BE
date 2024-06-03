@@ -72,18 +72,24 @@ export class ChordRetrievalAiController {
       let analysisResult = { audioAnalysis: {}, videoAnalysis: {}};
       let audioAnalysisResult;
       let videoAnalysisResult;
+      let tempAudioFilePath = null;
 
       try {
-        const tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
+        tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
+      } catch (error) {
+        console.error(error)
+      }
+      sendProgress('Retrieving Key and Loudness...');
 
-        sendProgress('Retrieving Key and Loudness...');
+      if (tempAudioFilePath != null) {
         audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
-      } catch (error) {
+      } else {
         audioAnalysisResult =
           await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
-        console.log("ERROR",error)
       }
+      
+      
 
       sendProgress('Detecting T-Outro Animation...');
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);

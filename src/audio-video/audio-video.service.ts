@@ -3,6 +3,7 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegPath from 'ffmpeg-static';
 import * as ffprobePath from 'ffprobe-static';
 import * as path from 'path';
+import * as fs from 'fs'
 
 @Injectable()
 export class AudioVideoService {
@@ -165,7 +166,18 @@ export class AudioVideoService {
   }
 
   private _initFfmpeg() {
+    const ffprobeFullPath = ffprobePath.path;
+
+    //Checken ob ffprobe binary accessible ist
+    fs.chmod(ffprobeFullPath, '755', (err) => {
+      if (err) {
+        this.logger.error('Error setting ffprobe permissions:', err);
+      } else {
+        this.logger.debug('ffprobe permissions set successfully');
+      }
+    });
+
     ffmpeg.setFfmpegPath(ffmpegPath);
-    ffmpeg.setFfprobePath(ffprobePath.path);
+    ffmpeg.setFfprobePath(ffprobeFullPath);
   }
 }

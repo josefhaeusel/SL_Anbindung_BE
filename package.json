@@ -28,14 +28,14 @@
     "@nestjs/platform-express": "^10.3.5",
     "@nestjs/serve-static": "^4.0.1",
     "@telekom/scale-components": "^3.0.0-beta.150",
+    "child-process": "^1.0.2",
     "express-session": "^1.18.0",
     "ffmpeg-static": "^5.2.0",
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1",
-    "videojs-marker-plugin": "^1.0.1"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/frontend/soundlogo/test
 
 # uploaded files
 /temp_uploads/audio/*
