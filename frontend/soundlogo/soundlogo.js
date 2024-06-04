@@ -62,20 +62,19 @@ const app = Vue.createApp({
     mounted() {
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
-
+    
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
-
+    
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             this.getProgress_API(data.message);
         };
-
-        // Handle errors
+    
         eventSource.onerror = (err) => {
             console.error('EventSource failed:', err);
             eventSource.close();
         };
-
+    
     },
 
     methods: {
@@ -249,11 +248,15 @@ const app = Vue.createApp({
 
                 let width = this.videoData.videoResolution[0]
                 let height = this.videoData.videoResolution[1]
-                if (width == 3840 && height == 2160 || width == 2160 && height == 3840 || width == 3840 && height == 3840 || width == 2160 && height == 2160) {
-                    width /= 2;
-                    height /= 2
+                let ratio = width / height
+
+                if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
+                    this.actionList.commonRatio = true
                 }
-                if (width == 1920 && height == 1080 || width == 1080 && height == 1920 || width == 1920 && height == 1920 || width == 1080 && height == 1080) {
+                else {
+                    this.actionList.commonRatio = false
+                }
+                if (width > 480 && height > 480) {
                     this.actionList.commonResolution = true
                 }
                 else {
