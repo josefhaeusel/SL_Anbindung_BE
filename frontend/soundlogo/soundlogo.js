@@ -84,8 +84,20 @@ const app = Vue.createApp({
         setWarningModal(show) {
             this.showWarningModal = show
         },
-        formatNumber(value, decimals=2){
-            return value.toFixed(decimals)
+        formatNumber(value, decimals = 2) {
+            return value.toFixed(decimals);
+        },
+        formatNumberPercentage(value, decimals = 1) {
+            let testValue = value.toFixed(decimals).toString()
+            let condition = testValue.endsWith('.0')
+            console.log(condition)
+
+            if (!condition){
+                console.log(value.toFixed(decimals))
+                return value.toFixed(decimals);}
+            else {
+                return value.toFixed(decimals)-0.1
+            }
         },
         handleReturn(){
             this.showWarningModal=false;

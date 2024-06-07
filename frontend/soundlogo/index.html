@@ -55,6 +55,8 @@
             line-height: 30px;
             text-align: center;
             margin-bottom: 20px;
+            color: #000000;
+
 
         }
 
@@ -400,7 +402,7 @@
 
                     <scale-progress-bar
                     v-show="!progressBar.error"
-                    :percentage="formatNumber(progressBar.percentage)"
+                    :percentage="formatNumberPercentage(progressBar.percentage)"
                     :hasError="progressBar.error"
                     label="Audiovisual Analysis"
                     :status-description="progressBar.texts[progressBar.phase]"
