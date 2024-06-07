@@ -89,11 +89,8 @@ const app = Vue.createApp({
         },
         formatNumberPercentage(value, decimals = 1) {
             let testValue = value.toFixed(decimals).toString()
-            let condition = testValue.endsWith('.0')
-            console.log(condition)
 
-            if (!condition){
-                console.log(value.toFixed(decimals))
+            if (!testValue.endsWith('.0')){
                 return value.toFixed(decimals);}
             else {
                 return value.toFixed(decimals)-0.1
