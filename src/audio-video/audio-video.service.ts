@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
-import * as ffmpegPath from 'ffmpeg-static';
 import * as ffprobePath from 'ffprobe-static';
 import * as path from 'path';
-import * as fs from 'fs'
+import * as fs from 'fs';
 
 @Injectable()
 export class AudioVideoService {
@@ -64,16 +63,6 @@ export class AudioVideoService {
     );
     const inputVideoPathExt = outputVideoPathParsed.ext;
 
-    /*
-    const inputAudioPathParsed = path.parse(inputAudioPath);
-
-    const inputAudioPathName = path.join(
-      inputAudioPathParsed.dir,
-      inputAudioPathParsed.name,
-    );
-    const inputAudioPathExt = inputAudioPathParsed.ext;
-    */
-
     const videoInputPath = this._getVideoPath(
       inputVideoPathName,
       inputVideoPathExt,
@@ -92,8 +81,6 @@ export class AudioVideoService {
     this.logger.debug(`audioOutputPath: ${audioOutputPath}`);
 
     const audioCodec = await this._getAudioCodecSettings(audioOutputPath);
-    // this.logger.debug('audioCodec:');
-    // this.logger.debug(audioCodec);
     this.logger.debug(`audioCodec: ${audioCodec.codec_name}`);
 
     return new Promise((resolve, reject) => {
@@ -167,17 +154,13 @@ export class AudioVideoService {
 
   private _initFfmpeg() {
     const ffprobeFullPath = ffprobePath.path;
-    ffmpeg.setFfmpegPath(ffmpegPath);
 
-    //Checken ob ffprobe binary accessible ist
     try {
-    fs.chmod(ffprobeFullPath, '755', () => {
-        this.logger.debug('ffprobe permissions set successfully');
-        ffmpeg.setFfprobePath(ffprobeFullPath);
-      
-    });} catch (err) {
+      fs.chmodSync(ffprobeFullPath, '755');
+      this.logger.debug('ffprobe permissions set successfully');
+      ffmpeg.setFfprobePath(ffprobeFullPath);
+    } catch (err) {
       this.logger.error('Error setting ffprobe permissions:', err);
     }
-
   }
 }
