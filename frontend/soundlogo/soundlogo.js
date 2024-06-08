@@ -78,12 +78,6 @@ const app = Vue.createApp({
     },
 
     methods: {
-        setModal(show) {
-            this.showModal = show
-        },
-        setWarningModal(show) {
-            this.showWarningModal = show
-        },
         formatNumber(value, decimals = 2) {
             return value.toFixed(decimals);
         },
@@ -105,15 +99,16 @@ const app = Vue.createApp({
             console.log("Progress message from API:", message)
             switch (message) {
                 case 'Splitting Audio from Video...':
+                    this.progressBar.phase = 0
                   break;
                 case 'Retrieving Key and Loudness...':
-                    this.progressBar.progressBoost = true
+                    this.progressBar.phase = 1
                     break;
                 case 'Detecting T-Outro Animation...':
-                    this.progressBar.progressBoost = true
+                    this.progressBar.phase = 2
                   break;
                 case 'Done.':
-                    this.progressBar.progressBoost = true
+                    this.progressBar.phase = 3
                   break;
 
               }
@@ -134,30 +129,8 @@ const app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
+            this.progressBar.percentage += percentDifference * 0.01; 
 
-            // Asymptotic approach
-            if (this.progressBar.phase != 2) {
-                this.progressBar.percentage += percentDifference * 0.02; 
-            } else if (this.progressBar.phase == 2 && !this.progressBar.progressBoost) {
-                this.progressBar.percentage += percentDifference * 0.01; 
-            } else {
-                this.progressBar.percentage += 0.5;
-            }
-        
-            if (this.progressBar.progressBoost) {
-                this.progressBar.percentage += 5;
-            }
-        
-            if (this.progressBar.phase == 0 && this.progressBar.percentage >= this.progressBar.phaseValues[0]) {
-                this.progressBar.progressBoost = false;
-                this.progressBar.phase = 1;
-            } else if (this.progressBar.phase == 1 && this.progressBar.percentage >= this.progressBar.phaseValues[1]) {
-                this.progressBar.progressBoost = false;
-                this.progressBar.phase = 2;
-            } else if (this.progressBar.phase == 2 && this.progressBar.percentage >= this.progressBar.phaseValues[2]) {
-                this.progressBar.phase = 3;
-            }
-        
             if (this.progressBar.percentage >= 100) {
                 clearInterval(this.progressBar.timer);
             }
