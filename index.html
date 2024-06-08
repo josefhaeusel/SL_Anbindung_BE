@@ -64,10 +64,10 @@
             position: relative;
             padding: 20px 50px 35px 50px;
             border-radius: 10px;
-            border-width: 0.75px;
+            border-width: 0.1px;
             height: 150px;
             border-color: #ABABAB;
-            border: solid;
+            border: groove;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -365,10 +365,15 @@
 
         
             <transition name="fade">
-                <div class="container" v-show="isLoadingAnalysis">
 
-                    <div class="analyzing-container" v-show="isLoadingAnalysis">
-                        <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
+                    <scale-card v-show="isLoadingAnalysis" header="Analyzing..."style="width:100%">
+
+                        <img style="margin-bottom: -4px; width: 550px;margin: -24px -24px 0 -24px"
+                            src="assets/patterns/T_pattern_2023_organic_canyon_rgb.png"
+                            alt="placeholder"/>
+                        
+
+                        <h4 style="margin: 10px 0 0 0; font: var(--telekom-text-style-heading-4);">Analyzing...</h4>
                         <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error"
                             :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error"
                             label="Audiovisual Analysis" :status-description="progressBar.texts[progressBar.phase]"
@@ -378,8 +383,8 @@
                             style="color:--telekom-color-text-and-icon-standard; margin: 10px"
                             heading="Something went wrong. Please try uploading again. " variant="danger"
                             dismissible="false" opened></scale-notification>
-                    </div>
-                </div>
+
+                    </scale-card>
             </transition>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
