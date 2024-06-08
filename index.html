@@ -55,6 +55,7 @@
             max-width: 800px;
             display: flex;
             flex-direction: column;
+            align-items: center;
             justify-content: center;
             gap: 20px
         }
@@ -66,7 +67,7 @@
             border-width: 1.5px;
             height: 150px;
             border-color: #ABABAB;
-            border-style: dashed;
+            border: solid;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -208,7 +209,6 @@
         .key-label {
             font-size: 20px;
             font-weight: bold;
-            color: #000;
         }
 
 
@@ -347,16 +347,21 @@
 
                 <div class="dropzone">
                     <input type="file" id="fileInput" @change="handleFileUpload"
-                        accept="video/mp4,video/mov,video/h264" />
-
+                        accept="video/mp4,video/webm,video/ogg" />
                     <span class="upload-instructions">Upload a Video or Drop the File Here</span>
-                    <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
+                    <div class="format-info">Allowed Formats: MP4, WebM, OGG</div>
                 </div>
 
                 <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()">
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
+
+                <scale-notification
+                    v-if="!filetypeValid" heading="Unsupported Format" variant="warning" type="toast" dismissible opened>
+                    <span slot="text">The provided filetype is invalid. <br>Supported formats: MP4, WebM, OGG.</span>
+                </scale-notification>
             </div>
+
 
         
             <transition name="fade">

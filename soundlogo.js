@@ -8,6 +8,7 @@ const app = Vue.createApp({
             showWarningModal: false,
             showKeys:false,
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
+            filetypeValid: true,
 
             progressBar: {
                 phase: 0,
@@ -68,6 +69,7 @@ const app = Vue.createApp({
     },
 
     methods: {
+
         formatNumber(value, decimals = 2) {
             return value.toFixed(decimals);
         },
@@ -131,12 +133,15 @@ const app = Vue.createApp({
         },
         
         async handleFileUpload(event) {
+
             this.video_file = event.target.files[0];
-            if (this.video_file) {
+            this.filetypeValid = this.checkFiletype();
+
+            if (this.video_file && this.filetypeValid) {
                 this.isLoadingAnalysis = true;
                 this.initProgressBar()
 
-                this.video_url = URL.createObjectURL(this.video_file);
+                this.video_url = await URL.createObjectURL(this.video_file);
                 await this.loadVideoPlayer();
                 await this.extractAudioBuffer();
 
@@ -153,6 +158,20 @@ const app = Vue.createApp({
                 }
 
             }
+        },
+        checkFiletype(){
+
+            let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm"]
+
+            for (let x = 0;x<allowedFiletypes.length; x++) {
+                if (this.video_file.type == allowedFiletypes[x]){
+                    return true
+                }
+            }
+
+            console.error(`Filetype ${this.video_file.type} is invalid. Allowed filetypes are mp4, ogg and webm.`)
+            return false
+
         },
         handleError(){
             this.progressBar.error = true
@@ -266,8 +285,6 @@ const app = Vue.createApp({
                 const progressControl = videoPlayer.controlBar.progressControl.children_[0].el_;
                 progressControl.appendChild(this.marker.element);
             }
-
-            
                 
             },
 
@@ -297,22 +314,28 @@ const app = Vue.createApp({
 
             let type = '';
             console.log(this.video_file)
-            if (this.video_file.name.endsWith('.mp4')) {
-                type = 'video/mp4';
-            } else if (this.video_file.name.endsWith('.ogg')) {
-                type = 'video/ogg';
-            } else if (this.video_file.name.endsWith('.webm')) {
-                type = 'video/webm';
-            } else {
-                throw new Error('Unsupported video format');
+            
+            try {
+                if (this.video_file.name.endsWith('.mp4')) {
+                    type = 'video/mp4';
+                } else if (this.video_file.name.endsWith('.ogg')) {
+                    type = 'video/ogg';
+                } else if (this.video_file.name.endsWith('.webm')) {
+                    type = 'video/webm';
+                } else {
+                    throw new Error('Unsupported video format');
+                }
+            
+                videoPlayer.src({
+                    type: type,
+                    src: this.video_url
+                });
+                await videoPlayer.load();
+
+            } catch {
+
             }
         
-            videoPlayer.src({
-                type: type,
-                src: this.video_url
-            });
-        
-            await videoPlayer.load();
         },
         async setLoudness(){
 
