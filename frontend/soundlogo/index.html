@@ -361,9 +361,9 @@
 
         
             <transition name="fade">
-                <div class="container" v-if="isLoadingAnalysis">
+                <div class="container" v-show="isLoadingAnalysis">
 
-                    <div class="analyzing-container" v-if="isLoadingAnalysis">
+                    <div class="analyzing-container" v-show="isLoadingAnalysis">
                         <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
                         <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error"
                             :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error"
