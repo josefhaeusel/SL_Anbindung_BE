@@ -7,6 +7,6 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    return "Use Address localhost:3000/soundlogo or localhost:3000/highlight";
+    return "Use Address /soundlogo or /highlight";
   }
 }

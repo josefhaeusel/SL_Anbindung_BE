@@ -14,14 +14,14 @@ import { MusicAiSearchModule } from './music-ai-search/music-ai-search.module';
   imports: [
     ChordRetrievalAiModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'frontend/soundlogo'),
+      rootPath: join(__dirname, '..',),
       serveRoot: '/soundlogo',
     }),
-    ServeStaticModule.forRoot({
+    /*ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'frontend/highlight'),
       serveRoot: '/highlight',
     }),
-    MusicAiSearchModule,],
+  MusicAiSearchModule,*/],
   controllers: [AppController, DownloadController],
   providers: [AppService, AudioVideoService, DownloadService, ComputerVisionService],
 })

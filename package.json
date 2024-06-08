@@ -27,6 +27,8 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.3.5",
     "@nestjs/serve-static": "^4.0.1",
+    "@telekom/design-tokens": "^1.0.0-beta.11",
+    "@telekom/scale-components": "^3.0.0-beta.151",
     "child-process": "^1.0.2",
     "express-session": "^1.18.0",
     "ffmpeg-static": "^5.2.0",
