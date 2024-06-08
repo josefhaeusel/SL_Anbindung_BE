@@ -6,6 +6,7 @@ import {
   Res,
   Req,
   Get,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChordRetrievalAiService } from './chord_retrieval_ai.service';
@@ -22,6 +23,8 @@ export interface ISession extends Session {
 
 @Controller('chord-retrieval-ai')
 export class ChordRetrievalAiController {
+  private readonly logger = new Logger(ChordRetrievalAiController.name);
+
   constructor(
     private readonly chordRetrievalAiService: ChordRetrievalAiService,
     private readonly audioVideoService: AudioVideoService,
@@ -35,10 +38,12 @@ export class ChordRetrievalAiController {
     res.setHeader('X-Accel-Buffering', 'no');
 
     const sendProgress = (message: string) => {
+      this.logger.log(`Progress: ${message}`);
       res.write(`data: ${JSON.stringify({ message })}\n\n`);
     };
 
     req.on('close', () => {
+      this.logger.log('Client connection closed');
       res.end();
     });
 
@@ -55,21 +60,20 @@ export class ChordRetrievalAiController {
     const sendProgress = request.app.get('sendProgress');
 
     try {
-      // Generate temporary filename for back-end Analysis
+      this.logger.log('Starting video upload handling');
+
       const tempVideoFilePath = path.join(
         __dirname,
         '../../temp_uploads/video',
         file.originalname,
       );
 
-      // Write the video buffer to new file
       fs.writeFileSync(tempVideoFilePath, file.buffer);
 
-      // Notify client about progress
       sendProgress('Splitting Audio from Video...');
+      this.logger.log('Splitting Audio from Video...');
 
-      // Service für Audio / Video Splitting
-      let analysisResult = { audioAnalysis: {}, videoAnalysis: {}};
+      let analysisResult = { audioAnalysis: {}, videoAnalysis: {} };
       let audioAnalysisResult;
       let videoAnalysisResult;
       let tempAudioFilePath = null;
@@ -77,34 +81,34 @@ export class ChordRetrievalAiController {
       try {
         tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
       } catch (error) {
-        console.log(error)
+        this.logger.error('Error during audio/video splitting', error.stack);
       }
+
       sendProgress('Retrieving Key and Loudness...');
+      this.logger.log('Retrieving Key and Loudness...');
 
       if (tempAudioFilePath != null) {
-        audioAnalysisResult =
-          await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
+        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
       } else {
-        audioAnalysisResult =
-          await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
+        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
       }
-      
-      
 
       sendProgress('Detecting T-Outro Animation...');
+      this.logger.log('Detecting T-Outro Animation...');
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
 
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
 
-      // Optional: Löschen (für Video wohl erst nach rendering relevant)
       fs.unlinkSync(tempVideoFilePath);
 
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
 
       sendProgress('Done.');
+      this.logger.log('Processing done');
       response.json(analysisResult);
     } catch (error) {
+      this.logger.error('Error during video handling', error.stack);
       response.status(500).send(error.message);
     }
   }
@@ -117,17 +121,16 @@ export class ChordRetrievalAiController {
     @Res() response: Response,
   ) {
     try {
-      // Generate temporary filename for back-end Analysis
+      this.logger.log('Starting audio upload handling');
+
       const tempAudioFilePath = path.join(
         __dirname,
         '../../temp_uploads/audio',
         file.originalname,
       );
 
-      // Write the audio buffer to new file
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
-      // Service für Audio / Video Merging
       let renderedResult;
 
       const tempVideoFilePath = (request.session as ISession).tempVideoFilePath;
@@ -138,11 +141,12 @@ export class ChordRetrievalAiController {
         true,
       );
 
-      // Optional: Löschen
       fs.unlinkSync(tempAudioFilePath);
 
+      this.logger.log('Audio processing done');
       response.json({ renderedResult: renderedResult });
     } catch (error) {
+      this.logger.error('Error during audio handling', error.stack);
       response.status(500).json({ error: error.message });
     }
   }
