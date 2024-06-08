@@ -8,7 +8,8 @@ const app = Vue.createApp({
             showWarningModal: false,
             showKeys:false,
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
-            filetypeValid: true,
+            filetypeValid: null,
+            showInvalidFileTypeToast: false,
 
             progressBar: {
                 phase: 0,
@@ -135,9 +136,9 @@ const app = Vue.createApp({
         async handleFileUpload(event) {
 
             this.video_file = event.target.files[0];
-            this.filetypeValid = this.checkFiletype();
+            this.filetypeValid = await this.checkFiletype();
 
-            if (this.video_file && this.filetypeValid) {
+            if (this.filetypeValid) {
                 this.isLoadingAnalysis = true;
                 this.initProgressBar()
 
@@ -156,11 +157,12 @@ const app = Vue.createApp({
                     this.handleError()
 
                 }
-
+            } else {
+                console.error(`Filetype ${this.video_file.type} is invalid. Allowed filetypes are mp4, ogg and webm.`)
+                this.showInvalidFileTypeToast = true
             }
         },
-        checkFiletype(){
-
+        async checkFiletype(){
             let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm"]
 
             for (let x = 0;x<allowedFiletypes.length; x++) {
@@ -168,10 +170,7 @@ const app = Vue.createApp({
                     return true
                 }
             }
-
-            console.error(`Filetype ${this.video_file.type} is invalid. Allowed filetypes are mp4, ogg and webm.`)
             return false
-
         },
         handleError(){
             this.progressBar.error = true

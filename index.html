@@ -357,7 +357,7 @@
                     Upload a Video</scale-button>
 
                 <scale-notification
-                    v-if="!filetypeValid" heading="Unsupported Format" variant="warning" type="toast" dismissible opened>
+                    v-if="showInvalidFileTypeToast"heading="Unsupported Format" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false">
                     <span slot="text">The provided filetype is invalid. <br>Supported formats: MP4, WebM, OGG.</span>
                 </scale-notification>
             </div>
