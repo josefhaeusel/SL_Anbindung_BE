@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#E20074">
     <link rel="stylesheet" href="assets/@telekom/scale-components/dist/scale-components/scale-components.css" />
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link href="https://unpkg.com/@videojs/themes@1/dist/forest/index.css" rel="stylesheet">
@@ -13,17 +12,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
+
     <style>
         body,
         html {
-            margin: 0;
-            padding: 0;
             height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: 'TeleNeo', sans-serif;
-            background: #FFFFFF;
         }
 
         .title,
@@ -35,12 +31,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 50px;
-            padding-top: 125px;
+            
         }
 
         .title {
-            color: #000000;
             margin: 20px 0 0;
             /* Adjusted margin */
             font-size: 64px;
@@ -55,12 +49,9 @@
             line-height: 30px;
             text-align: center;
             margin-bottom: 20px;
-            color: #000000;
-
-
         }
 
-        .container {
+        .upload-container {
             width: 80%;
             max-width: 800px;
             display: flex;
@@ -69,13 +60,30 @@
             gap: 20px
         }
 
-        .upload-area {
+        .analyzing-container {
+            position: relative;
+            padding: 20px 50px 35px 50px;
+            border-radius: 10px;
+            border-width: 1.5px;
+            height: 150px;
+            border-color: #ABABAB;
+            border-style: dashed;
+            display: flex;
+            /* Add flex display */
+            flex-direction: column;
+            /* Stack children vertically */
+            justify-content: center;
+            /* Center children vertically */
+            align-items: left;
+        }
+
+        .dropzone {
             position: relative;
             padding: 40px;
             cursor: pointer;
             background-color: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
-            border-width: 2px;
+            border-width: 1.5px;
             height: 350px;
             border-color: #ABABAB;
             border-style: dashed;
@@ -87,10 +95,9 @@
             justify-content: center;
             /* Center children vertically */
             align-items: center;
-            /* Center children horizontally */
         }
 
-        .upload-area:hover {
+        .dropzone:hover {
             background-color: rgba(0, 0, 0, 0.1);
             cursor: pointer;
         }
@@ -100,13 +107,14 @@
 
         }
 
-        .upload-area input[type="file"] {
+        .dropzone input[type="file"] {
             position: absolute;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
             opacity: 0;
+            
         }
 
         .upload-instructions {
@@ -126,22 +134,23 @@
             /* Ensures it spans the width of the container */
         }
 
+        .scale-progress-bar{
+            width:480px;
+            --color-status: #000
+        }
+
         .layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            margin-top: 150px;
+            margin-top: 100px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
-        #layer1 {
-            background-color: var(--primary);
-            /* Semi-transparent background */
-        }
 
         .vjs-marker {
             position: absolute;
@@ -187,36 +196,15 @@
             /* Prevent text wrapping */
         }
 
-        .spinner-container {
-            display: flex;
-            justify-content: center;
-            /* Horizontally center the spinner */
-            align-items: center;
-            /* Vertically center the spinner */
-            width: 100%;
-            /* Full width of the parent to allow for centering */
-            margin: 25px;
-
-        }
-
-        .scale-loading-spinner {
-            --color-text-white: #000000;
-            --color-text-primary: #000000;
-        }
-
         .controls-container {
             display: flex;
-            /* Use flexbox for the alignment of child elements */
             flex-wrap: nowrap;
             align-items: center;
-            /* Center items vertically */
             justify-content: space-between;
             margin: 25px;
-            /* Add some space between the label and the button */
             position: relative;
             height: auto;
-            width: 1000px;
-            /* Adjust width as needed */
+            width: 800px;
         }
 
         .left-controls {
@@ -319,32 +307,21 @@
         }
 
         .scale-modal {
-            --background-window: #FFFFFF;
-            /* White background */
-            --color-window: #000000;
-            /* Black text */
             --font-size-heading: 30px;
-            /* Bigger font size for heading */
-            --color-close-button: #E20074;
-            --color-close-button-hover: var(--telekom-color-primary-hovered);
-
-            display: flex;
-            flex-direction: column;
-            gap: 10px
+            gap: 10px;
         }
-
+        .scale-modal.button.modal__close-button {
+            display: none!important;
+        }
+        .button.modal__close-button {
+            display: none!important;
+        }
+        
         .download-audio-button {
             left: 0;
             margin-left: 0px;
             white-space: nowrap;
             /* Prevent text inside buttons from wrapping */
-            --background-secondary: #FFFFFF;
-            --background-secondary-active: #E20074;
-            --color-secondary: #E20074;
-            --color-secondary-hover: #FFFFFF;
-            --background-secondary-hover: var(--telekom-color-primary-hovered);
-            --border-secondary: var(--telekom-color-primary-standard);
-            --border-secondary-hover: var(--telekom-color-primary-hovered);
 
         }
 
@@ -367,7 +344,7 @@
     </style>
 </head>
 
-<body data-mode="light">
+<body>
 
 
 
@@ -379,28 +356,34 @@
         <!-- First Layer: Upload Area -->
 
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
-            <div class="container">
+
+            <div style="display:flex; flex-direction: column; align-items: center;">
+                <div class="title">Soundlogo Tool</div>
+                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
+                    on brand with the help of AI.</div>
+            </div>
+
+            <div class="upload-container" v-if="!isLoadingAnalysis">
                 
-                <div style="display:flex; flex-direction: column; align-items: center;">
-                    <div class="title">Soundlogo Tool</div>
-                    <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
-                        on brand with the help of AI.</div>
-                </div>
-                
-                <div class="upload-area">
-                    <input type="file" id="fileInput" @change="handleFileUpload"
-                        accept="video/mp4,video/mov,video/h264" />
-                    <span class="upload-instructions">Upload a Video or Drop the File Here</span>
-                    <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
+                <div class="dropzone">
+                        <input type="file" id="fileInput" @change="handleFileUpload"
+                            accept="video/mp4,video/mov,video/h264" />
+                            
+                        <span class="upload-instructions">Upload a Video or Drop the File Here</span>
+                        <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
                 </div>
 
                 <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()">
                     <scale-icon-action-upload-to-cloud style="margin-right: 5px;"></scale-icon-action-upload-to-cloud>
                     Upload a Video</scale-button>
+            </div>
 
-                <scale-modal heading="Analyzing..." size="default" :opened="isLoadingAnalysis" class="scale-modal">
+            <div class="container" v-if="isLoadingAnalysis">
 
+                <div class="analyzing-container" v-if="isLoadingAnalysis">
+                    <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
                     <scale-progress-bar
+                    class="scale-progress-bar"
                     v-show="!progressBar.error"
                     :percentage="formatNumberPercentage(progressBar.percentage)"
                     :hasError="progressBar.error"
@@ -415,8 +398,7 @@
                         dismissible="false"
                         opened
                     ></scale-notification>
-                </scale-modal>
-
+                </div>
             </div>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
@@ -440,58 +422,56 @@
                 </scale-button>
 
             </scale-modal>
-
-            <scale-modal heading="Soundlogo Added" size="default" :opened="showModal" class="scale-modal">
-                <div v-if="actionList.success">
-                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                        <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
-                        <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
-                        <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
-                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                        <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
-                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
-                </div>
-
-                <div v-if="!actionList.keyDetected && actionList.logoDetected">  
-                    
-                    <div v-if="actionList.audioEmpty">
-                    <h2 style="margin-bottom: 3px;">Understand:</h2>
-                        Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been set to <strong>standardized values</strong>.
-                    </div>
-
-                    <div v-if="this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
-                        <h2 style="margin-bottom: 3px;">Understand:</h2>
-                            Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized values</strong>.
-                    </div>
-
-                    <div v-if="!this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
-                        <h2 style="margin-bottom: 3px;">Understand:</h2>
-                            Your video ending indicates no musical content. The Soundlogo's musical key have been set to <strong>standardized values</strong>.
-                    </div>
-                    
-                    
-                        <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                        <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
-                        <li>Musical key: <strong>None</strong>.</li>
-
-                        <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
-                        <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness: <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
-
-                    <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                        <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
-                        <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                        <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
-                </div>
-
-                <scale-button slot="action" @click="this.showModal=false;this.isLoadingAnalysis=false;">
-                    View Result
-                </scale-button>
-            </scale-modal>
-  
             
         </div>
+
+        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal" @scale-before-close="isLoadingAnalysis=false">
+            <div v-if="actionList.success">
+                <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                    <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
+                    <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
+                    <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
+                <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                    <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                    <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                    <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
+                    <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
+            </div>
+
+            <div v-if="!actionList.keyDetected && actionList.logoDetected">  
+                
+                <div v-if="actionList.audioEmpty">
+                <h2 style="margin-bottom: 3px;">Understand:</h2>
+                    Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been set to <strong>standardized values</strong>.
+                </div>
+
+                <div v-if="this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                        Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized values</strong>.
+                </div>
+
+                <div v-if="!this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                        Your video ending indicates no musical content. The Soundlogo's musical key have been set to <strong>standardized values</strong>.
+                </div>
+                
+                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                    <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
+                    <li>Musical key: <strong>None</strong>.</li>
+
+                    <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
+                    <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness: <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
+
+                <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
+                    <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                    <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                    <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
+            </div>
+
+            <scale-button slot="action" @click="this.showResultModal=false;this.isLoadingAnalysis=false;">
+                View Result
+            </scale-button>
+        </scale-modal>
 
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
@@ -503,7 +483,7 @@
             </div>
 
                 <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" 
-                    data-setup='{"font-family": "TeleNeo","width":1000, "heigth":562.5}'
+                    data-setup='{"font-family": "TeleNeo","width":800}'
                     style="border-radius: 10px; object-fit: contain"controls muted>
                     <p class="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a

@@ -174,6 +174,7 @@ function isInView(element) {
     rect.bottom <= parentRect.bottom &&
     rect.right <= parentRect.right);
 }
+let activeDropdown = null;
 const DropdownSelect = class {
   constructor(hostRef) {
     index.registerInstance(this, hostRef);
@@ -246,7 +247,13 @@ const DropdownSelect = class {
       utils.emitEvent(this, 'scaleFocus');
     };
     this.handleClick = () => {
+      // * This is a fix to prevent the dropdown from being opened when the user clicks on another combobox.
+      // ! https://github.com/telekom/scale/issues/2285
+      if (activeDropdown && activeDropdown !== this) {
+        activeDropdown.setOpen(false);
+      }
       this.setOpen(!this.open);
+      activeDropdown = this;
       const indexOfValue = readOptions(this.hostElement).findIndex(({ value }) => value === this.value);
       if (indexOfValue > -1) {
         setTimeout(() => {

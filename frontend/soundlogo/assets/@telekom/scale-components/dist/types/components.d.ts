@@ -12743,6 +12743,7 @@ export namespace Components {
         "loginSettingsLabel"?: string;
         "loginSettingsUrl"?: string;
         "loginUrl"?: string;
+        "logoutHandler"?: string;
         "logoutLabel": string;
         "logoutUrl"?: string;
         "registerHeadline": string;
@@ -29449,6 +29450,7 @@ declare namespace LocalJSX {
         "loginSettingsLabel"?: string;
         "loginSettingsUrl"?: string;
         "loginUrl"?: string;
+        "logoutHandler"?: string;
         "logoutLabel"?: string;
         "logoutUrl"?: string;
         "registerHeadline"?: string;

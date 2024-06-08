@@ -10868,9 +10868,9 @@ class AppNavigationUserMenu {
             this.hide();
           }, onKeyDown: (e) => {
             if ([' ', 'Enter'].includes(e.key)) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
               if (item.onClick) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
                 item.onClick(e);
               }
               this.hide();
@@ -10895,14 +10895,16 @@ class AppNavigationUserMenu {
       if (item.type === 'button') {
         return (hAsync("scale-button", { class: "app-navigation-user-menu__button", part: "button", onClick: (e) => {
             if (item.onClick) {
+              e.stopImmediatePropagation();
+              e.preventDefault();
               item.onClick(e);
             }
             this.hide();
           }, onKeyDown: (e) => {
             if ([' ', 'Enter'].includes(e.key)) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
               if (item.onClick) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
                 item.onClick(e);
               }
               this.hide();
@@ -29148,6 +29150,7 @@ function isInView(element) {
     rect.bottom <= parentRect.bottom &&
     rect.right <= parentRect.right);
 }
+let activeDropdown = null;
 class DropdownSelect {
   constructor(hostRef) {
     registerInstance(this, hostRef);
@@ -29220,7 +29223,13 @@ class DropdownSelect {
       emitEvent$1(this, 'scaleFocus');
     };
     this.handleClick = () => {
+      // * This is a fix to prevent the dropdown from being opened when the user clicks on another combobox.
+      // ! https://github.com/telekom/scale/issues/2285
+      if (activeDropdown && activeDropdown !== this) {
+        activeDropdown.setOpen(false);
+      }
       this.setOpen(!this.open);
+      activeDropdown = this;
       const indexOfValue = readOptions(this.hostElement).findIndex(({ value }) => value === this.value);
       if (indexOfValue > -1) {
         setTimeout(() => {
@@ -39115,6 +39124,15 @@ class TelekomProfileMenu {
     // logged in
     return (hAsync("scale-badge", { "no-dot": "true" }, hAsync("scale-icon-user-file-user", { selected: this.menuOpen }), hAsync("div", { slot: "dot", class: "mydot" }, hAsync("scale-icon-action-checkmark", null))));
   }
+  buildLogoutButton() {
+    return {
+      type: 'button',
+      name: this.logoutLabel,
+      href: this.logoutUrl || LOGOUT_DEFAULT,
+      variant: 'secondary',
+      onClick: this.logoutHandler,
+    };
+  }
   buildUserNavigation() {
     const divider = [{ type: 'divider' }];
     const userInfo = readData(this.userInfo);
@@ -39133,12 +39151,6 @@ class TelekomProfileMenu {
       href: this.loginSettingsUrl || LOGIN_SETTINGS_DEFAULT,
       icon: 'service-settings',
     };
-    const logout = {
-      type: 'button',
-      name: this.logoutLabel,
-      href: this.logoutUrl || LOGOUT_DEFAULT,
-      variant: 'secondary',
-    };
     let menu = [];
     menu = menu.concat(userInfo);
     if (!this.serviceLinksEmpty()) {
@@ -39151,7 +39163,7 @@ class TelekomProfileMenu {
     if (!this.serviceLinksEmpty()) {
       menu = menu.concat(divider);
     }
-    menu = menu.concat(logout);
+    menu = menu.concat(this.buildLogoutButton());
     return menu;
   }
   serviceLinksEmpty() {
@@ -39220,6 +39232,7 @@ class TelekomProfileMenu {
       "hideLoginSettings": [4, "hide-login-settings"],
       "logoutLabel": [1, "logout-label"],
       "logoutUrl": [1, "logout-url"],
+      "logoutHandler": [1, "logout-handler"],
       "menuOpen": [32]
     },
     "$listeners$": [[0, "keydown", "onKeydown"]],

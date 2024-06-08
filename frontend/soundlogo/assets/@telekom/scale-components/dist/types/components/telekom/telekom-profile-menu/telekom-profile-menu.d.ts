@@ -33,12 +33,20 @@ export declare class TelekomProfileMenu {
   hideLoginSettings: boolean;
   logoutLabel: string;
   logoutUrl?: string;
+  logoutHandler?: string;
   menuOpen: boolean;
   onKeydown(event: KeyboardEvent): void;
   openMenu(event: any): void;
   closeMenu(event: any): void;
   printSignInMenu(): any;
   printProfileTrigger(): any;
+  buildLogoutButton(): {
+    type: string;
+    name: string;
+    href: string;
+    variant: string;
+    onClick: string;
+  };
   buildUserNavigation(): any[];
   serviceLinksEmpty(): boolean;
   buildDesktopMenuStyles(): string;

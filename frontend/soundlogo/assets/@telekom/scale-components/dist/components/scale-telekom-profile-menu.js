@@ -63,6 +63,15 @@ const TelekomProfileMenu = /*@__PURE__*/ proxyCustomElement(class extends HTMLEl
     // logged in
     return (h("scale-badge", { "no-dot": "true" }, h("scale-icon-user-file-user", { selected: this.menuOpen }), h("div", { slot: "dot", class: "mydot" }, h("scale-icon-action-checkmark", null))));
   }
+  buildLogoutButton() {
+    return {
+      type: 'button',
+      name: this.logoutLabel,
+      href: this.logoutUrl || LOGOUT_DEFAULT,
+      variant: 'secondary',
+      onClick: this.logoutHandler,
+    };
+  }
   buildUserNavigation() {
     const divider = [{ type: 'divider' }];
     const userInfo = readData(this.userInfo);
@@ -81,12 +90,6 @@ const TelekomProfileMenu = /*@__PURE__*/ proxyCustomElement(class extends HTMLEl
       href: this.loginSettingsUrl || LOGIN_SETTINGS_DEFAULT,
       icon: 'service-settings',
     };
-    const logout = {
-      type: 'button',
-      name: this.logoutLabel,
-      href: this.logoutUrl || LOGOUT_DEFAULT,
-      variant: 'secondary',
-    };
     let menu = [];
     menu = menu.concat(userInfo);
     if (!this.serviceLinksEmpty()) {
@@ -99,7 +102,7 @@ const TelekomProfileMenu = /*@__PURE__*/ proxyCustomElement(class extends HTMLEl
     if (!this.serviceLinksEmpty()) {
       menu = menu.concat(divider);
     }
-    menu = menu.concat(logout);
+    menu = menu.concat(this.buildLogoutButton());
     return menu;
   }
   serviceLinksEmpty() {
@@ -165,6 +168,7 @@ const TelekomProfileMenu = /*@__PURE__*/ proxyCustomElement(class extends HTMLEl
     "hideLoginSettings": [4, "hide-login-settings"],
     "logoutLabel": [1, "logout-label"],
     "logoutUrl": [1, "logout-url"],
+    "logoutHandler": [1, "logout-handler"],
     "menuOpen": [32]
   }, [[0, "keydown", "onKeydown"]]]);
 function defineCustomElement$1() {

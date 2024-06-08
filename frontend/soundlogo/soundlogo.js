@@ -14,7 +14,7 @@ const app = Vue.createApp({
         return {
 
             currentLayer: "layer1",
-            showModal: false,
+            showResultModal: false,
             showWarningModal: false,
             showKeys:false,
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
@@ -150,15 +150,16 @@ const app = Vue.createApp({
                 await this.loadVideoPlayer();
                 await this.extractAudioBuffer();
 
-                try {const analysis = await uploadVideo_API(this.video_file);
-                await this.analysisHandler(analysis);
+                try {
+                    const analysis = await uploadVideo_API(this.video_file);
+                    await this.analysisHandler(analysis);
+                    await this.actionListModal()
+                    console.log("ACTION LIST:",this.actionList)
+                } catch (error){
 
-                await this.actionListModal()
-
-                console.log("ACTION LIST:",this.actionList)}
-                catch (error){
                     console.log("Analysis Error:",error)
                     this.handleError()
+
                 }
 
             }
@@ -218,7 +219,8 @@ const app = Vue.createApp({
         actionListModal(){
 
             if (this.actionList.logoDetected == true && !this.actionList.fatalAnimationLength){
-                this.showModal = true
+                this.showResultModal = true
+                this.currentLayer = "layer2"
             }  else {
                 this.progressBar.error = true
                 this.showWarningModal = true;

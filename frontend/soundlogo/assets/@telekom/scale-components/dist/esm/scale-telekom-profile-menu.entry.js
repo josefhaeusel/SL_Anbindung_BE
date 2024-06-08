@@ -49,6 +49,15 @@ const TelekomProfileMenu = class {
     // logged in
     return (h("scale-badge", { "no-dot": "true" }, h("scale-icon-user-file-user", { selected: this.menuOpen }), h("div", { slot: "dot", class: "mydot" }, h("scale-icon-action-checkmark", null))));
   }
+  buildLogoutButton() {
+    return {
+      type: 'button',
+      name: this.logoutLabel,
+      href: this.logoutUrl || LOGOUT_DEFAULT,
+      variant: 'secondary',
+      onClick: this.logoutHandler,
+    };
+  }
   buildUserNavigation() {
     const divider = [{ type: 'divider' }];
     const userInfo = readData(this.userInfo);
@@ -67,12 +76,6 @@ const TelekomProfileMenu = class {
       href: this.loginSettingsUrl || LOGIN_SETTINGS_DEFAULT,
       icon: 'service-settings',
     };
-    const logout = {
-      type: 'button',
-      name: this.logoutLabel,
-      href: this.logoutUrl || LOGOUT_DEFAULT,
-      variant: 'secondary',
-    };
     let menu = [];
     menu = menu.concat(userInfo);
     if (!this.serviceLinksEmpty()) {
@@ -85,7 +88,7 @@ const TelekomProfileMenu = class {
     if (!this.serviceLinksEmpty()) {
       menu = menu.concat(divider);
     }
-    menu = menu.concat(logout);
+    menu = menu.concat(this.buildLogoutButton());
     return menu;
   }
   serviceLinksEmpty() {

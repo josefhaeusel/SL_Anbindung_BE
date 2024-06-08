@@ -31,9 +31,9 @@ const AppNavigationUserMenu = class {
             this.hide();
           }, onKeyDown: (e) => {
             if ([' ', 'Enter'].includes(e.key)) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
               if (item.onClick) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
                 item.onClick(e);
               }
               this.hide();
@@ -58,14 +58,16 @@ const AppNavigationUserMenu = class {
       if (item.type === 'button') {
         return (index.h("scale-button", { class: "app-navigation-user-menu__button", part: "button", onClick: (e) => {
             if (item.onClick) {
+              e.stopImmediatePropagation();
+              e.preventDefault();
               item.onClick(e);
             }
             this.hide();
           }, onKeyDown: (e) => {
             if ([' ', 'Enter'].includes(e.key)) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
               if (item.onClick) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
                 item.onClick(e);
               }
               this.hide();
