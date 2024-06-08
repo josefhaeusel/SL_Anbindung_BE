@@ -330,9 +330,10 @@ const app = Vue.createApp({
                     src: this.video_url
                 });
                 await videoPlayer.load();
+                console.log("Video player loaded", videoPlayer)
 
-            } catch {
-
+            } catch (error) {
+                console.error("Error loading video-player",error)
             }
         
         },
