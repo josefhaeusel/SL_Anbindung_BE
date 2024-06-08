@@ -33,7 +33,7 @@
             align-items: center;
 
             padding: 90px 0 0 20px;
-            
+
         }
 
         .title {
@@ -109,7 +109,7 @@
             top: 0;
             left: 0;
             opacity: 0;
-            
+
         }
 
         .upload-instructions {
@@ -128,8 +128,8 @@
             width: 100%;
         }
 
-        .scale-progress-bar{
-            width:480px;
+        .scale-progress-bar {
+            width: 480px;
             --color-status: #000
         }
 
@@ -185,6 +185,12 @@
             position: relative;
             height: auto;
             width: 800px;
+        }
+
+        .disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+            /* Optional: Makes the button look "disabled" */
         }
 
         .left-controls {
@@ -283,13 +289,15 @@
             --font-size-heading: 30px;
             gap: 10px;
         }
+
         .scale-modal.button.modal__close-button {
-            display: none!important;
+            display: none !important;
         }
+
         .button.modal__close-button {
-            display: none!important;
+            display: none !important;
         }
-        
+
         .download-audio-button {
             left: 0;
             margin-left: 0px;
@@ -337,13 +345,13 @@
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
 
             <div class="upload-container" v-if="!isLoadingAnalysis">
-                
+
                 <div class="dropzone">
-                        <input type="file" id="fileInput" @change="handleFileUpload"
-                            accept="video/mp4,video/mov,video/h264" />
-                            
-                        <span class="upload-instructions">Upload a Video or Drop the File Here</span>
-                        <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
+                    <input type="file" id="fileInput" @change="handleFileUpload"
+                        accept="video/mp4,video/mov,video/h264" />
+
+                    <span class="upload-instructions">Upload a Video or Drop the File Here</span>
+                    <div class="format-info">Allowed Formats: MP4, H264, WebM, OGG</div>
                 </div>
 
                 <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()">
@@ -351,27 +359,21 @@
                     Upload a Video</scale-button>
             </div>
 
+        
             <transition name="fade">
                 <div class="container" v-if="isLoadingAnalysis">
 
                     <div class="analyzing-container" v-if="isLoadingAnalysis">
                         <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
-                        <scale-progress-bar
-                        class="scale-progress-bar"
-                        v-show="!progressBar.error"
-                        :percentage="formatNumberPercentage(progressBar.percentage)"
-                        :hasError="progressBar.error"
-                        label="Audiovisual Analysis"
-                        :status-description="progressBar.texts[progressBar.phase]"
-                        show-status="true"
-                        ></scale-progress-bar>
+                        <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error"
+                            :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error"
+                            label="Audiovisual Analysis" :status-description="progressBar.texts[progressBar.phase]"
+                            show-status="true"></scale-progress-bar>
 
-                        <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard; margin: 10px"
-                            heading= "Something went wrong. Please try uploading again. "
-                            variant="danger"
-                            dismissible="false"
-                            opened
-                        ></scale-notification>
+                        <scale-notification v-if="progressBar.error"
+                            style="color:--telekom-color-text-and-icon-standard; margin: 10px"
+                            heading="Something went wrong. Please try uploading again. " variant="danger"
+                            dismissible="false" opened></scale-notification>
                     </div>
                 </div>
             </transition>
@@ -381,66 +383,77 @@
 
                 <p v-if="!actionList.fatalAnimationLength">
                     The official outro animation could not be detected.
-                    <span v-if="!actionList.commonResolution"><br>This could be due to the small video-resolution: <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
+                    <span v-if="!actionList.commonResolution"><br>This could be due to the small video-resolution:
+                        <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
                 </p>
-                    <p v-if="!actionList.fatalAnimationLength">
-                    To access this tool, make sure to use <a href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro animations in the brand-portal.</a><br>
+                <p v-if="!actionList.fatalAnimationLength">
+                    To access this tool, make sure to use <a
+                        href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro
+                        animations in the brand-portal.</a><br>
                 </p>
                 <p v-if="actionList.fatalAnimationLength">
                     The official outro animation was detected, yet is <strong>cut off too early </strong>in the end.
-                    To access this tool, make sure to use <a href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro animations in the brand-portal at full length.</a>
+                    To access this tool, make sure to use <a
+                        href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro
+                        animations in the brand-portal at full length.</a>
                 </p>
-                
-                <scale-button slot="action"
-                    @click="handleReturn()">
+
+                <scale-button slot="action" @click="handleReturn()">
                     Return
                 </scale-button>
 
             </scale-modal>
-            
+
         </div>
 
-        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal" @scale-before-close="currentLayer='layer2';isLoadingAnalysis=false" omit-closing-button>
+        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal"
+            @scale-before-close="currentLayer='layer2';isLoadingAnalysis=false" omit-closing-button>
             <div v-if="actionList.success">
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                    <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
-                    <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
-                    <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
+                <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
+                <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
+                <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
                 <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                    <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
-                    <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                    <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                    <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
+                <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
+                <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.
+                </li>
             </div>
 
-            <div v-if="!actionList.keyDetected && actionList.logoDetected">  
-                
+            <div v-if="!actionList.keyDetected && actionList.logoDetected">
+
                 <div v-if="actionList.audioEmpty">
-                <h2 style="margin-bottom: 3px;">Understand:</h2>
-                    Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been set to <strong>standardized values</strong>.
+                    <h2 style="margin-bottom: 3px;">Understand:</h2>
+                    Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been
+                    set to <strong>standardized values</strong>.
                 </div>
 
                 <div v-if="this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
-                        Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized values</strong>.
+                    Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized
+                        values</strong>.
                 </div>
 
                 <div v-if="!this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
-                        Your video ending indicates no musical content. The Soundlogo's musical key have been set to <strong>standardized values</strong>.
+                    Your video ending indicates no musical content. The Soundlogo's musical key have been set to
+                    <strong>standardized values</strong>.
                 </div>
-                
-                    <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
-                    <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
-                    <li>Musical key: <strong>None</strong>.</li>
 
-                    <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
-                    <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness: <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
+                <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
+                <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
+                <li>Musical key: <strong>None</strong>.</li>
+
+                <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
+                <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness:
+                    <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
 
                 <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                    <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
-                    <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
-                    <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
+                <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
+                <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.
+                </li>
             </div>
 
             <scale-button slot="action" @click="currentLayer='layer2';isLoadingAnalysis=false; showResultModal=false">
@@ -451,31 +464,33 @@
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
 
-                <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" 
-                    data-setup='{"font-family": "TeleNeo","width":800}'
-                    style="border-radius: 10px; object-fit: contain"controls muted>
-                    <p class="vjs-no-js">
-                        To view this video please enable JavaScript, and consider upgrading to a
-                        web browser that
-                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                    </p>
-                </video>
+            <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
+                data-setup='{"font-family": "TeleNeo","width":800}' style="border-radius: 10px; object-fit: contain"
+                controls muted>
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a
+                    web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                </p>
+            </video>
 
             <transition name="fade">
                 <div class="controls-container" v-if="!isLoadingAnalysis">
 
                     <div class="left-controls">
-                        <scale-button @click="downloadVideo" style="left:0; display:flex; align-items: center;">
-                            <scale-icon-action-download v-if="!isLoadingResult"> </scale-icon-action-download> <span v-if="!isLoadingResult">Download Result</span> 
+                        <scale-button @click="downloadVideo" style="left:0; display:flex; align-items: center;"
+                            :disabled="isLoadingResult">
                             <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
+                            <scale-icon-action-download size=20 v-if="!isLoadingResult"> </scale-icon-action-download>
+                            Download Result
                         </scale-button>
 
-                        <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio">
-                            <scale-icon-action-download v-if="!isLoadingResult"> </scale-icon-action-download> <span v-if="!isLoadingResult">Audio Only</span> 
+                        <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio"
+                        :disabled="isLoadingResult">
                             <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
-
+                            <scale-icon-action-download size=20 v-if="!isLoadingResult"> </scale-icon-action-download>
+                            Audio Only
                         </scale-button>
-
                     </div>
 
                     <div class="right-controls">
@@ -498,7 +513,7 @@
 
 
         </div>
-        
+
     </div>
     </div>
     </div>
