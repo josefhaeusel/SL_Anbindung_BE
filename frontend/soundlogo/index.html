@@ -31,12 +31,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+
+            padding: 90px 0 0 20px;
             
         }
 
         .title {
             margin: 20px 0 0;
-            /* Adjusted margin */
             font-size: 64px;
             font-weight: 800;
             line-height: 96px;
@@ -52,7 +53,6 @@
         }
 
         .upload-container {
-            width: 80%;
             max-width: 800px;
             display: flex;
             flex-direction: column;
@@ -69,11 +69,8 @@
             border-color: #ABABAB;
             border-style: dashed;
             display: flex;
-            /* Add flex display */
             flex-direction: column;
-            /* Stack children vertically */
             justify-content: center;
-            /* Center children vertically */
             align-items: left;
         }
 
@@ -84,16 +81,14 @@
             background-color: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
             border-width: 1.5px;
-            height: 350px;
+            height: 250px;
+            width: 550px;
             border-color: #ABABAB;
             border-style: dashed;
             transition: background-color 0.3s ease;
             display: flex;
-            /* Add flex display */
             flex-direction: column;
-            /* Stack children vertically */
             justify-content: center;
-            /* Center children vertically */
             align-items: center;
         }
 
@@ -131,7 +126,6 @@
             font-size: 0.8rem;
             text-align: center;
             width: 100%;
-            /* Ensures it spans the width of the container */
         }
 
         .scale-progress-bar{
@@ -140,11 +134,10 @@
         }
 
         .layer {
-            position: absolute;
+            position: relative;
             top: 0;
             left: 0;
             width: 100%;
-            margin-top: 100px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -156,16 +149,11 @@
             position: absolute;
             background: #E20074;
             width: 10px;
-            /* Adjust width for a more dot-like appearance */
             height: 10px;
-            /* Equal height and width for a circular shape */
             border-radius: 50%;
-            /* Fully rounded corners for a smooth dot appearance */
             z-index: 30;
             top: 50%;
-            /* Center vertically relative to its position */
             transform: translateY(-50%);
-            /* Centering adjustment */
         }
 
         .vjs-marker:hover span {
@@ -179,21 +167,13 @@
             z-index: 90;
             background: rgba(0, 0, 0, 0.8);
             color: #FFFFFF;
-            /* Text color for readability */
             padding: 5px 10px;
-            /* Padding for text content */
             border-radius: 4px;
-            /* Rounded corners for the tooltip */
             font-family: "TeleNeo", sans-serif;
-            /* Consistent font family */
             font-size: 20px;
-            /* Adjusted font size for readability */
             transition: opacity 0.3s;
-            /* Smooth transition for hover effect */
             top: 30px;
-            /* Adjust position to not overlap the marker */
             white-space: nowrap;
-            /* Prevent text wrapping */
         }
 
         .controls-container {
@@ -201,7 +181,7 @@
             flex-wrap: nowrap;
             align-items: center;
             justify-content: space-between;
-            margin: 25px;
+            padding-top: 20px;
             position: relative;
             height: auto;
             width: 800px;
@@ -210,9 +190,7 @@
         .left-controls {
             display: flex;
             align-items: center;
-            /* Ensure vertical alignment */
             gap: 10px;
-            /* Spacing between children */
         }
 
         .right-controls {
@@ -224,11 +202,8 @@
 
         .key-label {
             font-size: 20px;
-            /* Set label font size */
             font-weight: bold;
-            /* Set label font weight */
             color: #000;
-            /* Set label color to black */
         }
 
 
@@ -262,10 +237,8 @@
 
         .video-js.vjs-theme-forest .vjs-big-play-button {
             background-image: url('assets/icons/play_nb/default.png');
-            /* Path to your custom icon */
             background-repeat: no-repeat;
             background-position: center;
-            /* Center the icon */
             background-size: contain;
             width: 80px;
             height: 80px;
@@ -339,7 +312,7 @@
 
         .fade-enter-active,
         .fade-leave-active {
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -353,15 +326,15 @@
         <scale-telekom-header style="position:absolute;width: 100%;left:0;">
         </scale-telekom-header>
 
+
+        <div class="title-container">
+            <div class="title">Soundlogo Tool</div>
+            <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
+                on brand with the help of AI.</div>
+        </div>
+
         <!-- First Layer: Upload Area -->
-
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
-
-            <div style="display:flex; flex-direction: column; align-items: center;">
-                <div class="title">Soundlogo Tool</div>
-                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
-                    on brand with the help of AI.</div>
-            </div>
 
             <div class="upload-container" v-if="!isLoadingAnalysis">
                 
@@ -378,28 +351,30 @@
                     Upload a Video</scale-button>
             </div>
 
-            <div class="container" v-if="isLoadingAnalysis">
+            <transition name="fade">
+                <div class="container" v-if="isLoadingAnalysis">
 
-                <div class="analyzing-container" v-if="isLoadingAnalysis">
-                    <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
-                    <scale-progress-bar
-                    class="scale-progress-bar"
-                    v-show="!progressBar.error"
-                    :percentage="formatNumberPercentage(progressBar.percentage)"
-                    :hasError="progressBar.error"
-                    label="Audiovisual Analysis"
-                    :status-description="progressBar.texts[progressBar.phase]"
-                    show-status="true"
-                    ></scale-progress-bar>
+                    <div class="analyzing-container" v-if="isLoadingAnalysis">
+                        <h2 style="margin-top:10px; margin-bottom:10px">Analyzing...</h2>
+                        <scale-progress-bar
+                        class="scale-progress-bar"
+                        v-show="!progressBar.error"
+                        :percentage="formatNumberPercentage(progressBar.percentage)"
+                        :hasError="progressBar.error"
+                        label="Audiovisual Analysis"
+                        :status-description="progressBar.texts[progressBar.phase]"
+                        show-status="true"
+                        ></scale-progress-bar>
 
-                    <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard; margin: 10px"
-                        heading= "Something went wrong. Please try uploading again. "
-                        variant="danger"
-                        dismissible="false"
-                        opened
-                    ></scale-notification>
+                        <scale-notification v-if="progressBar.error"style="color:--telekom-color-text-and-icon-standard; margin: 10px"
+                            heading= "Something went wrong. Please try uploading again. "
+                            variant="danger"
+                            dismissible="false"
+                            opened
+                        ></scale-notification>
+                    </div>
                 </div>
-            </div>
+            </transition>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
                 style="z-index:100">
@@ -425,7 +400,7 @@
             
         </div>
 
-        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal" @scale-before-close="isLoadingAnalysis=false">
+        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal" @scale-before-close="currentLayer='layer2';isLoadingAnalysis=false" omit-closing-button>
             <div v-if="actionList.success">
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
                     <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
@@ -468,19 +443,13 @@
                     <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
             </div>
 
-            <scale-button slot="action" @click="this.showResultModal=false;this.isLoadingAnalysis=false;">
+            <scale-button slot="action" @click="currentLayer='layer2';isLoadingAnalysis=false; showResultModal=false">
                 View Result
             </scale-button>
         </scale-modal>
 
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
-
-            <div style="display:flex; flex-direction: column; align-items: center;">
-                <div class="title">Soundlogo Tool</div>
-                <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on
-                    brand with the help of AI.</div>
-            </div>
 
                 <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" 
                     data-setup='{"font-family": "TeleNeo","width":800}'
@@ -496,10 +465,16 @@
                 <div class="controls-container" v-if="!isLoadingAnalysis">
 
                     <div class="left-controls">
-                        <scale-button class="download-video-button" @click="downloadVideo" style="left:0">
-                            <scale-icon-action-download></scale-icon-action-download> Download Result </scale-button>
+                        <scale-button @click="downloadVideo" style="left:0; display:flex; align-items: center;">
+                            <scale-icon-action-download v-if="!isLoadingResult"> </scale-icon-action-download> <span v-if="!isLoadingResult">Download Result</span> 
+                            <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
+                        </scale-button>
+
                         <scale-button variant="secondary" class="download-audio-button" @click="downloadAudio">
-                            <scale-icon-action-download></scale-icon-action-download> Audio Only </scale-button>
+                            <scale-icon-action-download v-if="!isLoadingResult"> </scale-icon-action-download> <span v-if="!isLoadingResult">Audio Only</span> 
+                            <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
+
+                        </scale-button>
 
                     </div>
 

@@ -220,7 +220,6 @@ const app = Vue.createApp({
 
             if (this.actionList.logoDetected == true && !this.actionList.fatalAnimationLength){
                 this.showResultModal = true
-                this.currentLayer = "layer2"
             }  else {
                 this.progressBar.error = true
                 this.showWarningModal = true;
