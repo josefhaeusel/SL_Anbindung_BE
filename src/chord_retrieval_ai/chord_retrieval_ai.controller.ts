@@ -68,7 +68,7 @@ export class ChordRetrievalAiController {
         file.originalname,
       );
 
-      fs.writeFileSync(tempVideoFilePath, file.buffer);
+      await fs.writeFileSync(tempVideoFilePath, file.buffer);
 
       sendProgress('Splitting Audio from Video...');
       this.logger.log('Splitting Audio from Video...');
