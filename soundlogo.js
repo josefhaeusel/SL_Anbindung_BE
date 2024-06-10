@@ -114,7 +114,7 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [20, 50, 100, 105],
+                phaseValues: [25, 60, 100, 105],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 timer: null,
@@ -127,7 +127,7 @@ const app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
-            this.progressBar.percentage += percentDifference * 0.01; 
+            this.progressBar.percentage += percentDifference * 0.008; 
 
             if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
