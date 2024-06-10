@@ -113,7 +113,7 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [20, 50, 90, 100],
+                phaseValues: [20, 50, 100, 100],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 progressBoost:null,
