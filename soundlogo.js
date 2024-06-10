@@ -13,10 +13,9 @@ const app = Vue.createApp({
 
             progressBar: {
                 phase: 0,
-                phaseValues: [20, 50, 90, 100],
+                phaseValues: [20, 50, 100, 105],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
-                progressBoost:null,
                 timer: null,
                 error: false,
                 eventSource: null
@@ -113,10 +112,9 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [20, 50, 100, 100],
+                phaseValues: [20, 50, 100, 105],
                 texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
-                progressBoost:null,
                 timer: null,
                 error: false,
                 eventSource: null
@@ -133,10 +131,8 @@ const app = Vue.createApp({
                 clearInterval(this.progressBar.timer);
             }
 
-            if (this.progressBar.phase != 0 && this.progressBar.phase != 3){
+            if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
-            } else if (this.progressBar.phase == 3){
-                this.progressBar.percentage = 100
             }
 
             //If eventSource / SSE connection fails: fake progressBar phases
