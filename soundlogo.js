@@ -127,7 +127,7 @@ const app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
-            this.progressBar.percentage += percentDifference * 0.1; 
+            this.progressBar.percentage += percentDifference * 0.01; 
 
             if (this.progressBar.percentage >= 100) {
                 clearInterval(this.progressBar.timer);
