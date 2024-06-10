@@ -127,7 +127,7 @@ const app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
-            this.progressBar.percentage += percentDifference * 0.01; 
+            this.progressBar.percentage += percentDifference * 0.1; 
 
             if (this.progressBar.percentage >= 100) {
                 clearInterval(this.progressBar.timer);
@@ -138,7 +138,7 @@ const app = Vue.createApp({
             }
 
             //If eventSource / SSE connection fails: fake progressBar phases
-            if (!this.progressBar.eventSource && this.progressBar.phase!= 2 && percentDifference < 1) {
+            if (!this.progressBar.eventSource && this.progressBar.phase!= 2 && percentDifference < 5) {
                 this.progressBar.phase += 1
             }
         },
