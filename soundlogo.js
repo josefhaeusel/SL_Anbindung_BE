@@ -104,9 +104,9 @@ const app = Vue.createApp({
                     this.progressBar.phase = 2
                   break;
                 case 'Done.':
+                    clearInterval(this.progressBar.timer);
                     this.progressBar.phase = 3
                     this.progressBar.percentage = 101
-                    clearInterval(this.progressBar.timer);
                   break;
 
               }
