@@ -138,7 +138,7 @@ const app = Vue.createApp({
             }
 
             //If eventSource / SSE connection fails: fake progressBar phases
-            if (!this.progressBar.eventSource && this.progressBar.phase!= 3 && percentDifference < 1) {
+            if (!this.progressBar.eventSource && this.progressBar.phase!= 2 && percentDifference < 1) {
                 this.progressBar.phase += 1
             }
         },
