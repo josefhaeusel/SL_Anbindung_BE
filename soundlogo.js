@@ -19,6 +19,7 @@ const app = Vue.createApp({
                 progressBoost:null,
                 timer: null,
                 error: false,
+                eventSource: null
             },
 
             playbackPosition: 0,
@@ -58,13 +59,16 @@ const app = Vue.createApp({
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
     
         eventSource.onmessage = (event) => {
+            this.progressBar.eventSource = true
             const data = JSON.parse(event.data);
-            this.getProgress_API(data.message);
+            this.setProgress_API(data.message);
         };
     
         eventSource.onerror = (err) => {
+            this.progressBar.eventSource = false
             console.error('EventSource failed:', err);
             eventSource.close();
+
         };
     
     },
@@ -88,7 +92,7 @@ const app = Vue.createApp({
             this.isLoadingAnalysis=false;
             this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}
         },
-        getProgress_API(message){
+        setProgress_API(message){
             console.log("Progress message from API:", message)
             switch (message) {
                 case 'Splitting Audio from Video...':
@@ -115,6 +119,7 @@ const app = Vue.createApp({
                 progressBoost:null,
                 timer: null,
                 error: false,
+                eventSource: null
             }
 
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
@@ -130,6 +135,11 @@ const app = Vue.createApp({
 
             if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
+            }
+
+            //If eventSource / SSE connection fails: fake progressBar phases
+            if (!this.progressBar.eventSource && this.progressBar.phase!= 3 && percentDifference < 1) {
+                this.progressBar.phase += 1
             }
         },
         
@@ -154,7 +164,7 @@ const app = Vue.createApp({
                 } catch (error){
 
                     console.log("Analysis Error:",error)
-                    this.handleError()
+                    this.handleProgressAnalysisError()
 
                 }
             } else {
@@ -172,7 +182,7 @@ const app = Vue.createApp({
             }
             return false
         },
-        handleError(){
+        handleProgressAnalysisError(){
             this.progressBar.error = true
             "Oops... Something went wrong. Please try uploading again."
         },
