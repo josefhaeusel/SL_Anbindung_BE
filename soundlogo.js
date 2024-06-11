@@ -379,7 +379,6 @@ const app = Vue.createApp({
             this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
             const videoFilepath = await uploadRenderedAudio_API(renderedBuffer);
-            await downloadVideo(videoFilepath);
             this.isLoadingResult = false;
         },
         async downloadAudio() {
@@ -717,19 +716,12 @@ async function uploadRenderedAudio_API(buffer) {
 
 
     function audioToWavFile(buffer) {
-        // Convert the buffer to a WAV Blob
+
         const wavBlob = convertToWav(buffer);
 
-        // Convert the Blob to a File
         const audioFile = new File([wavBlob], 'soundlogoAnbindung.wav', { type: 'audio/wav' });
-
-        // Create a FormData instance
         const formData = new FormData();
-
-        // Append the File to FormData
         formData.append('file', audioFile);
-
-        // Send the FormData to your backend
         return formData
     }
 

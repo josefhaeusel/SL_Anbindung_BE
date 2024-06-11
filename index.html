@@ -30,7 +30,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-
             padding: 90px 0 0 20px;
 
         }
@@ -147,7 +146,7 @@
 
         .vjs-marker {
             position: absolute;
-            background: #E20074;
+            background: #E20076;
             width: 10px;
             height: 10px;
             border-radius: 50%;
@@ -166,10 +165,9 @@
             margin-left: -55px;
             z-index: 90;
             background: rgba(0, 0, 0, 0.8);
-            color: #FFFFFF;
+            color: #ffffff;
             padding: 5px 10px;
             border-radius: 4px;
-            font-family: "TeleNeo", sans-serif;
             font-size: 20px;
             transition: opacity 0.3s;
             top: 30px;
@@ -190,7 +188,6 @@
         .disabled {
             cursor: not-allowed;
             pointer-events: none;
-            /* Optional: Makes the button look "disabled" */
         }
 
         .left-controls {
@@ -213,15 +210,11 @@
 
 
         .video-js.vjs-theme-forest .vjs-play-progress {
-            background-color: #E20074
+            background-color: #ffffff
         }
 
         .video-js.vjs-theme-forest .vjs-playback-rate {
             display: none
-        }
-
-        .vjs-big-play-button {
-            background-color: #E20074
         }
 
         .video-js.vjs-theme-forest .vjs-volume-menu-button {
@@ -240,17 +233,28 @@
             display: none;
         }
 
+        .video-js.vjs-theme-forest .vjs-progress-control {
+            z-index:2;
+        }
+
+        .video-js.vjs-theme-forest .vjs-remaining-time {
+            z-index:2;
+        }
+
         .video-js.vjs-theme-forest .vjs-big-play-button {
-            background-image: url('assets/icons/play_nb/default.png');
+            background-image: url('assets/icons/play/default.png');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             width: 80px;
             height: 80px;
         }
+        .video-js.vjs-theme-forest .vjs-play-control.vjs-control.vjs-button {
+            z-index:2;
+        }
 
         .video-js.vjs-theme-forest .vjs-big-play-button:hover {
-            background-image: url('assets/icons/play_nb/selected.png')
+            background-image: url('assets/icons/play/selected.png')
         }
 
         .video-js.vjs-theme-forest .vjs-play-control .vjs-icon-placeholder::before {
@@ -263,6 +267,7 @@
             background-repeat: no-repeat;
             background-position: center;
             background-size: 28px 28px;
+
         }
 
         .video-js.vjs-theme-forest .vjs-play-control.vjs-control.vjs-button.vjs-paused:hover {
@@ -301,8 +306,6 @@
             left: 0;
             margin-left: 0px;
             white-space: nowrap;
-            /* Prevent text inside buttons from wrapping */
-
         }
 
 
@@ -320,6 +323,17 @@
         .fade-enter-active,
         .fade-leave-active {
             transition: opacity 0.5s ease-in-out;
+        }
+
+        .shadow-fade {
+            position: absolute;
+            align-self: flex-end;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            border-radius: 10px;
+            z-index:1
         }
     </style>
 </head>
@@ -342,6 +356,7 @@
 
         <!-- First Layer: Upload Area -->
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
+
 
             <div class="upload-container" v-if="!isLoadingAnalysis">
 
@@ -472,15 +487,18 @@
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
 
-            <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
-                data-setup='{"font-family": "TeleNeo","width":800}' style="border-radius: 10px; object-fit: contain"
-                controls muted>
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a
-                    web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                </p>
-            </video>
+            <div style="display:flex">
+                <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
+                    data-setup='{"font-family": "TeleNeo","width":800}' style="border-radius: 10px; object-fit: contain"
+                    controls muted>
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                    </p>
+                </video>
+                <div class="shadow-fade"></div>
+            </div>
 
             <transition name="fade">
                 <div class="controls-container" v-if="!isLoadingAnalysis">
