@@ -48,6 +48,8 @@ const app = Vue.createApp({
             video_url:"",
             videoData:{logo_start: null, videoResolution: [null, null]},
 
+            feedback: {thumbs: null, text: "", show: false, thumbsup:{hover:null}, thumbsdown:{hover:null}}
+
         }
     },
 
@@ -396,6 +398,7 @@ const app = Vue.createApp({
                 await this.setLoudness()
 
                 scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
+                scheduleFilter(this.audioDuration, 0, this.soundlogoPosition, transport)
                 scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
                 transport.start();
             }, this.audioDuration)
@@ -419,12 +422,17 @@ app.mount('#app')
 //Global Audio Players and Buffers
 let logoPlayer
 let logoBuffers
+let filter
+let filterEnvelope
+let filterModulation
 let video_url
 let audioPlayer
 let audioBuffer
 let envelope
 let videoPlayer
 let master
+
+//ENVELOPE MASTER
 
 async function setup() {
 
@@ -446,21 +454,27 @@ async function setupAudioNodes(context) {
     try {
         console.log('Setting up audio nodes...');
 
-        // Initialize master gain
         master = await loadMasterGain(context);
         console.log('Master gain node initialized:', master);
 
-        // Initialize envelope
         envelope = await ampEnvelope();
         console.log('Envelope initialized:', envelope);
 
-        // Initialize audio player
-        audioPlayer = await loadAudioplayer(context, envelope, master);
+
+        audioPlayer = await loadAudioplayer(context);
         console.log('Audio player initialized:', audioPlayer);
 
-        // Load logo buffers and initialize logo player
+        filterEnvelope = await loadFilterEnvelope();
+        console.log('Filter-Envelope initialized:', filterEnvelope);
+
+        filterModulation = await loadFilterModulationEnvelope();
+        console.log('Filter-Modulation initialized:', filterModulation);
+
+        filter = await loadFilter(context)
+        console.log('Filter initialized:', filter);
+
         await loadLogoBuffers();
-        logoPlayer = await loadLogoPlayer(context, master);
+        logoPlayer = await loadLogoPlayer(context);
         console.log('Logo player initialized:', logoPlayer);
 
         console.log('Audio nodes setup complete.');
@@ -552,6 +566,7 @@ function startTransports(currentPosition, audioDuration, logoStart) {
 
     scheduleAudio(audioDuration, currentPosition, logoStart, transport);
     scheduleLogoSound(audioDuration, currentPosition, logoStart, transport);
+    scheduleFilter(audioDuration, currentPosition, logoStart, transport)
 
     videoPlayer.setCurrentTime = currentPosition;
     videoPlayer.play();
@@ -567,7 +582,30 @@ function stopTransports() {
     Tone.Transport.cancel()
     audioPlayer.stop();
     logoPlayer.stop();
+    filterEnvelope.cancel();
+    filterModulation.cancel();
     videoPlayer.pause();
+}
+
+let filterSettings = {attack: 0.1, start:20000, frequency:1000, rampTime:2.3, delay:0.7}
+
+function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
+
+    filter.set({frequency: filterSettings.start})
+
+    const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition, logoStart);
+    if (secondsTillLogoStart >= 0) {
+
+        transport.schedule((time) => {
+            //filterEnvelope.triggerAttack(time);
+            console.log("Go Filter!");
+        }, `+${secondsTillLogoStart}`);
+
+        transport.schedule((time) => {
+            filter.frequency.exponentialRampTo(filterSettings.frequency, filterSettings.rampTime, time)
+            console.log("Go Filter Ramp!");
+        }, `+${secondsTillLogoStart+filterSettings.delay}`);
+    }
 }
 
 function scheduleAudio(audioDuration, currentPosition, logoStart, transport) {
@@ -643,30 +681,73 @@ async function loadLogoBuffers() {
     })
 }
 
-async function loadLogoPlayer(Context, Master,tonality = 'A') {
+async function loadLogoPlayer(Context, tonality = 'A') {
 
     const logoBuffer = logoBuffers.get('A');
     const newLogoPlayer = new Tone.Player({ url: logoBuffer, context: Context, volume: 0 });
 
-    newLogoPlayer.connect(Master)
+    newLogoPlayer.connect(master)
 
     return newLogoPlayer
 
 }
 
-async function loadAudioplayer(Context, Env, Master) {
+async function loadAudioplayer(Context) {
 
     const newAudioPlayer = new Tone.Player({ url: audioBuffer, context: Context, volume: 0 });
-
-    if (Env) {
-        newAudioPlayer.chain(Env, Master);
-    } else {
-        newAudioPlayer.toDestination();
-    }
 
     return newAudioPlayer
 
 }
+
+
+async function loadFilter(Context){
+    const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
+
+    /*const audioPlayerCrossFade = new Tone.CrossFade()
+    audioPlayerCrossFade.fade.value = 0;
+    audioPlayerCrossFade.chain(envelope, master);
+    audioPlayer.fan(audioPlayerCrossFade.a, filterEffect);
+
+    filterEffect.connect(audioPlayerCrossFade.b);
+    filterEnvelope.connect(audioPlayerCrossFade.fade)*/
+    audioPlayer.chain(filterEffect,envelope,master)
+
+    return filterEffect
+
+}
+
+async function loadFilterEnvelope(){
+    const ampEnv = new Tone.Envelope({
+        attack: filterSettings.attack,
+        decay: 0,
+        sustain: 1,
+        release: 0
+    });
+
+    ampEnv.attackCurve ="cosine";
+
+    return ampEnv
+}
+
+async function loadFilterModulationEnvelope(){
+
+    const scaleExp = new Tone.ScaleExp(3000, 20000);
+
+    const ampEnv = new Tone.Envelope({
+        attack: filterSettings.rampTime,
+        decay: 0,
+        sustain: 1,
+        release: 0,
+    });
+
+    await ampEnv.connect(scaleExp)
+
+    return ampEnv
+
+}
+
+
 
 async function ampEnvelope() {
     const ampEnv = new Tone.AmplitudeEnvelope({

@@ -335,6 +335,12 @@
             border-radius: 10px;
             z-index:1
         }
+        .feedback-container {
+            display:flex;
+            flex-direction: row;
+            gap: 20px
+        }
+
     </style>
 </head>
 
@@ -402,7 +408,8 @@
             </transition>
 
             <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
-                style="z-index:100">
+                style="z-index:100"
+                @scale-before-close="handleReturn()">
 
                 <p v-if="!actionList.fatalAnimationLength">
                     The official outro animation could not be detected.
@@ -535,6 +542,17 @@
 
                 </div>
             </transition>
+
+            <div v-if="feedback.show" class="feedback-container">
+            
+                <scale-icon-action-thumbs-up :size="feedback.thumbsup.hover? '30' : '28'" @mouseover="feedback.thumbsup.hover = true" @mouseleave="feedback.thumbsup.hover = false" :fill="feedback.thumbs === 'up'? '#E20076' : '#000000'" @click="feedback.thumbs = 'up'; console.log('up')" style="padding:5px"></scale-icon-action-thumbs-up>
+                <scale-icon-action-thumbs-down  :size="feedback.thumbsdown.hover? '30' : '28'" @mouseover="feedback.thumbsdown.hover = true" @mouseleave="feedback.thumbsdown.hover = false" :fill="feedback.thumbs === 'down'? '#E20076' : '#000000'" @click="feedback.thumbs = 'down'; console.log('down')" style="padding:5px"></scale-icon-action-thumbs-down>
+
+            </div>
+        
+
+
+
 
 
 
