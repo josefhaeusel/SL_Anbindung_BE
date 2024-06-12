@@ -587,7 +587,7 @@ function stopTransports() {
     videoPlayer.pause();
 }
 
-let filterSettings = {attack: 0.1, start:20000, frequency:1000, rampTime:2.3, delay:0.7}
+let filterSettings = {attack: 1, start:20000, frequency:1000, rampTime:2.3, delay:0.7}
 
 function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
 
@@ -597,7 +597,7 @@ function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
     if (secondsTillLogoStart >= 0) {
 
         transport.schedule((time) => {
-            //filterEnvelope.triggerAttack(time);
+            filterEnvelope.triggerAttack(time);
             console.log("Go Filter!");
         }, `+${secondsTillLogoStart}`);
 
@@ -704,14 +704,13 @@ async function loadAudioplayer(Context) {
 async function loadFilter(Context){
     const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
 
-    /*const audioPlayerCrossFade = new Tone.CrossFade()
+    const audioPlayerCrossFade = new Tone.CrossFade()
     audioPlayerCrossFade.fade.value = 0;
     audioPlayerCrossFade.chain(envelope, master);
     audioPlayer.fan(audioPlayerCrossFade.a, filterEffect);
 
     filterEffect.connect(audioPlayerCrossFade.b);
-    filterEnvelope.connect(audioPlayerCrossFade.fade)*/
-    audioPlayer.chain(filterEffect,envelope,master)
+    filterEnvelope.connect(audioPlayerCrossFade.fade)
 
     return filterEffect
 
