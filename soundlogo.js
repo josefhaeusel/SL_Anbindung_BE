@@ -424,7 +424,6 @@ let logoPlayer
 let logoBuffers
 let filter
 let filterEnvelope
-let filterModulation
 let video_url
 let audioPlayer
 let audioBuffer
@@ -466,9 +465,6 @@ async function setupAudioNodes(context) {
 
         filterEnvelope = await loadFilterEnvelope();
         console.log('Filter-Envelope initialized:', filterEnvelope);
-
-        filterModulation = await loadFilterModulationEnvelope();
-        console.log('Filter-Modulation initialized:', filterModulation);
 
         filter = await loadFilter(context)
         console.log('Filter initialized:', filter);
@@ -583,7 +579,6 @@ function stopTransports() {
     audioPlayer.stop();
     logoPlayer.stop();
     filterEnvelope.cancel();
-    filterModulation.cancel();
     videoPlayer.pause();
 }
 
@@ -728,24 +723,6 @@ async function loadFilterEnvelope(){
 
     return ampEnv
 }
-
-async function loadFilterModulationEnvelope(){
-
-    const scaleExp = new Tone.ScaleExp(3000, 20000);
-
-    const ampEnv = new Tone.Envelope({
-        attack: filterSettings.rampTime,
-        decay: 0,
-        sustain: 1,
-        release: 0,
-    });
-
-    await ampEnv.connect(scaleExp)
-
-    return ampEnv
-
-}
-
 
 
 async function ampEnvelope() {
