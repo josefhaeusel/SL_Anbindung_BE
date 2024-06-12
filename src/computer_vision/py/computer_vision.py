@@ -52,6 +52,8 @@ class ComputerVision:
 
     def setVideoBeforeEnd(self):
         start_time = self.duration_secs - self.analysisStartBeforeEnd
+        if start_time<0:
+            start_time=0
         start_frame = int(start_time * self.fps)
         self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 

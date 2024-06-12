@@ -27,7 +27,7 @@ const app = Vue.createApp({
             soundlogoPosition: 0,
             
             animationLength: null,
-            animationMinimumLength: 1.25,
+            animationMinimumLength: 1, //01:00:01:04 rest length from "T" logo detection
 
             isLoadingAnalysis: false,
             isLoadingResult: false,
@@ -39,7 +39,7 @@ const app = Vue.createApp({
 
             selectedKey: { id: '1', key: 'X' },
             measuredLUFS: 0,
-            desiredMasterLUFS: -20,
+            desiredMasterLUFS: -14,
             soundlogoLUFS:-16,
 
             actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, fatalAnimationLength: null},
@@ -221,6 +221,7 @@ const app = Vue.createApp({
                 if (this.animationLength < this.animationMinimumLength)
                     {
                         this.actionList.fatalAnimationLength = true
+                        console.log(`FATAL ANIMATION LENGTH (${this.animationMinimumLength}):`, this.animationLength)
                     }
             }
 
@@ -296,11 +297,8 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            if (this.actionList.logoDetected == false) {
-                this.soundlogoPosition = this.audioDuration - 6;
-            } else {
-                this.soundlogoPosition = this.videoData.logo_start - 3.55
-            }
+            this.soundlogoPosition = this.videoData.logo_start - 3.55 //Hardcut: 4.25, Besser in Sync: 3.55
+            
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -349,11 +347,9 @@ const app = Vue.createApp({
 
             const soundlogoDb = this.measuredLUFS - this.soundlogoLUFS;
             logoPlayer.set({volume: soundlogoDb})
-            console.log(logoPlayer.get())
 
             const masterDb = this.desiredMasterLUFS - this.measuredLUFS;
             master.set({gain: masterDb})
-            console.log(master.get())
 
         },
 
