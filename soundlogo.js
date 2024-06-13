@@ -10,6 +10,7 @@ const app = Vue.createApp({
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
             filetypeValid: null,
             showInvalidFileTypeToast: false,
+            showResolutionHint:false,
 
             progressBar: {
                 phase: 0,
@@ -43,7 +44,7 @@ const app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -92,7 +93,7 @@ const app = Vue.createApp({
         handleReturn(){
             this.showWarningModal=false;
             this.isLoadingAnalysis=false;
-            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, fatalAnimationLength: null}
+            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, commonFiletype:null,fatalAnimationLength: null}
         },
         setProgress_API(message){
             console.log("Progress message from API:", message)
@@ -145,30 +146,47 @@ const app = Vue.createApp({
         async handleFileUpload(event) {
 
             this.video_file = event.target.files[0];
-            this.filetypeValid = await this.checkFiletype();
+            this.actionList.commonFiletype = await this.checkFiletype();
 
-            if (this.filetypeValid) {
-                this.isLoadingAnalysis = true;
-                this.initProgressBar()
+            if (this.actionList.commonFiletype) {
 
                 this.video_url = await URL.createObjectURL(this.video_file);
+
+
                 await this.loadVideoPlayer();
-                await this.extractAudioBuffer();
 
-                try {
-                    const analysis = await uploadVideo_API(this.video_file);
-                    await this.analysisHandler(analysis);
-                    await this.actionListModal()
-                    console.log("ACTION LIST:",this.actionList)
-                } catch (error){
+                videoPlayer.on('loadedmetadata', async () => {
 
-                    console.log("Analysis Error:",error)
-                    this.handleProgressAnalysisError()
+                    this.checkResolution();
 
-                }
+                    if (this.actionList.commonRatio && this.actionList.commonResolution){
+                        await this.extractAudioBuffer();
+                        this.isLoadingAnalysis = true;
+                        this.initProgressBar()
+    
+                        try {
+                            const analysis = await uploadVideo_API(this.video_file);
+                            await this.analysisHandler(analysis);
+                            await this.actionListModal()
+                            console.log("ACTION LIST:",this.actionList)
+                        } catch (error){
+    
+                            console.log("Analysis Error:",error)
+                            this.handleProgressAnalysisError()
+    
+                        }} else{
+                            this.showInvalidFileTypeToast = true
+                            this.showResolutionHint = false
+
+                        }
+
+                });
+
+                
             } else {
                 console.error(`Filetype ${this.video_file.type} is invalid. Allowed filetypes are mp4, ogg and webm.`)
                 this.showInvalidFileTypeToast = true
+                this.actionList.commonFiletype = false
             }
         },
         async checkFiletype(){
@@ -230,7 +248,6 @@ const app = Vue.createApp({
                 this.actionList.success = true;
             }
 
-            this.checkResolution();
             this.setSoundlogoPosition()
             this.setVideoMarker();
         },
@@ -247,22 +264,30 @@ const app = Vue.createApp({
 
         async checkResolution() {
 
-                let width = this.videoData.videoResolution[0]
-                let height = this.videoData.videoResolution[1]
-                let ratio = width / height
+            this.showResolutionHint = false
 
-                if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
-                    this.actionList.commonRatio = true
-                }
-                else {
-                    this.actionList.commonRatio = false
-                }
-                if (width > 480 && height > 480) {
-                    this.actionList.commonResolution = true
-                }
-                else {
-                    this.actionList.commonResolution = false
-                }
+            let width = videoPlayer.videoWidth()
+            let height = videoPlayer.videoHeight()
+            let ratio = width / height
+            console.log(width, height, ratio)
+
+            if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
+                this.actionList.commonRatio = true
+            }
+            else {
+                this.actionList.commonRatio = false
+                this.showResolutionHint = true
+
+            }
+            if (width >= 1080 && height >= 1080) {
+                this.actionList.commonResolution = true
+            }
+            else {
+                this.actionList.commonResolution = false
+                this.showResolutionHint= true
+
+            }
+                
         },
 
         setVideoMarker(){
@@ -699,6 +724,36 @@ async function loadLogoPlayer(Context, tonality = 'A') {
 
     return newLogoPlayer
 
+}
+
+function getVideoDimensions(url) {
+    return new Promise((resolve, reject) => {
+        // Create a temporary video element
+        const video = document.createElement('video');
+
+        // Set the source of the video
+        video.src = url;
+
+        // Listen for the loadedmetadata event to get dimensions
+        video.addEventListener('loadedmetadata', () => {
+            // Resolve the promise with the video's width and height
+            resolve({
+                width: video.videoWidth,
+                height: video.videoHeight
+            });
+
+            // Clean up
+            video.remove();
+        });
+
+        // Handle errors
+        video.addEventListener('error', (e) => {
+            reject(e);
+        });
+
+        // Load the video metadata
+        video.load();
+    });
 }
 
 async function loadAudioplayer(Context) {

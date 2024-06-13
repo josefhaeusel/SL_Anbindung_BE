@@ -392,8 +392,13 @@
 
                 <scale-notification
                     v-if="showInvalidFileTypeToast"heading="Unsupported Format" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false">
-                    <span slot="text">The provided filetype is invalid. <br>Supported formats: MP4, WebM, OGG.</span>
+                    <span slot="text">The provided filetype is invalid.<br/></span>
+                    <span slot="text" v-if="!actionList.commonFiletype">Supported formats: MP4, WebM, OGG.<br/></span>
+                    <span slot="text" v-if="showResolutionHint&&!actionList.commonResolution">Supported resolutions: FullHD, UHD.<br/></span>
+                    <span slot="text" v-if="showResolutionHint&&!actionList.commonRatio">Supported ratios: 16:9, 9:16, 1:1.<br/></span>
+
                 </scale-notification>
+
             </div>
 
 

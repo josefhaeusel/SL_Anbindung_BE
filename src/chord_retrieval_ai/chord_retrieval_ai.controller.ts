@@ -100,7 +100,8 @@ export class ChordRetrievalAiController {
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
 
-      fs.unlinkSync(tempVideoFilePath);
+      try {fs.unlinkSync(tempVideoFilePath);}
+        catch(error){this.logger.log("Error deleting temp. video", error)}
 
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
 
