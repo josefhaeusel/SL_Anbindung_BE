@@ -338,6 +338,8 @@ const app = Vue.createApp({
                 });
                 await videoPlayer.load();
 
+                this.videoPlayerLUFS = -26.71;
+                this.setLoudness()
                 this.volumeElement = document.querySelector('.vjs-volume-level');
                 this.volumeElement.style.width = "70%"
 
@@ -462,8 +464,6 @@ async function setup() {
 
     videoPlayer = videojs('myVideo');
     
-
-
     await setupAudioNodes(Tone.getContext());
 }
 
