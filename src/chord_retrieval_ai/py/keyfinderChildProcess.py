@@ -14,7 +14,6 @@ if len(sys.argv) > 1:
 
         y, sr = librosa.load(audio_path)
         duration = librosa.get_duration(y=y, sr=sr)
-        analyzeFromEnd = 4.5
 
         if duration > 4.5:
             analysis_start = librosa.time_to_samples(duration - 4.5, sr=sr)
@@ -23,16 +22,17 @@ if len(sys.argv) > 1:
             analysis_start = librosa.time_to_samples(0, sr=sr)
             analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
 
-        y_segment = y[analysis_start:analysis_end]
+        y_harmony_segment = y[analysis_start:analysis_end]
+        y_loudness_segment =  y[librosa.time_to_samples(0, sr=sr):analysis_end]
 
         # Ensure y_segment is not empty
-        if len(y_segment) == 0:
+        if len(y_harmony_segment) == 0:
             raise ValueError("The audio segment is empty")
 
         # Integrated Loudness Analysis
         meter = pyln.Meter(sr)  # create BS.1770 meter
-        integrated_loudness = meter.integrated_loudness(y)  # measure loudness
-        segment_loudness = meter.integrated_loudness(y_segment)
+        integrated_loudness = meter.integrated_loudness(y_loudness_segment)  # measure loudness
+        segment_loudness = meter.integrated_loudness(y_harmony_segment)
 
         audioEmpty = False
         analysisSegmentEmpty = False
@@ -49,7 +49,7 @@ if len(sys.argv) > 1:
             segment_loudness = None
             audioEmpty = False
         else:
-            y_harmonic, y_percussive = librosa.effects.hpss(y_segment)
+            y_harmonic, y_percussive = librosa.effects.hpss(y_harmony_segment)
             key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
 
         analysis = {

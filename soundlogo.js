@@ -14,8 +14,8 @@ const app = Vue.createApp({
 
             progressBar: {
                 phase: 0,
-                phaseValues: [20, 50, 100, 105],
-                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
+                phaseValues: [40, 65, 100, 105],
+                texts: ["Detecting T-Outro Animation...", "Splitting Audio from Video...", "Retrieving Key and Loudness...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -98,13 +98,13 @@ const app = Vue.createApp({
         setProgress_API(message){
             console.log("Progress message from API:", message)
             switch (message) {
-                case 'Splitting Audio from Video...':
+                case 'Detecting T-Outro Animation...':
                     this.progressBar.phase = 0
                   break;
-                case 'Retrieving Key and Loudness...':
+                case 'Splitting Audio from Video...':
                     this.progressBar.phase = 1
                     break;
-                case 'Detecting T-Outro Animation...':
+                case 'Retrieving Key and Loudness...':
                     this.progressBar.phase = 2
                   break;
                 case 'Done.':
@@ -118,8 +118,8 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [25, 60, 100, 105],
-                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
+                phaseValues: [40, 65, 100, 105],
+                texts: ["Detecting T-Outro Animation...", "Splitting Audio from Video...", "Retrieving Key and Loudness...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,

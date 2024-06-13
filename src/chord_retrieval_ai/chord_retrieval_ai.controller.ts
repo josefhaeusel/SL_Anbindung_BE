@@ -59,6 +59,11 @@ export class ChordRetrievalAiController {
   ) {
     const sendProgress = request.app.get('sendProgress');
 
+    let analysisResult = { audioAnalysis: {}, videoAnalysis: {} };
+    let audioAnalysisResult;
+    let videoAnalysisResult;
+    let tempAudioFilePath = null;
+
     try {
       this.logger.log('Starting video upload handling');
 
@@ -70,13 +75,20 @@ export class ChordRetrievalAiController {
 
       await fs.writeFileSync(tempVideoFilePath, file.buffer);
 
+      //TODO Check fileCodec, ratio, resolution...
+      //TODO Maybe convert into compatible format
+
+      sendProgress('Detecting T-Outro Animation...');
+      this.logger.log('Detecting T-Outro Animation...');
+      videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
+
+      //TODO If animation does not exist, append the right animation.
+      //Use newly rendered file for upcoming analysis,
+      //Ignore last X seconds in any case
+
+
       sendProgress('Splitting Audio from Video...');
       this.logger.log('Splitting Audio from Video...');
-
-      let analysisResult = { audioAnalysis: {}, videoAnalysis: {} };
-      let audioAnalysisResult;
-      let videoAnalysisResult;
-      let tempAudioFilePath = null;
 
       try {
         tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
@@ -92,10 +104,6 @@ export class ChordRetrievalAiController {
       } else {
         audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
       }
-
-      sendProgress('Detecting T-Outro Animation...');
-      this.logger.log('Detecting T-Outro Animation...');
-      videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
 
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
