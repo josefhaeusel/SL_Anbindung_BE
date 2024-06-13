@@ -17,7 +17,7 @@ class ComputerVision:
 
         self.isUHD = self.checkUHD()
 
-        self.analysisStartBeforeEnd = 3
+        self.analysisStartBeforeEnd = 6
         self.analysisAbortBeforeEnd = 0.5
         
         self.setVideoBeforeEnd()

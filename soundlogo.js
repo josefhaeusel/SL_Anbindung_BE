@@ -39,8 +39,9 @@ const app = Vue.createApp({
 
             selectedKey: { id: '1', key: 'X' },
             measuredLUFS: 0,
-            desiredMasterLUFS: -14,
             soundlogoLUFS:-16,
+            videoPlayerLUFS:-26.71,
+            desiredMasterLUFS: -20,
 
             actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, fatalAnimationLength: null},
 
@@ -336,20 +337,34 @@ const app = Vue.createApp({
                     src: this.video_url
                 });
                 await videoPlayer.load();
+
+                this.volumeElement = document.querySelector('.vjs-volume-level');
+                this.volumeElement.style.width = "70%"
+
                 console.log("Video player loaded", videoPlayer)
 
             } catch (error) {
                 console.error("Error loading video-player",error)
             }
-        
         },
+
         async setLoudness(){
 
             const soundlogoDb = this.measuredLUFS - this.soundlogoLUFS;
             logoPlayer.set({volume: soundlogoDb})
 
-            const masterDb = this.desiredMasterLUFS - this.measuredLUFS;
-            master.set({gain: masterDb})
+            masterDb = this.desiredMasterLUFS - this.measuredLUFS;
+            listeningDb = this.videoPlayerLUFS - this.measuredLUFS;
+
+
+            if(this.isLoadingResult){
+                master.set({gain: masterDb})
+                console.log("MASTER DB")
+            } 
+                else {
+                master.set({gain: listeningDb})
+                console.log("LISTENING DB")
+            }
 
         },
 
@@ -363,6 +378,15 @@ const app = Vue.createApp({
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
+            }
+        },
+        updateListeningVolume(event){
+            videoPlayer.muted(true)
+            this.videoPlayerLUFS = scaleValue(event.target.volume)
+            this.setLoudness()
+
+            if (this.volumeElement) {
+                this.volumeElement.style.width = event.target.volume*100 + '%';
             }
         },
 
@@ -427,8 +451,6 @@ let envelope
 let videoPlayer
 let master
 
-//ENVELOPE MASTER
-
 async function setup() {
 
     //Start Web-Audio Context w. User Gesture
@@ -487,14 +509,10 @@ function downloadAudio(buffer, writeName) {
     // Create a download link
     const link = document.createElement('a');
     link.href = url;
-    link.download = writeName;
+    link.download = writeName.split('.').slice(0, -1).join('.');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
-
-function downloadVideo(filepath) {
-
 }
 
 // Simple WAV encoder function
@@ -847,6 +865,24 @@ function keyToScale(key) {
 
 function clamp(num, lower, upper) {
     return Math.min(Math.max(num, lower), upper);
+}
+
+function scaleValue(value) {
+    const minInput = 0;
+    const maxInput = 1;
+    const minOutput = -80;
+    const maxOutput = -14;
+
+    // Ensure the value is within the input range
+    value = Math.min(Math.max(value, minInput), maxInput);
+
+    // Apply exponential scaling
+    const expValue = Math.pow(value, 0.6); // Exponent chosen for scaling, can be adjusted
+
+    // Scale to the output range
+    const output = minOutput + (maxOutput - minOutput) * expValue;
+
+    return output;
 }
 
 const logoKeyMap = {
