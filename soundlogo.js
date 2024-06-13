@@ -323,7 +323,7 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoData.logo_start - 3.55 //Hardcut: 4.25, Besser in Sync: 3.55
+            this.soundlogoPosition = this.videoData.logo_start - 4 //Hardcut: 4.25, Besser in Sync: 3.7
             
         },
         async setKeys(keyName){
@@ -621,7 +621,7 @@ function stopTransports() {
     videoPlayer.pause();
 }
 
-let filterSettings = {attack: 1, start:20000, frequency:1000, rampTime:2.3, delay:0.7}
+let filterSettings = {attack: 1, start:20000, frequency:1000, rampTime:1.75, delay:1.25}
 
 function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
 
