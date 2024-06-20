@@ -251,7 +251,6 @@ export class AudioVideoService {
 
   private _initFfmpeg() {
     try {
-      this.logger.debug("ffprobe path:",ffprobePath);
       fs.chmodSync(ffprobePath.path, '755');
       ffmpeg.setFfprobePath(ffprobePath.path);
     } catch (err) {

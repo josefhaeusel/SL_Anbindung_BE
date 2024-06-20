@@ -32,6 +32,15 @@
 $ npm install
 ```
 
+## Useful Server Commands
+```bash
+$ ./autoupdateDocker.sh
+$ docker system prune -a —volumes
+$ docker logs -f soundlogo
+$ docker exec -it soundlogo /bin/bash
+```
+
+
 ## Running the app
 
 ```bash
