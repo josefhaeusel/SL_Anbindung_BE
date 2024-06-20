@@ -1,0 +1,10 @@
+//Create silent audio
+ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -i video.mov -c:v copy -c:a aac -shortest output.mov
+
+
+//Mute Videofile with existing audiostream
+
+ffmpeg -f lavfi -i anullsrc -i input.mp4 -c:v copy -c:a aac -map 0:a -map 1:v -shortest output.mp4
+
+
+https://stackoverflow.com/questions/12368151/adding-silent-audio-in-ffmpeg

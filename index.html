@@ -432,7 +432,7 @@
                 <p v-if="!actionList.fatalAnimationLength">
                     The official outro animation could not be detected.
                     <span v-if="!actionList.commonResolution"><br>This could be due to the small video-resolution:
-                        <strong>{{videoData.videoResolution[0]}} x {{videoData.videoResolution[1]}}</strong></span>
+                        <strong>{{videoAnalysis.videoResolution[0]}} x {{videoAnalysis.videoResolution[1]}}</strong></span>
                 </p>
                 <p v-if="!actionList.fatalAnimationLength">
                     To access this tool, make sure to use <a
@@ -459,7 +459,7 @@
             <div v-if="actionList.success">
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
                 <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
-                <li>Telekom outro animation start: at <strong>{{formatNumber(videoData.logo_start-0.96)}} seconds</strong>.</li>
+                <li>Telekom outro animation start: at <strong>{{formatNumber(videoAnalysis.logo_start-0.96)}} seconds</strong>.</li>
                 <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
                 <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
                 <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
@@ -515,7 +515,7 @@
             <div style="display:flex">
                 <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
                     data-setup='{"font-family": "TeleNeo"}' style="border-radius: 10px; object-fit: contain; max-width:800px; max-height:450px"
-                    controls muted @volumechange="updateListeningVolume">
+                    controls muted>
                     <p class="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
                         web browser that

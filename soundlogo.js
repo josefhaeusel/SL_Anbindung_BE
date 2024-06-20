@@ -48,7 +48,8 @@ const app = Vue.createApp({
 
             video_file: null,
             video_url:"",
-            videoData:{logo_start: null, videoResolution: [null, null]},
+            videoAnalysis:{logo_start: null, videoResolution: [null, null]},
+            metadataLoadedOnce: false,
 
             feedback: {thumbs: null, text: "", show: false, thumbsup:{hover:null}, thumbsdown:{hover:null}}
 
@@ -58,6 +59,7 @@ const app = Vue.createApp({
     mounted() {
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
+        this.$refs.myVideo.addEventListener('volumechange', this.updateListeningVolume);
     
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
     
@@ -98,13 +100,13 @@ const app = Vue.createApp({
         setProgress_API(message){
             console.log("Progress message from API:", message)
             switch (message) {
-                case 'Detecting T-Outro Animation...':
+                case 'Splitting Audio from Video...':
                     this.progressBar.phase = 0
                   break;
-                case 'Splitting Audio from Video...':
+                case 'Retrieving Key and Loudness...':
                     this.progressBar.phase = 1
                     break;
-                case 'Retrieving Key and Loudness...':
+                case 'Detecting T-Outro Animation...':
                     this.progressBar.phase = 2
                   break;
                 case 'Done.':
@@ -119,7 +121,7 @@ const app = Vue.createApp({
             this.progressBar={
                 phase: 0,
                 phaseValues: [40, 65, 100, 105],
-                texts: ["Detecting T-Outro Animation...", "Splitting Audio from Video...", "Retrieving Key and Loudness...", "Done."],
+                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -152,34 +154,35 @@ const app = Vue.createApp({
 
                 this.video_url = await URL.createObjectURL(this.video_file);
 
-
                 await this.loadVideoPlayer();
 
                 videoPlayer.on('loadedmetadata', async () => {
 
+                    if (!this.metadataLoadedOnce) {
+
                     this.checkResolution();
 
-                    if (this.actionList.commonRatio && this.actionList.commonResolution){
-                        await this.extractAudioBuffer();
-                        this.isLoadingAnalysis = true;
-                        this.initProgressBar()
-    
-                        try {
-                            const analysis = await uploadVideo_API(this.video_file);
-                            await this.analysisHandler(analysis);
-                            await this.actionListModal()
-                            console.log("ACTION LIST:",this.actionList)
-                        } catch (error){
-    
-                            console.log("Analysis Error:",error)
-                            this.handleProgressAnalysisError()
-    
-                        }} else{
-                            this.showInvalidFileTypeToast = true
-                            this.showResolutionHint = false
-
+                        this.metadataLoadedOnce = true //block .on from creating feedback loop through second loadVideoPlayer() in reload
+                        if (this.actionList.commonRatio && this.actionList.commonResolution){
+                            await this.extractAudioBuffer();
+                            this.isLoadingAnalysis = true;
+                            this.initProgressBar()
+        
+                            try {
+                                const analysis = await uploadVideo_API(this.video_file);
+                                await this.analysisHandler(analysis);
+                                await this.actionListModal()
+                                console.log("ACTION LIST:",this.actionList)
+                            } catch (error){
+        
+                                console.log("Analysis Error:",error)
+                                this.handleProgressAnalysisError()
+        
+                            }} else{
+                                this.showInvalidFileTypeToast = true
+                                this.showResolutionHint = false
+                            }
                         }
-
                 });
 
                 
@@ -188,6 +191,18 @@ const app = Vue.createApp({
                 this.showInvalidFileTypeToast = true
                 this.actionList.commonFiletype = false
             }
+        },
+        async handleVideoFileUpdate(url){
+            try {
+                console.log("Updating Video File:", this.video_url)
+                await this.loadVideoPlayer(url);
+                await this.extractAudioBuffer();
+
+            } catch (error) {
+                console.error("Error loading video-player",error)
+            }
+
+
         },
         async checkFiletype(){
             let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm"]
@@ -205,9 +220,9 @@ const app = Vue.createApp({
         },
         async analysisHandler(analysis) {
 
-            this.videoData = analysis.videoAnalysis.analysis;
-            const audioEmpty = analysis.audioAnalysis.audioEmpty;
+            this.videoAnalysis = analysis.videoAnalysis.analysis;
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
+            const audioEmpty = analysis.audioAnalysis.audioEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
 
@@ -217,7 +232,6 @@ const app = Vue.createApp({
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
                 console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
-                
             }
             else if (likely_key == null){
                 await this.setKeys("C major")
@@ -228,14 +242,12 @@ const app = Vue.createApp({
                 this.measuredLUFS = loudness
                 await this.setKeys(likely_key)
             }
-
-            this.setLoudness();
             
-            if (this.videoData.logo_start == "None"){
+            if (this.videoAnalysis.logo_start == "None"){
                 this.actionList.logoDetected = false;
             } else {
                 this.actionList.logoDetected = true;
-                this.animationLength = this.audioDuration - this.videoData.logo_start
+                this.animationLength = this.audioDuration - this.videoAnalysis.logo_start
 
                 if (this.animationLength < this.animationMinimumLength)
                     {
@@ -244,16 +256,38 @@ const app = Vue.createApp({
                     }
             }
 
+            if (analysis.videoAnalysis.appendAnimation == true) {
+                console.log("APPENDING ANIMATION")
+
+                const url = `./temp_uploads/video/${analysis.videoAnalysis.newVideoFile}`
+                const response = await fetch(url);
+                const blob = await response.blob();
+
+                this.video_file = new File([blob], analysis.videoAnalysis.newVideoFile, {
+                    type: "video/mp4",
+                });
+
+                this.video_url = await URL.createObjectURL(this.video_file);
+                //await this.handleVideoFileUpdate(url)
+                await this.loadVideoPlayer(url);
+                await this.extractAudioBuffer();
+                //this.audioDuration += 2.5
+                this.videoAnalysis.logo_start = this.audioDuration - 1.04
+
+            }
+
             if (this.actionList.logoDetected && this.actionList.keyDetected){
                 this.actionList.success = true;
             }
 
             this.setSoundlogoPosition()
             this.setVideoMarker();
+            this.setLoudness();
+
         },
         actionListModal(){
 
-            if (this.actionList.logoDetected == true && !this.actionList.fatalAnimationLength){
+            if (!this.actionList.fatalAnimationLength){
                 this.showResultModal = true
             }  else {
                 this.progressBar.error = true
@@ -323,7 +357,7 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoData.logo_start - 4 //Hardcut: 4.25, Besser in Sync: 3.7
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.25 //Hardcut: 4.25, Besser in Sync: 3.7
             
         },
         async setKeys(keyName){
@@ -341,12 +375,20 @@ const app = Vue.createApp({
             console.log("Selected Key", this.selectedKey.key);
             //updateLogoBuffer(this.selectedKey.key )
         },
-        async loadVideoPlayer() {
+        async loadVideoPlayer(url) {
+
+            let src
+            if (url) {
+                src = url
+            } else {
+                src = this.video_url
+            }
 
             let type = '';
             console.log(this.video_file)
             
             try {
+                
                 if (this.video_file.name.endsWith('.mp4')) {
                     type = 'video/mp4';
                 } else if (this.video_file.name.endsWith('.ogg')) {
@@ -359,7 +401,7 @@ const app = Vue.createApp({
             
                 videoPlayer.src({
                     type: type,
-                    src: this.video_url
+                    src: src
                 });
                 await videoPlayer.load();
 
@@ -386,11 +428,11 @@ const app = Vue.createApp({
 
             if(this.isLoadingResult){
                 master.set({gain: masterDb})
-                console.log("MASTER DB")
+                console.log("MASTER DB", masterDb)
             } 
                 else {
                 master.set({gain: listeningDb})
-                console.log("LISTENING DB")
+                console.log("LISTENING DB", listeningDb)
             }
 
         },
@@ -402,6 +444,8 @@ const app = Vue.createApp({
                 console.log("Audio buffer loaded:", audioBuffer);
                 audioPlayer.buffer = audioBuffer;
                 this.audioDuration = audioPlayer.buffer.duration;
+                console.log("AUDIO DURATION:", this.audioDuration)
+
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
@@ -420,8 +464,10 @@ const app = Vue.createApp({
         startPlayback() {
             this.playbackPosition = videoPlayer.currentTime();
             startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
+            console.log("Start Playback")
         },
         stopPlayback() {
+            console.log("Stop Playback")
             stopTransports();
         },
         async downloadVideo() {
@@ -501,7 +547,6 @@ async function setupAudioNodes(context) {
 
         envelope = await ampEnvelope();
         console.log('Envelope initialized:', envelope);
-
 
         audioPlayer = await loadAudioplayer(context);
         console.log('Audio player initialized:', audioPlayer);
@@ -836,8 +881,10 @@ async function uploadRenderedAudio_API(buffer) {
 
         await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
 
+        console.log('Downloaded successfully:', data);
+
     } catch (error) {
-        console.error('Error uploading audio:', error);
+        console.error('Error during download:', error);
     }
 
 

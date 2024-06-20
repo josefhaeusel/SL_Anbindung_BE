@@ -5,10 +5,15 @@ if len(sys.argv) > 1:
     video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
 
     analysis = ComputerVision(video_path).matchVideoFrames()
+    if analysis["logo_start"] == "None":
+        appendAnimation = True
+    else:
+        appendAnimation = False
 
     response = {
         "analyzed_video": video_path,
-        "analysis": analysis
+        "analysis": analysis,
+        "appendAnimation": appendAnimation,
     }
     
     print(json.dumps(response))

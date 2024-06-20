@@ -16,7 +16,7 @@ export class AudioVideoService {
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
     const inputPathExt = inputPathParsed.ext;
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true);
     const audioOutputPath = this._getAudioPath(
       inputPathName,
       inputPathExt,
@@ -51,6 +51,7 @@ export class AudioVideoService {
     outputVideoPath: string,
     inputAudioPath: string,
     basenameOnly = false,
+    animationAppended = false,
   ): Promise<string> {
     this.logger.debug(`outputVideoPath: ${outputVideoPath}`);
     this.logger.debug(`inputAudioPath: ${inputAudioPath}`);
@@ -66,6 +67,7 @@ export class AudioVideoService {
     const videoInputPath = this._getVideoPath(
       inputVideoPathName,
       inputVideoPathExt,
+      animationAppended
     );
 
     const videoInputAudioCodec =
@@ -110,8 +112,81 @@ export class AudioVideoService {
     });
   }
 
-  private _getVideoPath(inputPathName: string, inputPathExt: string) {
-    return `${inputPathName}-video${inputPathExt}`;
+  public async getVideoData(
+    inputVideoPath:string
+  ): Promise<object> {
+
+    let videoData = {ratio:"", width: null, height: null, fidelity: ""}
+
+    const videoStream = await this._getVideoCodecSettings(inputVideoPath);
+    videoData.ratio = videoStream.display_aspect_ratio.replace(":", "_")
+    videoData.width = videoStream.width
+    videoData.height = videoStream.height
+
+
+    if (videoData.width == 1080 || videoData.height == 1080) {
+      videoData.fidelity = "hd"
+    } else if (videoData.width == 2160 || videoData.height == 2160) {
+      videoData.fidelity = "uhd"
+    } else {
+      videoData.fidelity = "low"
+    }
+
+
+    return new Promise((resolve) => {
+          resolve(
+            videoData
+          );
+    })
+  }
+  
+  public async appendAnimation(
+    inputVideoPath: string,
+    videoData: any,
+    basenameOnly = false
+  ): Promise<string> {
+
+    const inputPathParsed = path.parse(inputVideoPath);
+
+    const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
+    const inputPathExt = inputPathParsed.ext;
+
+
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true);
+
+    const appendAnimationPath = path.resolve(`.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`)
+
+    return new Promise((resolve, reject) => {
+      this._initFfmpeg();
+
+      ffmpeg()
+      .input(inputVideoPath)
+      .input(appendAnimationPath)
+      .complexFilter([
+        '[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[outv][outa]' // Concatenate both video and audio streams
+      ], ['outv', 'outa'])
+      /*.outputOptions([
+        '-map 0:a?', // map the audio from the first input (if it exists)
+      ])*/
+      .on('error', (error) => {
+        this.logger.error('error:', error);
+        reject(error);
+      })
+      .on('end', () => {
+        this.logger.debug('Appending animation done:', videoOutputPath);
+        resolve(basenameOnly ? path.basename(videoOutputPath) : videoOutputPath);
+      })
+      .save(videoOutputPath);
+
+    });
+  }
+
+  private _getVideoPath(inputPathName: string, inputPathExt: string, appendedAnimation: boolean) {
+    if (appendedAnimation) {
+      return `${inputPathName}-animation${inputPathExt}`;
+    } else {
+      return `${inputPathName}-video${inputPathExt}`;
+    }
   }
 
   private _getAudioPath(
@@ -152,12 +227,32 @@ export class AudioVideoService {
     });
   }
 
+  private _getVideoCodecSettings(videoPath: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._initFfmpeg();
+
+      ffmpeg.ffprobe(
+        videoPath,
+        (err, metadata) => {
+          if (err) {
+            reject(err);
+          } else {
+            const videoStream = metadata.streams.find(
+              (stream) => stream.codec_type === 'video',
+            );
+            resolve(videoStream);
+          }
+        },
+      );
+    });
+  }
+
+
   private _initFfmpeg() {
     const ffprobeFullPath = ffprobePath.path;
 
     try {
       fs.chmodSync(ffprobeFullPath, '755');
-      this.logger.debug('ffprobe permissions set successfully');
       ffmpeg.setFfprobePath(ffprobeFullPath);
     } catch (err) {
       this.logger.error('Error setting ffprobe permissions:', err);
