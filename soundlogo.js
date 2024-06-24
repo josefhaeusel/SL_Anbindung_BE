@@ -230,7 +230,11 @@ const app = Vue.createApp({
         },
         async analysisHandler(analysis) {
 
+
             this.videoAnalysis = analysis.videoAnalysis.analysis;
+            console.log("INPUT VIDEO DATA:",this.analysis.videoAnalysis.inputVideoData)
+            console.log("CODEC:",this.analysis.videoAnalysis.inputVideoData.codec)
+
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             //const audioEmpty = analysis.audioAnalysis.audioEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
