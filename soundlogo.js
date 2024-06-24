@@ -232,13 +232,11 @@ const app = Vue.createApp({
 
             this.videoAnalysis = analysis.videoAnalysis.analysis;
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
-            const audioEmpty = analysis.audioAnalysis.audioEmpty;
+            //const audioEmpty = analysis.audioAnalysis.audioEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
 
-            if (audioEmpty) {
-                this.actionList.audioEmpty = true
-
+            if (this.actionList.audioSegmentEmpty) {
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
                 console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
@@ -338,16 +336,23 @@ const app = Vue.createApp({
 
         setVideoMarker(){
 
-            if (this.marker.exists){
-                const left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
+            let left
+            if (this.soundlogoPosition < 0) {
+                left = "0%"}
+            else {
+                left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
+                }
 
+            if (this.marker.exists){
+                let left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
                 this.marker.element.style.left = left
                 this.marker.element.setAttribute('data-time', this.soundlogoPosition);
 
 
             } else {
                 const markerElement = document.createElement('div');
-                const left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
+
+
 
                 this.marker =
                     { element: markerElement, time: this.soundlogoPosition, label: 'Soundlogo', left: left, exists:true}

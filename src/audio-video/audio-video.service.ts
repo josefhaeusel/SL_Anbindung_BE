@@ -17,7 +17,7 @@ export class AudioVideoService {
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
     const inputPathExt = inputPathParsed.ext;
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false);
     const audioOutputPath = this._getAudioPath(
       inputPathName,
       inputPathExt,
@@ -117,12 +117,19 @@ export class AudioVideoService {
     inputVideoPath:string
   ): Promise<object> {
 
-    let videoData = {ratio:"", width: null, height: null, fidelity: ""}
+    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec: null}
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath);
+    //this.logger.debug(videoStream)
+    const audioStream = await this._getAudioCodecSettings(inputVideoPath);
+    //this.logger.debug(audioStream)
+
+
     videoData.ratio = videoStream.display_aspect_ratio.replace(":", "_")
     videoData.width = videoStream.width
     videoData.height = videoStream.height
+    videoData.codec = videoStream.codec_long_name
+    //videoData.audio = audioStream
 
 
     if (videoData.width == 1080 || videoData.height == 1080) {

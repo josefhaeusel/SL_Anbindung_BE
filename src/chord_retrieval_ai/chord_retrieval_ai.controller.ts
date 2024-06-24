@@ -104,6 +104,8 @@ export class ChordRetrievalAiController {
       sendProgress('Detecting T-Outro Animation...');
       this.logger.log('Detecting T-Outro Animation...');
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
+      videoAnalysisResult.inputVideoData = videoData;
+
       this.logger.debug(videoAnalysisResult)
 
       if (videoAnalysisResult.appendAnimation == true) {

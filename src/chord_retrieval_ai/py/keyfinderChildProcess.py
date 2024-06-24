@@ -33,13 +33,18 @@ if len(sys.argv) > 1:
         meter = pyln.Meter(sr)  # create BS.1770 meter
         integrated_loudness = meter.integrated_loudness(y_loudness_segment)  # measure loudness
         segment_loudness = meter.integrated_loudness(y_harmony_segment)
+        overall_loudness = (meter.integrated_loudness(y))
 
-        audioEmpty = False
         analysisSegmentEmpty = False
+        audioEmpty = False
         key_analysis = {"likely_key": None, "correlation": None}
 
-        if np.isnan(integrated_loudness) or np.isinf(integrated_loudness):
+        if np.isnan(overall_loudness) or np.isinf(overall_loudness):
+            analysisSegmentEmpty = True
             audioEmpty = True
+            integrated_loudness = None
+            segment_loudness = None
+        elif np.isnan(integrated_loudness) or np.isinf(integrated_loudness):
             analysisSegmentEmpty = True
             integrated_loudness = None
             segment_loudness = None
@@ -47,17 +52,16 @@ if len(sys.argv) > 1:
         elif np.isnan(segment_loudness) or np.isinf(segment_loudness):
             analysisSegmentEmpty = True
             segment_loudness = None
-            audioEmpty = False
         else:
             y_harmonic, y_percussive = librosa.effects.hpss(y_harmony_segment)
             key_analysis = Tonal_Fragment(y_harmonic, sr).get_key_info()
 
         analysis = {
             "analyzed_audio": audio_path,
+            "audioEmpty": audioEmpty,
             "analysis": key_analysis,
             "loudness": integrated_loudness,
             "segmentLoudness": segment_loudness,
-            "audioEmpty": audioEmpty,
             "analysisSegmentEmpty": analysisSegmentEmpty
         }
 

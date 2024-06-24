@@ -379,8 +379,7 @@
         <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput-big"@change="handleFileUpload"
         accept="video/mp4,video/webm,video/ogg" />
 
-        <scale-telekom-header style="position:absolute;width: 100%;left:0;">
-        </scale-telekom-header>
+        <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
 
 
         <div class="title-container">
@@ -477,7 +476,7 @@
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
                 <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
                 <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
-                <li v-if="!actionList.appendedAnimation">T-Outro Animation start: at <strong>{{formatNumber(videoAnalysis.logo_start-0.96)}} seconds</strong>.</li>
+                <li v-if="!actionList.appendedAnimation">T-Outro Animation start: at <strong>{{formatNumber(videoAnalysis.logo_start)}} seconds</strong>.</li>
                 <li v-if="actionList.appendedAnimation"><strong>No T-Outro Animation</strong> detected.</li>
 
                 <h2 style="margin-bottom: 3px;">Actions:</h2>
@@ -492,17 +491,17 @@
 
                 <div v-if="actionList.audioEmpty">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
-                    Your video has <strong>no audio track</strong>. The Soundlogo's musical key and loudness have been
+                    Your video's <strong>audio track is empty or doesn't exist</strong>. The Soundlogo's musical key and loudness have been
                     set to <strong>standardized values</strong>.
                 </div>
 
-                <div v-if="this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                <div v-if="!actionList.audioEmpty && this.actionList.audioSegmentEmpty && !actionList.keyDetected">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
-                    Your video ending is silent. The Soundlogo's musical key has been set to <strong>standardized
+                    Your video ending (except animation) is silent. The Soundlogo's musical key has been set to <strong>standardized
                         values</strong>.
                 </div>
 
-                <div v-if="!this.actionList.audioSegmentEmpty && !actionList.audioEmpty && !actionList.keyDetected">
+                <div v-if="!actionList.audioEmpty && !this.actionList.audioSegmentEmpty && !actionList.keyDetected">
                     <h2 style="margin-bottom: 3px;">Understand:</h2>
                     Your video ending indicates no musical content. The Soundlogo's musical key have been set to
                     <strong>standardized values</strong>.
@@ -512,8 +511,8 @@
                 <li>Telekom outro animation start: at <strong>{{formatNumber(soundlogoPosition)}} seconds</strong>.</li>
                 <li>Musical key: <strong>None</strong>.</li>
 
-                <li v-if="actionList.audioEmpty">Integrated loudness: <strong>None</strong>.</li>
-                <li v-if="actionList.audioSegmentEmpty && !actionList.audioEmpty">Integrated loudness:
+                <li v-if="actionList.audioTrack">Integrated loudness: <strong>None</strong>.</li>
+                <li v-if="actionList.audioSegmentEmpty && !actionList.audioTrack">Integrated loudness:
                     <strong>{{formatNumber(measuredLUFS)}}</strong>.</li>
 
                 <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
