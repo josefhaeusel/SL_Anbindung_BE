@@ -114,6 +114,17 @@
             opacity: 0;
             z-index:2
         }
+        .fileinput-big{
+            position: absolute;
+            left:0;
+            top:0;
+            right: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
 
         .upload-instructions {
             justify-content: center;
@@ -229,10 +240,6 @@
         .video-js.vjs-theme-forest .vjs-volume-menu-button {
             display: none
         }
-
-        /*.video-js.vjs-theme-forest .vjs-volume-panel {
-            display: none
-        }*/
 
         .video-js.vjs-theme-forest .vjs-fullscreen-control {
             display: none
@@ -369,7 +376,7 @@
 
     <div id="app">
 
-        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput"@change="handleFileUpload"
+        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput-big"@change="handleFileUpload"
         accept="video/mp4,video/webm,video/ogg" />
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;">
