@@ -232,8 +232,8 @@ const app = Vue.createApp({
 
 
             this.videoAnalysis = analysis.videoAnalysis.analysis;
-            console.log("INPUT VIDEO DATA:",this.analysis.videoAnalysis.inputVideoData)
-            console.log("CODEC:",this.analysis.videoAnalysis.inputVideoData.codec)
+            console.log("INPUT VIDEO DATA:",analysis.videoAnalysis.inputVideoData)
+            console.log("CODEC:",analysis.videoAnalysis.inputVideoData.codec)
 
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             //const audioEmpty = analysis.audioAnalysis.audioEmpty;
