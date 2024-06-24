@@ -459,14 +459,16 @@
             <div v-if="actionList.success">
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
                 <li>Musical key: <strong>{{selectedKey.key}}-Major</strong>.</li>
-                <li>Telekom outro animation start: at <strong>{{formatNumber(videoAnalysis.logo_start-0.96)}} seconds</strong>.</li>
                 <li>Integrated loudness: <strong>{{formatNumber(measuredLUFS)}} LUFS</strong>.</li>
-                <h2 style="margin-bottom: 3px;">Audio Actions:</h2>
-                <li><strong>Synchronized Soundlogo</strong> to outro animation.</li>
+                <li v-if="!actionList.appendedAnimation">T-Outro Animation start: at <strong>{{formatNumber(videoAnalysis.logo_start-0.96)}} seconds</strong>.</li>
+                <li v-if="actionList.appendedAnimation"><strong>No T-Outro Animation</strong> detected.</li>
+
+                <h2 style="margin-bottom: 3px;">Actions:</h2>
+                <li v-if="actionList.appendedAnimation">Appended <strong>T-Outro Animation</strong> to the end of video</strong>.
+                <li><strong>Synchronized Soundlogo</strong> to T-Outro Animation.</li>
                 <li>Adjusted Soundlogo <strong>loudness and key</strong>.</li>
                 <li>Created <strong>crossfade</strong> from original audio to Soundlogo.</li>
-                <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.
-                </li>
+                <li>Set <strong>master volume</strong> to <strong>{{formatNumber(desiredMasterLUFS)}} LUFS</strong>.</li>
             </div>
 
             <div v-if="!actionList.keyDetected && actionList.logoDetected">
@@ -536,12 +538,6 @@
                             Download Result
                         </scale-button>
 
-                        <!--scale-button variant="secondary" class="download-audio-button" @click="downloadAudio"
-                        :disabled="isLoadingResult">
-                            <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
-                            <scale-icon-action-download size=20 v-if="!isLoadingResult"> </scale-icon-action-download>
-                            Audio Only
-                        </scale-button-->
                     </div>
 
                     <div class="right-controls">

@@ -14,8 +14,8 @@ const app = Vue.createApp({
 
             progressBar: {
                 phase: 0,
-                phaseValues: [40, 65, 100, 105],
-                texts: ["Detecting T-Outro Animation...", "Splitting Audio from Video...", "Retrieving Key and Loudness...", "Done."],
+                phaseValues: [15, 30, 40, 60, 80, 100, 105],
+                texts: ['Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -44,7 +44,7 @@ const app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -100,18 +100,27 @@ const app = Vue.createApp({
         setProgress_API(message){
             console.log("Progress message from API:", message)
             switch (message) {
-                case 'Splitting Audio from Video...':
+                case 'Retrieving Video Data...':
                     this.progressBar.phase = 0
                   break;
-                case 'Retrieving Key and Loudness...':
+                case 'Converting Video Format...':
                     this.progressBar.phase = 1
+                  break;
+                case 'Splitting Audio from Video...':
+                    this.progressBar.phase = 2
+                  break;
+                case 'Retrieving Key and Loudness...':
+                    this.progressBar.phase = 3
                     break;
                 case 'Detecting T-Outro Animation...':
-                    this.progressBar.phase = 2
+                    this.progressBar.phase = 4
+                  break;
+                case 'Appending T-Outro Animation...':
+                    this.progressBar.phase = 5
                   break;
                 case 'Done.':
                     clearInterval(this.progressBar.timer);
-                    this.progressBar.phase = 3
+                    this.progressBar.phase = 6
                     this.progressBar.percentage = 101
                   break;
 
@@ -120,8 +129,8 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [40, 65, 100, 105],
-                texts: ["Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Done."],
+                phaseValues: [15, 30, 40, 60, 80, 100, 105],
+                texts: ['Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -133,7 +142,7 @@ const app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
-            this.progressBar.percentage += percentDifference * 0.008; 
+            this.progressBar.percentage += percentDifference * 0.006; 
 
             if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
@@ -274,9 +283,11 @@ const app = Vue.createApp({
                 //this.audioDuration += 2.5
                 this.videoAnalysis.logo_start = this.audioDuration - 1.04
 
+                this.actionList.appendedAnimation = true
+
             }
 
-            if (this.actionList.logoDetected && this.actionList.keyDetected){
+            if (this.actionList.logoDetected && this.actionList.keyDetected || this.actionList.appendedAnimation && this.actionList.keyDetected){
                 this.actionList.success = true;
             }
 

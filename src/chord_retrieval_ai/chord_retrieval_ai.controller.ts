@@ -77,14 +77,14 @@ export class ChordRetrievalAiController {
 
       await fs.writeFileSync(tempVideoFilePath, file.buffer);
 
-      this.logger.log('Getting Video Data...');
+      this.logger.log('Retrieving Video Data...');
+      sendProgress('Retrieving Video Data...');
       const videoData = await this.audioVideoService.getVideoData(tempVideoFilePath)
       this.logger.debug(videoData)
 
       //TODO Maybe convert into compatible format
-
-      sendProgress('Splitting Audio from Video...');
       this.logger.log('Splitting Audio from Video...');
+      sendProgress('Splitting Audio from Video...');
 
       try {
         tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
@@ -107,8 +107,8 @@ export class ChordRetrievalAiController {
       this.logger.debug(videoAnalysisResult)
 
       if (videoAnalysisResult.appendAnimation == true) {
-        this.logger.log('Appending Animation...');
-        sendProgress('Appending Animation...');
+        this.logger.log("Appending T-Outro Animation...");
+        sendProgress("Appending T-Outro Animation...");
         tempAnimationAppendedVideoFilePath = await this.audioVideoService.appendAnimation(tempVideoFilePath, videoData, true)
         videoAnalysisResult.newVideoFile = tempAnimationAppendedVideoFilePath
       }
@@ -149,13 +149,11 @@ export class ChordRetrievalAiController {
 
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
-      let renderedResult;
-      let videoToRender;
       const appendedAnimation = (request.session as ISession).appendedAnimation;
 
       const tempVideoFilePath = (request.session as ISession).tempVideoFilePath;
 
-      renderedResult = await this.audioVideoService.join(
+      const renderedResult = await this.audioVideoService.join(
         tempVideoFilePath,
         tempAudioFilePath,
         true,
@@ -165,7 +163,7 @@ export class ChordRetrievalAiController {
 
       //fs.unlinkSync(tempAudioFilePath);
 
-      this.logger.log(`Audio ${tempAudioFilePath} and Video ${videoToRender} joined as ${renderedResult}`);
+      this.logger.log(`Audio ${tempAudioFilePath} and Video ${tempVideoFilePath} joined as ${renderedResult}`);
       response.json({ renderedResult: renderedResult });
     } catch (error) {
       this.logger.error('Error during audio handling', error.stack);
