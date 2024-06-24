@@ -50,6 +50,7 @@ const app = Vue.createApp({
             video_url:"",
             videoAnalysis:{logo_start: null, videoResolution: [null, null]},
             metadataLoadedOnce: false,
+            playerHasBeenClicked: false,
 
             feedback: {thumbs: null, text: "", show: false, thumbsup:{hover:null}, thumbsdown:{hover:null}}
 

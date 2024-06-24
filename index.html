@@ -257,6 +257,7 @@
             background-size: contain;
             width: 80px;
             height: 80px;
+            z-index:2;
         }
         .video-js.vjs-theme-forest .vjs-play-control.vjs-control.vjs-button {
             z-index:2;
@@ -333,8 +334,17 @@
         .fade-leave-active {
             transition: opacity 0.5s ease-in-out;
         }
-
-        .shadow-fade {
+        .shadow-fade-overall {
+            position: absolute;
+            align-self: flex-end;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            border-radius: 10px;
+            z-index:1
+        }
+        .shadow-fade-bottom {
             position: absolute;
             align-self: flex-end;
             width: 100%;
@@ -514,7 +524,7 @@
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
 
-            <div style="display:flex">
+            <div style="display:flex" @click="this.playerHasBeenClicked = true">
                 <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
                     data-setup='{"font-family": "TeleNeo"}' style="border-radius: 10px; object-fit: contain; max-width:800px; max-height:450px"
                     controls muted>
@@ -524,8 +534,10 @@
                         <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
                     </p>
                 </video>
-                <div class="shadow-fade"></div>
+                <div class="shadow-fade-bottom"></div>
+                <div v-if="!playerHasBeenClicked" class="shadow-fade-overall"></div>
             </div>
+
 
             <transition name="fade">
                 <div class="controls-container" v-if="!isLoadingAnalysis">
