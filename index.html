@@ -535,7 +535,10 @@
                     </p>
                 </video>
                 <div class="shadow-fade-bottom"></div>
-                <div v-if="!playerHasBeenClicked" class="shadow-fade-overall"></div>
+                <transition name="fade">
+                    <div v-if="!playerHasBeenClicked" class="shadow-fade-overall"></div>
+                </transition>
+
             </div>
 
 
