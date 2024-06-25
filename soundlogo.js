@@ -494,7 +494,8 @@ const app = Vue.createApp({
         async downloadVideo() {
             this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
-            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer);
+            const basename = this.video_file.name.split(".")[0]
+            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, basename);
             this.isLoadingResult = false;
         },
         async downloadAudio() {
@@ -887,9 +888,9 @@ async function updateLogoBuffer(key) {
 }
 
 
-async function uploadRenderedAudio_API(buffer) {
+async function uploadRenderedAudio_API(buffer, name) {
 
-    const formData = await audioToWavFile(buffer);
+    const formData = await audioToWavFile(buffer, name);
 
     try {
         const response = await fetch('/chord-retrieval-ai/uploadRenderedAudio', {
@@ -909,11 +910,11 @@ async function uploadRenderedAudio_API(buffer) {
     }
 
 
-    function audioToWavFile(buffer) {
+    function audioToWavFile(buffer, name) {
 
         const wavBlob = convertToWav(buffer);
 
-        const audioFile = new File([wavBlob], 'soundlogoAnbindung.wav', { type: 'audio/wav' });
+        const audioFile = new File([wavBlob], `${name}.wav`, { type: 'audio/wav' });
         const formData = new FormData();
         formData.append('file', audioFile);
         return formData
