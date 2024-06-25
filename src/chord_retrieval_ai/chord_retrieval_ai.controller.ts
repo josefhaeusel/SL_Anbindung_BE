@@ -83,7 +83,7 @@ export class ChordRetrievalAiController {
       const videoData = await this.audioVideoService.getVideoData(tempVideoFilePath)
       this.logger.debug(videoData)
 
-      if (videoData.codec_name != "h264" && videoData.codec_name != "h265"){
+      if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempVideoFilePath.endsWith(".mp4")){
         tempVideoFilePath = await this.audioVideoService.convert(tempVideoFilePath);
         (request.session as ISession).convertedVideo = true;
         this.logger.log('Converting Video Format...');
