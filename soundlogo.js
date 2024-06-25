@@ -173,7 +173,7 @@ const app = Vue.createApp({
                     this.checkResolution();
 
                         this.metadataLoadedOnce = true //block .on from creating feedback loop through second loadVideoPlayer() in reload
-                        if (this.actionList.commonRatio && this.actionList.commonResolution){
+                        if (this.actionList.commonRatio && this.actionList.commonResolution || this.passResolution){
                             await this.extractAudioBuffer();
                             this.isLoadingAnalysis = true;
                             this.initProgressBar()
@@ -215,7 +215,7 @@ const app = Vue.createApp({
 
         },
         async checkFiletype(){
-            let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm"]
+            let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm", "video/quicktime"]
 
             for (let x = 0;x<allowedFiletypes.length; x++) {
                 if (this.video_file.type == allowedFiletypes[x]){
@@ -318,23 +318,29 @@ const app = Vue.createApp({
             let height = videoPlayer.videoHeight()
             let ratio = width / height
             console.log(width, height, ratio)
+            if (width == 0){
+                this.passResolution = true
+                console.log("Pass resolution, because undetectable.")
+            } else{
+                if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
+                    this.actionList.commonRatio = true
+                }
+                else {
+                    this.actionList.commonRatio = false
+                    this.showResolutionHint = true
+    
+                }
+                if (width >= 1080 && height >= 1080) {
+                    this.actionList.commonResolution = true
+                }
+                else {
+                    this.actionList.commonResolution = false
+                    this.showResolutionHint= true
+    
+                }
+            }
 
-            if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
-                this.actionList.commonRatio = true
-            }
-            else {
-                this.actionList.commonRatio = false
-                this.showResolutionHint = true
-
-            }
-            if (width >= 1080 && height >= 1080) {
-                this.actionList.commonResolution = true
-            }
-            else {
-                this.actionList.commonResolution = false
-                this.showResolutionHint= true
-
-            }
+            
                 
         },
 
@@ -412,7 +418,7 @@ const app = Vue.createApp({
                 
                 if (this.video_file.name.endsWith('.mp4')) {
                     type = 'video/mp4';
-                } else if (this.video_file.name.endsWith('.ogg')) {
+                } else if (this.video_file.name.endsWith('.ogv') || this.video_file.name.endsWith('.ogg')) {
                     type = 'video/ogg';
                 } else if (this.video_file.name.endsWith('.webm')) {
                     type = 'video/webm';

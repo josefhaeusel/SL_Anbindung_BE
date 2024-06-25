@@ -117,19 +117,22 @@ export class AudioVideoService {
     inputVideoPath:string
   ): Promise<object> {
 
-    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec: null}
+    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec: null,profile:null, pixel_format: null, audio: null}
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath);
-    //this.logger.debug(videoStream)
+    this.logger.debug(videoStream)
     const audioStream = await this._getAudioCodecSettings(inputVideoPath);
-    //this.logger.debug(audioStream)
+    this.logger.debug(audioStream)
 
 
     videoData.ratio = videoStream.display_aspect_ratio.replace(":", "_")
     videoData.width = videoStream.width
     videoData.height = videoStream.height
     videoData.codec = videoStream.codec_long_name
-    //videoData.audio = audioStream
+    videoData.pixel_format = videoStream.pix_fmt
+    videoData.profile = videoStream.profile
+
+    videoData.audio = audioStream.codec_long_name
 
 
     if (videoData.width == 1080 || videoData.height == 1080) {
