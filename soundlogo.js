@@ -44,10 +44,11 @@ const app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: true, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
+            vudei_path:"",
             videoAnalysis:{logo_start: null, videoResolution: [null, null]},
             metadataLoadedOnce: false,
             playerHasBeenClicked: false,
@@ -158,88 +159,57 @@ const app = Vue.createApp({
         async handleFileUpload(event) {
 
             this.video_file = event.target.files[0];
-            this.actionList.commonFiletype = await this.checkFiletype();
+            this.actionList.commonFiletype = await this.checkFiletype()
 
-            if (this.actionList.commonFiletype) {
+            if (this.actionList.commonFiletype){
+                try {
+                    this.isLoadingAnalysis = true;
+                    this.initProgressBar()
+                    const analysis = await uploadVideo_API(this.video_file);
 
-                this.video_url = await URL.createObjectURL(this.video_file);
+                    await this.createVideoSources(analysis.videoOutputFile);
+                    await this.loadVideoPlayer();
+                    await this.extractAudioBuffer();
+                    
+                    //Throw an Error if unsupported type (resolution, aspect ratio...)
+                    await this.analysisHandler(analysis);
+                    await this.actionListModal()
+                    console.log(this.actionList)
 
-                await this.loadVideoPlayer();
-
-                videoPlayer.on('loadedmetadata', async () => {
-
-                    if (!this.metadataLoadedOnce) {
-
-                    this.checkResolution();
-
-                        this.metadataLoadedOnce = true //block .on from creating feedback loop through second loadVideoPlayer() in reload
-                        if (this.actionList.commonRatio && this.actionList.commonResolution || this.passResolution){
-                            await this.extractAudioBuffer();
-                            this.isLoadingAnalysis = true;
-                            this.initProgressBar()
-        
-                            try {
-                                const analysis = await uploadVideo_API(this.video_file);
-                                await this.analysisHandler(analysis);
-                                await this.actionListModal()
-                                console.log("ACTION LIST:",this.actionList)
-                            } catch (error){
-        
-                                console.log("Analysis Error:",error)
-                                this.handleProgressAnalysisError()
-        
-                            }} else{
-                                this.showInvalidFileTypeToast = true
-                                this.showResolutionHint = false
-                            }
-                        }
-                });
-
-                
-            } else {
-                console.error(`Filetype ${this.video_file.type} is invalid. Allowed filetypes are mp4, ogg and webm.`)
-                this.showInvalidFileTypeToast = true
-                this.actionList.commonFiletype = false
-            }
-        },
-        async handleVideoFileUpdate(url){
-            try {
-                console.log("Updating Video File:", this.video_url)
-                await this.loadVideoPlayer(url);
-                await this.extractAudioBuffer();
-
-            } catch (error) {
-                console.error("Error loading video-player",error)
+                } catch (error){
+                    console.log("Analysis Error:",error)
+                    this.handleProgressAnalysisError()
+                }} 
+            else {
+                this.showInvalidFileTypeToast = true;
             }
 
-
         },
-        async checkFiletype(){
-            let allowedFiletypes = ["video/mp4", "video/ogg", "video/webm", "video/quicktime"]
+        
+        async checkFiletype() {
+            let allowedFiletypes = new Set(["video/mp4", "video/ogg", "video/webm", "video/quicktime"]);
 
-            for (let x = 0;x<allowedFiletypes.length; x++) {
-                if (this.video_file.type == allowedFiletypes[x]){
-                    return true
-                }
-            }
-            return false
+            return allowedFiletypes.has(this.video_file.type);
         },
+
         handleProgressAnalysisError(){
+            this.showResolutionHint = false
             this.progressBar.error = true
             "Oops... Something went wrong. Please try uploading again."
+
+
         },
         async analysisHandler(analysis) {
 
-
             this.videoAnalysis = analysis.videoAnalysis.analysis;
             console.log("INPUT VIDEO DATA:",analysis.videoAnalysis.inputVideoData)
-            console.log("CODEC:",analysis.videoAnalysis.inputVideoData.codec)
+            console.log("CODEC:",analysis.videoAnalysis.inputVideoData.codec_name)
 
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
-            //const audioEmpty = analysis.audioAnalysis.audioEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
 
+            //KEY ANALYSIS PART
             if (this.actionList.audioSegmentEmpty) {
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
@@ -254,7 +224,8 @@ const app = Vue.createApp({
                 this.measuredLUFS = loudness
                 await this.setKeys(likely_key)
             }
-            
+
+            //T-OUTRO ANALYSIS PART
             if (this.videoAnalysis.logo_start == "None"){
                 this.actionList.logoDetected = false;
             } else {
@@ -268,37 +239,45 @@ const app = Vue.createApp({
                     }
             }
 
+
+            //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
-                console.log("APPENDING ANIMATION")
-
-                const url = `./temp_uploads/video/${analysis.videoAnalysis.newVideoFile}`
-                const response = await fetch(url);
-                const blob = await response.blob();
-
-                this.video_file = new File([blob], analysis.videoAnalysis.newVideoFile, {
-                    type: "video/mp4",
-                });
-
-                this.video_url = await URL.createObjectURL(this.video_file);
-                //await this.handleVideoFileUpdate(url)
-                await this.loadVideoPlayer(url);
-                await this.extractAudioBuffer();
-                //this.audioDuration += 2.5
+                console.log("APPENDED ANIMATION")
                 this.videoAnalysis.logo_start = this.audioDuration - 1.04
-
-                this.actionList.appendedAnimation = true
-
+                this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
+                this.actionList.convertedVideo = analysis.videoAnalysis.convertedVideo;
             }
 
+            //CONVERTED VIDEO PART
+            if (analysis.videoAnalysis.convertedVideo == true) {
+                this.actionList.convertedVideo = true
+            }
+
+            //SIMPLE SUCCESS FEEDBACK
             if (this.actionList.logoDetected && this.actionList.keyDetected || this.actionList.appendedAnimation && this.actionList.keyDetected){
                 this.actionList.success = true;
             }
+
+
 
             this.setSoundlogoPosition()
             this.setVideoMarker();
             this.setLoudness();
 
         },
+        async createVideoSources(video_name){
+
+            const parsedPath = video_name.split("/");
+            this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-1]}`
+
+            const response = await fetch(this.video_path);
+            const blob = await response.blob();
+
+            this.video_file = new File([blob], this.video_path, {
+                type: "video/mp4",
+            });
+            this.video_url = await URL.createObjectURL(this.video_file);
+        },   
         actionListModal(){
 
             if (!this.actionList.fatalAnimationLength){
@@ -310,7 +289,7 @@ const app = Vue.createApp({
         
         },
 
-        async checkResolution() {
+        /*async checkResolution() {
 
             this.showResolutionHint = false
 
@@ -318,10 +297,7 @@ const app = Vue.createApp({
             let height = videoPlayer.videoHeight()
             let ratio = width / height
             console.log(width, height, ratio)
-            if (width == 0){
-                this.passResolution = true
-                console.log("Pass resolution, because undetectable.")
-            } else{
+    
                 if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
                     this.actionList.commonRatio = true
                 }
@@ -337,12 +313,8 @@ const app = Vue.createApp({
                     this.actionList.commonResolution = false
                     this.showResolutionHint= true
     
-                }
-            }
-
-            
-                
-        },
+                }        
+        },*/
 
         setVideoMarker(){
 
@@ -402,20 +374,12 @@ const app = Vue.createApp({
             console.log("Selected Key", this.selectedKey.key);
             //updateLogoBuffer(this.selectedKey.key )
         },
-        async loadVideoPlayer(url) {
-
-            let src
-            if (url) {
-                src = url
-            } else {
-                src = this.video_url
-            }
+        async loadVideoPlayer() {
 
             let type = '';
-            console.log(this.video_file)
-            
+            console.log("Loading", this.video_path)
+
             try {
-                
                 if (this.video_file.name.endsWith('.mp4')) {
                     type = 'video/mp4';
                 } else if (this.video_file.name.endsWith('.ogv') || this.video_file.name.endsWith('.ogg')) {
@@ -428,7 +392,7 @@ const app = Vue.createApp({
             
                 videoPlayer.src({
                     type: type,
-                    src: src
+                    src: this.video_path
                 });
                 await videoPlayer.load();
 

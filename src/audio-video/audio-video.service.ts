@@ -5,6 +5,18 @@ import * as ffprobeLinuxPath from '@ffprobe-installer/ffprobe'
 import * as path from 'path';
 import * as fs from 'fs';
 
+export interface VideoData {
+  ratio: string;
+  width: number | null;
+  height: number | null;
+  fidelity: string;
+  codec_name: string | null;
+  codec_name_long: string | null;
+  profile: string | null;
+  pixel_format: string | null;
+  audio: string | null;
+}
+
 @Injectable()
 export class AudioVideoService {
   private readonly logger = new Logger(AudioVideoService.name);
@@ -43,6 +55,34 @@ export class AudioVideoService {
           this.logger.debug('Splitting done');
 
           resolve(audioOutputPath);
+        })
+        .run();
+    });
+  }
+
+  public async convert(inputPath: string): Promise<string> {
+
+    const inputPathParsed = path.parse(inputPath);
+    const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
+    const videoOutputPath = this._getVideoPath(inputPathName, '.mp4', false);
+
+    this.logger.debug(`videoOutputPath: ${videoOutputPath}`);
+
+    return new Promise((resolve, reject) => {
+      this._initFfmpeg();
+
+      ffmpeg(inputPath)
+        .outputOptions(['-pix_fmt yuv420p'])
+        .output(videoOutputPath)
+        .on('error', (error) => {
+          this.logger.error('error:', error);
+
+          reject(error);
+        })
+        .on('end', () => {
+          this.logger.debug('Converting done');
+
+          resolve(videoOutputPath);
         })
         .run();
     });
@@ -115,9 +155,9 @@ export class AudioVideoService {
 
   public async getVideoData(
     inputVideoPath:string
-  ): Promise<object> {
+  ): Promise<VideoData> {
 
-    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec: null,profile:null, pixel_format: null, audio: null}
+    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec_name: null, codec_name_long:null,profile:null, pixel_format: null, audio: null}
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath);
     this.logger.debug(videoStream)
@@ -128,7 +168,8 @@ export class AudioVideoService {
     videoData.ratio = videoStream.display_aspect_ratio.replace(":", "_")
     videoData.width = videoStream.width
     videoData.height = videoStream.height
-    videoData.codec = videoStream.codec_long_name
+    videoData.codec_name = videoStream.codec_name
+    videoData.codec_name_long = videoStream.codec_long_name
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
 
