@@ -152,6 +152,7 @@
             flex-direction: column-reverse;
             margin-top: 20px;
             margin-bottom: -15px;
+            max-height: 95px;
         }
 
         .current-phase {
@@ -372,6 +373,19 @@
             transition: opacity 0.5s ease-in-out;
         }
 
+        .subtitle-fade-enter-from,
+        .subtitle-fade-leave-to {
+            opacity: 0;
+        }
+
+        .subtitle-fade-enter-to,
+        .subtitle-fade-leave-from {
+            opacity: 1;
+        }
+        .subtitle-fade-enter-active{
+            transition: opacity 0.25s ease-in;
+        }
+
 
         .shadow-fade-overall {
             position: absolute;
@@ -461,7 +475,7 @@
                             label="Audiovisual Analysis" show-status="true"></scale-progress-bar>
 
                         <div class="progress-bar-subtitles">
-                            <transition name="fade" v-for="(phase, index) in progressBar.texts" >
+                            <transition name="subtitle-fade" v-for="(phase, index) in progressBar.texts" >
                                 <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)">{{phase}}</p>
                             </transition>    
                         </div>
