@@ -138,7 +138,7 @@ const app = Vue.createApp({
                 error: false,
                 eventSource: true
             }
-            
+
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
         updateProgressBar() {
@@ -153,7 +153,7 @@ const app = Vue.createApp({
             }
             
             //If eventSource / SSE connection fails: fake progressBar phases
-            if (!this.progressBar.eventSource && this.progressBar.phase!= (this.progressBar.phaseValues.length-1) && percentDifference < 5) {
+            if (!this.progressBar.eventSource && this.progressBar.phase != (this.progressBar.phaseValues.length-1) && percentDifference < 5) {
                 this.progressBar.phase += 1
             }
         },
@@ -178,7 +178,6 @@ const app = Vue.createApp({
                     await this.loadVideoPlayer();
                     await this.extractAudioBuffer();
                     
-                    //Throw an Error if unsupported type (resolution, aspect ratio...)
                     await this.analysisHandler(analysis);
                     await this.actionListModal()
                     console.log(this.actionList)
@@ -222,8 +221,8 @@ const app = Vue.createApp({
         async analysisHandler(analysis) {
 
             this.videoAnalysis = analysis.videoAnalysis.analysis;
-            console.log("INPUT VIDEO DATA:",analysis.videoAnalysis.inputVideoData)
-            console.log("CODEC:",analysis.videoAnalysis.inputVideoData.codec_name)
+            console.log("Input Video Data:",analysis.videoAnalysis.inputVideoData)
+            console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
 
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
@@ -286,6 +285,8 @@ const app = Vue.createApp({
 
         },
         async createVideoSources(video_name){
+
+            console.log("Creating Video Sources...")
 
             const parsedPath = video_name.split("/");
             this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-1]}`
