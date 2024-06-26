@@ -337,8 +337,7 @@
             opacity: 1;
         }
 
-        .fade-enter-active,
-        .fade-leave-active {
+        .fade-enter-active{
             transition: opacity 0.5s ease-in-out;
         }
         .shadow-fade-overall {
@@ -392,6 +391,7 @@
         <!-- First Layer: Upload Area -->
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
 
+            <transition name="fade">
             <div class="upload-container" v-if="!isLoadingAnalysis">
 
                 <div class="dropzone">
@@ -405,15 +405,15 @@
                     Upload a Video</scale-button>
 
                 <scale-notification
-                    v-if="showInvalidFileTypeToast"heading="Unsupported Format" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false">
+                    v-if="showInvalidFormatToast"heading="Unsupported Format" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false">
                     <span slot="text">The provided filetype is invalid.<br/></span>
                     <span slot="text" v-if="!actionList.commonFiletype">Supported formats: MP4, WebM, OGG.<br/></span>
                     <span slot="text" v-if="showResolutionHint&&!actionList.commonResolution">Supported resolutions: FullHD, UHD.<br/></span>
                     <span slot="text" v-if="showResolutionHint&&!actionList.commonRatio">Supported ratios: 16:9, 9:16, 1:1.<br/></span>
-
                 </scale-notification>
 
             </div>
+            </transition>
 
 
         
@@ -438,33 +438,6 @@
 
                     </scale-card>
             </transition>
-
-            <scale-modal heading="Animation Warning" size="default" :opened="showWarningModal" class="scale-modal"
-                style="z-index:100"
-                @scale-before-close="handleReturn()">
-
-                <p v-if="!actionList.fatalAnimationLength">
-                    The official outro animation could not be detected.
-                    <span v-if="!actionList.commonResolution"><br>This could be due to the small video-resolution:
-                        <strong>{{videoAnalysis.videoResolution[0]}} x {{videoAnalysis.videoResolution[1]}}</strong></span>
-                </p>
-                <p v-if="!actionList.fatalAnimationLength">
-                    To access this tool, make sure to use <a
-                        href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro
-                        animations in the brand-portal.</a><br>
-                </p>
-                <p v-if="actionList.fatalAnimationLength">
-                    The official outro animation was detected, yet is <strong>cut off too early </strong>in the end.
-                    To access this tool, make sure to use <a
-                        href="https://www.brand-design.telekom.com/asset/t-outro-hardcut/">one of the latest outro
-                        animations in the brand-portal at full length.</a>
-                </p>
-
-                <scale-button slot="action" @click="handleReturn()">
-                    Return
-                </scale-button>
-
-            </scale-modal>
 
         </div>
 

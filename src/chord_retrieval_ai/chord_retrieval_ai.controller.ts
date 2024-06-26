@@ -61,7 +61,7 @@ export class ChordRetrievalAiController {
   ) {
     const sendProgress = request.app.get('sendProgress');
 
-    let analysisResult = { audioAnalysis: {}, videoAnalysis: {}, videoOutputFile: null};
+    let analysisResult = { audioAnalysis: {}, videoAnalysis: {}, videoOutputFile: null };
     let audioAnalysisResult;
     let videoAnalysisResult;
     let tempAudioFilePath = null;
@@ -80,15 +80,24 @@ export class ChordRetrievalAiController {
 
       this.logger.log('Retrieving Video Data...');
       sendProgress('Retrieving Video Data...');
-      const videoData = await this.audioVideoService.getVideoData(tempVideoFilePath)
-      this.logger.debug(videoData)
+      const videoData = await this.audioVideoService.getVideoData(tempVideoFilePath);
+      this.logger.debug(videoData);
 
-      if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempVideoFilePath.endsWith(".mp4")){
+      switch (true) {
+        case videoData.supported_resolution === false && videoData.supported_ratio === false:
+          throw new Error('ResolutionAndRatioNotSupported');
+        case videoData.supported_resolution === false && videoData.supported_ratio === true:
+          throw new Error('ResolutionNotSupported');
+        case videoData.supported_resolution === true && videoData.supported_ratio === false:
+          throw new Error('RatioNotSupported');
+      }
+
+      if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempVideoFilePath.endsWith(".mp4")) {
         tempVideoFilePath = await this.audioVideoService.convert(tempVideoFilePath);
         (request.session as ISession).convertedVideo = true;
         this.logger.log('Converting Video Format...');
         sendProgress('Converting Video Format...');
-      } else{
+      } else {
         (request.session as ISession).convertedVideo = false;
       }
 
@@ -115,21 +124,17 @@ export class ChordRetrievalAiController {
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
       videoAnalysisResult.inputVideoData = videoData;
 
-      this.logger.debug(videoAnalysisResult)
+      this.logger.debug(videoAnalysisResult);
 
       if (videoAnalysisResult.appendAnimation == true) {
         this.logger.log("Appending T-Outro Animation...");
         sendProgress("Appending T-Outro Animation...");
-        tempVideoFilePath = await this.audioVideoService.appendAnimation(tempVideoFilePath, videoData, true)
-      } else {
+        tempVideoFilePath = await this.audioVideoService.appendAnimation(tempVideoFilePath, videoData, true);
       }
 
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
       analysisResult.videoOutputFile = tempVideoFilePath;
-
-      /*try {fs.unlinkSync(tempVideoFilePath);}
-        catch(error){this.logger.log("Error deleting temp. video", error)}*/
 
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
       (request.session as ISession).appendedAnimation = videoAnalysisResult.appendAnimation;
@@ -138,8 +143,16 @@ export class ChordRetrievalAiController {
       this.logger.log('Processing done');
       response.json(analysisResult);
     } catch (error) {
-      this.logger.error('Error during video handling', error.stack);
-      response.status(500).send(error.message);
+      this.logger.warn('Error during video handling', error.stack);
+      if (error.message === 'ResolutionAndRatioNotSupported') {
+        response.status(400).json({ error: 'Resolution and display ratio not supported.' });
+      } else if (error.message === 'ResolutionNotSupported') {
+        response.status(400).json({ error: 'Resolution not supported.' });
+      } else if (error.message === 'RatioNotSupported') {
+        response.status(400).json({ error: 'Display ratio not supported.' });
+      } else {
+        response.status(500).json({ error: error.message });
+      }
     }
   }
 

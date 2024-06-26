@@ -4,6 +4,7 @@ import * as ffprobePath from 'ffprobe-static';
 import * as ffprobeLinuxPath from '@ffprobe-installer/ffprobe'
 import * as path from 'path';
 import * as fs from 'fs';
+import { throwError } from 'rxjs';
 
 export interface VideoData {
   ratio: string;
@@ -14,6 +15,8 @@ export interface VideoData {
   codec_name_long: string | null;
   profile: string | null;
   pixel_format: string | null;
+  supported_ratio: boolean;
+  supported_resolution: boolean;
   audio: string | null;
 }
 
@@ -157,14 +160,17 @@ export class AudioVideoService {
     inputVideoPath:string
   ): Promise<VideoData> {
 
-    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec_name: null, codec_name_long:null,profile:null, pixel_format: null, audio: null}
+    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec_name: null, codec_name_long:null,profile:null, pixel_format: null, supported_ratio: null, supported_resolution: null, audio: null}
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath);
     this.logger.debug(videoStream)
     const audioStream = await this._getAudioCodecSettings(inputVideoPath);
     this.logger.debug(audioStream)
 
+    const resolutionRatioCheck = await this._checkResolution(videoStream);
 
+    videoData.supported_ratio = resolutionRatioCheck.supportedRatio
+    videoData.supported_resolution = resolutionRatioCheck.supportedResolution
     videoData.ratio = videoStream.display_aspect_ratio.replace(":", "_")
     videoData.width = videoStream.width
     videoData.height = videoStream.height
@@ -172,7 +178,6 @@ export class AudioVideoService {
     videoData.codec_name_long = videoStream.codec_long_name
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
-
     videoData.audio = audioStream.codec_long_name
 
 
@@ -190,6 +195,7 @@ export class AudioVideoService {
             videoData
           );
     })
+   
   }
   
   public async appendAnimation(
@@ -233,6 +239,21 @@ export class AudioVideoService {
     });
   }
 
+  private _checkResolution(videoStream) {
+    let supportedRatio = true
+    let supportedResolution = true
+
+    if (videoStream.display_aspect_ratio != "1:1" && videoStream.display_aspect_ratio != "16:9" && videoStream.display_aspect_ratio != "9:16") {
+      supportedRatio = false
+    } 
+
+    if (videoStream.width < 1080 || videoStream.heigth < 1080){
+      supportedResolution = false
+    }
+
+    return { supportedRatio:supportedRatio, supportedResolution: supportedResolution }
+    
+  }
   private _getVideoPath(inputPathName: string, inputPathExt: string, appendedAnimation: boolean) {
     if (appendedAnimation) {
       return `${inputPathName}-animation${inputPathExt}`;

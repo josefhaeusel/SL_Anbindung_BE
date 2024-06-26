@@ -5,11 +5,9 @@ const app = Vue.createApp({
 
             currentLayer: "layer1",
             showResultModal: false,
-            showWarningModal: false,
             showKeys:false,
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
-            filetypeValid: null,
-            showInvalidFileTypeToast: false,
+            showInvalidFormatToast: false,
             showResolutionHint:false,
 
             progressBar: {
@@ -44,7 +42,7 @@ const app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: true, keyDetected: false,logoDetected: false, commonResolution: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: true, keyDetected: false,logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -95,9 +93,11 @@ const app = Vue.createApp({
             }
         },
         handleReturn(){
-            this.showWarningModal=false;
+
             this.isLoadingAnalysis=false;
-            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: null, commonFiletype:null,fatalAnimationLength: null}
+            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype,fatalAnimationLength: null}
+            console.log("ACTION LIST:", this.actionList)
+
         },
         setProgress_API(message){
             console.log("Progress message from API:", message)
@@ -159,13 +159,18 @@ const app = Vue.createApp({
         async handleFileUpload(event) {
 
             this.video_file = event.target.files[0];
+            console.log(this.video_file)
             this.actionList.commonFiletype = await this.checkFiletype()
 
+            
             if (this.actionList.commonFiletype){
                 try {
                     this.isLoadingAnalysis = true;
                     this.initProgressBar()
                     const analysis = await uploadVideo_API(this.video_file);
+                    if (analysis.error) {
+                        throw new Error(analysis.error)
+                    }
 
                     await this.createVideoSources(analysis.videoOutputFile);
                     await this.loadVideoPlayer();
@@ -178,10 +183,10 @@ const app = Vue.createApp({
 
                 } catch (error){
                     console.log("Analysis Error:",error)
-                    this.handleProgressAnalysisError()
+                    this.handleProgressAnalysisError(error.message)
                 }} 
             else {
-                this.showInvalidFileTypeToast = true;
+                this.showInvalidFormatToast = true;
             }
 
         },
@@ -192,11 +197,24 @@ const app = Vue.createApp({
             return allowedFiletypes.has(this.video_file.type);
         },
 
-        handleProgressAnalysisError(){
-            this.showResolutionHint = false
-            this.progressBar.error = true
-            "Oops... Something went wrong. Please try uploading again."
+        handleProgressAnalysisError(error){
 
+            if (error == 'Resolution and display ratio not supported.'){
+                this.actionList.commonResolution, this.actionList.commonRatio = false
+            } else if (error == 'Resolution not supported.'){
+                this.actionList.commonResolution = false
+                this.actionList.commonRatio = true
+            } else if (error == 'Display ratio not supported.') {
+                this.actionList.commonResolution = true
+                this.actionList.commonRatio = false
+            } else {
+                this.progressBar.error = true
+            }
+
+            //TBD TOAST DISPLAY SEPARATE FROM FILETYPE
+            this.handleReturn()
+            this.showResolutionHint = true
+            this.showInvalidFormatToast = true
 
         },
         async analysisHandler(analysis) {
@@ -284,7 +302,6 @@ const app = Vue.createApp({
                 this.showResultModal = true
             }  else {
                 this.progressBar.error = true
-                this.showWarningModal = true;
             }
         
         },
