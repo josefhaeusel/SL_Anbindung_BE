@@ -102,6 +102,9 @@ const app = Vue.createApp({
         setProgress_API(message){
             console.log("Progress message:", message)
             switch (message) {
+                case 'Uploading Video...':
+                    this.progressBar.phase = 0
+                  break;
                 case 'Retrieving Video Data...':
                     this.progressBar.phase = 1
                   break;
@@ -170,6 +173,7 @@ const app = Vue.createApp({
             if (this.actionList.commonFiletype){
                 try {
                     this.isLoadingAnalysis = true;
+                    this.setProgress_API("Uploading Video...")
                     this.initProgressBar()
                     const analysis = await uploadVideo_API(this.video_file);
                     if (analysis.error) {

@@ -325,7 +325,18 @@
             white-space: nowrap;
         }
 
+        .fade-in-enter-from,
+        .fade-in-leave-to {
+            opacity: 0;
+        }
 
+        .fade-in-enter-to,
+        .fade-in-leave-from {
+            opacity: 1;
+        }
+        .fade-in-enter-active{
+            transition: opacity 0.5s ease-in-out;
+        }
 
         .fade-enter-from,
         .fade-leave-to {
@@ -336,10 +347,12 @@
         .fade-leave-from {
             opacity: 1;
         }
-
-        .fade-enter-active{
+        .fade-enter-active,
+        .fade-leave-active{
             transition: opacity 0.5s ease-in-out;
         }
+
+
         .shadow-fade-overall {
             position: absolute;
             align-self: flex-end;
@@ -375,7 +388,7 @@
 
     <div id="app">
 
-        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput-big"@change="handleFileUpload" accept="video/*"/>
+        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput-big"@change="handleFileUpload" accept="video/*" @click.prevent/>
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
 
@@ -391,11 +404,11 @@
         <!-- First Layer: Upload Area -->
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
 
-            <transition name="fade">
+            <transition name="fade-in-in">
             <div class="upload-container" v-if="!isLoadingAnalysis">
 
                 <div class="dropzone">
-                    <input type="file" id="fileInput" class="fileinput"@change="handleFileUpload" accept="video/*"/>
+                    <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
                     <span class="upload-instructions">Upload a Video or Drop the File Here</span>
                     <div class="format-info">Allowed Formats: MP4, WebM, OGG</div>
                 </div>
@@ -417,7 +430,7 @@
 
 
         
-            <transition name="fade">
+            <transition name="fade-in">
 
                     <scale-card v-show="isLoadingAnalysis" header="Analyzing..."style="width:100%">
 
