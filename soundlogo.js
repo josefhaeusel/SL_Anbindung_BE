@@ -43,7 +43,7 @@ const app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: true, keyDetected: false,logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false,logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -96,7 +96,7 @@ const app = Vue.createApp({
         handleReturn(){
 
             this.isLoadingAnalysis=false;
-            this.actionList= { success: false, audioEmpty: false, logoDetected: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype,fatalAnimationLength: null}
+            this.actionList= { success: false, audioEmpty: false, logoDetected: false, convertedVideo: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype,fatalAnimationLength: null}
             console.log("ACTION LIST:", this.actionList)
 
         },
@@ -129,13 +129,13 @@ const app = Vue.createApp({
                     break
                 case 'Done (on Client-side).':
                     clearInterval(this.progressBar.timer);
-                    this.progressBar.phase = 8
+                    this.progressBar.phase = 8;
                     this.progressBar.percentage = 101
-                  break;
+                    setTimeout(()=>{this.currentLayer = "layer2"; this.isLoadingAnalysis=false}, 1200)
+                    break;
               }
 
               this.progressBar.hasBeenActive.push(this.progressBar.phase)
-              console.log("this.progressBar.hasBeenActive",this.progressBar.hasBeenActive)
               if (this.progressBar.hasBeenActive.length > 3) {
                 this.progressBar.hasBeenActive.shift()
               }
@@ -143,7 +143,7 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100, 105],
+                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100],
                 texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 hasBeenActive: [0],
                 percentage: 0,
@@ -248,6 +248,7 @@ const app = Vue.createApp({
             console.log("Input Video Data:",analysis.videoAnalysis.inputVideoData)
             console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
 
+            this.actionList.convertedVideo = this.videoAnalysis.convertedVideo
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
@@ -325,6 +326,7 @@ const app = Vue.createApp({
         },   
         actionListModal(){
 
+
             if (!this.actionList.fatalAnimationLength){
                 this.showResultModal = true
             }  else {
@@ -332,34 +334,6 @@ const app = Vue.createApp({
             }
         
         },
-
-        /*async checkResolution() {
-
-            this.showResolutionHint = false
-
-            let width = videoPlayer.videoWidth()
-            let height = videoPlayer.videoHeight()
-            let ratio = width / height
-            console.log(width, height, ratio)
-    
-                if (ratio == (16/9) || ratio == (9/16) || ratio == 1) {
-                    this.actionList.commonRatio = true
-                }
-                else {
-                    this.actionList.commonRatio = false
-                    this.showResolutionHint = true
-    
-                }
-                if (width >= 1080 && height >= 1080) {
-                    this.actionList.commonResolution = true
-                }
-                else {
-                    this.actionList.commonResolution = false
-                    this.showResolutionHint= true
-    
-                }        
-        },*/
-
         setVideoMarker(){
 
             let left

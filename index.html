@@ -157,14 +157,19 @@
 
         .current-phase {
             margin-top: -5px;
+            align-items: center;
+            display: flex;
             color: var(--telekom-color-text-and-icon-additional);
             font-size: var(--telekom-color-text-and-icon-additional);      
         }
 
         .previous-phase {
             margin-top: -8px;
+            align-items: center;
+            display: flex;
+
             color: var(--telekom-color-text-and-icon-disabled);
-            font-size: var(--telekom-color-text-and-icon-additional)-4px;   
+            font-size: var(--telekom-color-text-and-icon-additional);   
             font-weight: var(--telekom-typography-font-weight-thin);
         }
 
@@ -216,6 +221,17 @@
             align-items: center;
             justify-content: space-between;
             padding-top: 20px;
+            position: relative;
+            height: auto;
+            width: 800px;
+        }
+
+        .av-actions-container {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 50px 0 50px 0;
             position: relative;
             height: auto;
             width: 800px;
@@ -383,7 +399,7 @@
             opacity: 1;
         }
         .subtitle-fade-enter-active{
-            transition: opacity 0.25s ease-in;
+            transition: opacity 0.5s ease-in;
         }
 
 
@@ -422,7 +438,7 @@
 
     <div id="app">
 
-        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInput" class="fileinput-big"@change="handleFileUpload" accept="video/*" @click.prevent/>
+        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'"type="file" id="fileInputBig" class="fileinput-big"@change="handleFileUpload" accept="video/*" @click.prevent/>
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
 
@@ -441,6 +457,7 @@
                 <div class="dropzone">
                     <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
                     <span class="upload-instructions">Upload a Video or Drop the File Here</span>
+                    <!--scale-icon-action-drag-and-drop accessibility-title="drag-and-drop"></scale-icon-action-drag-and-drop--> 
                     <div class="format-info">Allowed Formats: MP4, WebM, OGG</div>
                 </div>
 
@@ -476,7 +493,7 @@
 
                         <div class="progress-bar-subtitles">
                             <transition name="subtitle-fade" v-for="(phase, index) in progressBar.texts" >
-                                <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)">{{phase}}</p>
+                                <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)"><scale-icon-action-success size="14" v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length-1)"></scale-icon-action-success><span v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length-1)">&nbsp;&nbsp;</span>{{phase}}</p>
                             </transition>    
                         </div>
 
@@ -490,7 +507,7 @@
 
         </div>
 
-        <scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal"
+        <!--scale-modal heading="Soundlogo Added" size="default" :opened="showResultModal" class="scale-modal"
             @scale-before-close="currentLayer='layer2';isLoadingAnalysis=false" omit-closing-button>
             <div v-if="actionList.success">
                 <h2 style="margin-bottom: 3px;">Audiovisual Analysis:</h2>
@@ -545,7 +562,7 @@
             <scale-button slot="action" @click="currentLayer='layer2';isLoadingAnalysis=false; showResultModal=false">
                 View Result
             </scale-button>
-        </scale-modal>
+        </scale-modal-->
 
         <!-- Second Layer: Video, Controls, and Key Display -->
         <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
@@ -596,7 +613,50 @@
                     </div>
 
                 </div>
+
+                
+
+                
             </transition>
+
+            <div class="av-actions-container">
+                <scale-tab-nav size="large">
+                    <scale-tab-header slot="tab">
+                        <scale-icon-action-show-password></scale-icon-action-show-password>
+                        <span v-if="actionList.appendedAnimation">Appended Animation</span>
+                        <span v-if="actionList.logoDetected">Detected Animation</span>
+                    </scale-tab-header>
+                    <scale-tab-panel slot="panel">
+                        <span v-if="actionList.appendedAnimation">Because the T-Outro Animation could not be detected, is was appended to the videos ending.</span>
+                        <span v-if="actionList.logoDetected">The T-Outro Animation was detected by Computer-Vision AI.</span>
+                    </scale-tab-panel>
+                    <scale-tab-header slot="tab">
+                        <scale-icon-content-music></scale-icon-content-music> Set Soundlogo
+                    </scale-tab-header>
+                    <scale-tab-panel slot="panel">
+                        <span>The Telekom Soundlogo has been synchronized to the T-Outro animation.</span>
+                        <span v-if="!this.actionList.audioSegmentEmpty"> Its tonality and loudness have been matched to the AI-detected music. The music has been filtered and faded for a smooth transition.</span>
+                        <span v-if="actionList.audioEmpty"> Your video's <strong>audio track is empty or doesn't exist</strong>. The Soundlogo's tonality and loudness have been
+                            set to <strong>standardized values</strong>.</span>
+                        <span v-if="!actionList.audioEmpty && this.actionList.audioSegmentEmpty && !actionList.keyDetected">
+                            Your video ending (except animation) is silent. The Soundlogo's tonality has been set to <strong>standardized
+                                values</strong>.
+                        </span>
+                    </scale-tab-panel>
+                    <scale-tab-header  v-if="actionList.convertedVideo" slot="tab">
+                        <scale-icon-user-file-videos accessibility-title="videos"></scale-icon-user-file-videos> Converted Format
+                    </scale-tab-header>
+                    <scale-tab-panel v-if="actionList.convertedVideo"slot="panel">
+                        Converted video codec from {{this.videoAnalysis.inputVideoData.codec_name}} to H264 (.mp4).
+                    </scale-tab-panel>
+                    <scale-tab-header slot="tab">
+                        <scale-icon-t-product-usage accessibility-title="usage"></scale-icon-t-product-usage> Mastered Loudness
+                    </scale-tab-header>
+                    <scale-tab-panel slot="panel">
+                      The overall loudness of the audio-track has been set to standardized {{formatNumber(desiredMasterLUFS)}}LUFS.
+                    </scale-tab-panel>
+                </scale-tab-nav>
+            </div>
 
             <div v-if="feedback.show" class="feedback-container">
             

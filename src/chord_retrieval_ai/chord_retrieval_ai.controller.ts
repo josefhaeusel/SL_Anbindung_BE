@@ -61,11 +61,10 @@ export class ChordRetrievalAiController {
   ) {
     const sendProgress = request.app.get('sendProgress');
 
-    let analysisResult = { audioAnalysis: {}, videoAnalysis: {}, videoOutputFile: null };
+    let analysisResult = { audioAnalysis: {}, videoAnalysis: {convertedVideo:null}, videoOutputFile: null };
     let audioAnalysisResult;
     let videoAnalysisResult;
     let tempAudioFilePath = null;
-    let tempAnimationAppendedVideoFilePath;
 
     try {
       this.logger.log('Starting video upload handling');
@@ -134,6 +133,7 @@ export class ChordRetrievalAiController {
 
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
+      analysisResult.videoAnalysis.convertedVideo = (request.session as ISession).convertedVideo
       analysisResult.videoOutputFile = tempVideoFilePath;
 
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
