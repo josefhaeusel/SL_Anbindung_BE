@@ -47,7 +47,8 @@ const app = Vue.createApp({
 
             video_file: null,
             video_url:"",
-            vudei_path:"",
+            video_path:"",
+            inputVideoData:{},
             videoAnalysis:{logo_start: null, videoResolution: [null, null]},
             metadataLoadedOnce: false,
             playerHasBeenClicked: false,
@@ -245,10 +246,12 @@ const app = Vue.createApp({
         async analysisHandler(analysis) {
 
             this.videoAnalysis = analysis.videoAnalysis.analysis;
+
             console.log("Input Video Data:",analysis.videoAnalysis.inputVideoData)
             console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
 
-            this.actionList.convertedVideo = this.videoAnalysis.convertedVideo
+            this.inputVideoData = analysis.videoAnalysis.inputVideoData
+            this.actionList.convertedVideo = analysis.videoAnalysis.convertedVideo
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
@@ -527,6 +530,7 @@ let logoPlayer
 let logoBuffers
 let filter
 let filterEnvelope
+let audioPlayerCrossFade
 let video_url
 let audioPlayer
 let audioBuffer
@@ -823,13 +827,13 @@ async function loadAudioplayer(Context) {
 async function loadFilter(Context){
     const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
 
-    const audioPlayerCrossFade = new Tone.CrossFade()
-    audioPlayerCrossFade.fade.value = 0;
+    audioPlayerCrossFade = new Tone.CrossFade()
+    audioPlayerCrossFade.fade.value = 1;
     audioPlayerCrossFade.chain(envelope, master);
     audioPlayer.fan(audioPlayerCrossFade.a, filterEffect);
 
     filterEffect.connect(audioPlayerCrossFade.b);
-    filterEnvelope.connect(audioPlayerCrossFade.fade)
+    //filterEnvelope.connect(audioPlayerCrossFade.fade)
 
     return filterEffect
 
@@ -843,7 +847,7 @@ async function loadFilterEnvelope(){
         release: 0
     });
 
-    ampEnv.attackCurve ="cosine";
+    ampEnv.set({attackCurve:"linear"});
 
     return ampEnv
 }
