@@ -643,14 +643,14 @@
                                 values</strong>.
                         </span>
                     </scale-tab-panel>
-                    <scale-tab-header  v-if="actionList.convertedVideo" slot="tab">
-                        <scale-icon-user-file-videos accessibility-title="videos"></scale-icon-user-file-videos> Converted Format
+                    <scale-tab-header  v-show="actionList.convertedVideo" slot="tab">
+                        <scale-icon-user-file-videos></scale-icon-user-file-videos> Converted Format
                     </scale-tab-header>
-                    <scale-tab-panel v-if="actionList.convertedVideo"slot="panel">
-                        Converted video codec from {{inputVideoData.codec_name}} to H264 (.mp4).
+                    <scale-tab-panel v-show="actionList.convertedVideo"slot="panel">
+                        Converted video codec from <strong>{{inputVideoData.codec_name}}</strong> to <strong>H264</strong> (.mp4).
                     </scale-tab-panel>
                     <scale-tab-header slot="tab">
-                        <scale-icon-t-product-usage accessibility-title="usage"></scale-icon-t-product-usage> Mastered Loudness
+                        <scale-icon-t-product-usage></scale-icon-t-product-usage> Mastered Loudness
                     </scale-tab-header>
                     <scale-tab-panel slot="panel">
                       The overall loudness of the audio-track has been set to standardized {{formatNumber(desiredMasterLUFS)}}LUFS.

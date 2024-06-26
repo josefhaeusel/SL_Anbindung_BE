@@ -247,16 +247,16 @@ const app = Vue.createApp({
 
             this.videoAnalysis = analysis.videoAnalysis.analysis;
 
+            //VIDEO DATA
             console.log("Input Video Data:",analysis.videoAnalysis.inputVideoData)
             console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
-
             this.inputVideoData = analysis.videoAnalysis.inputVideoData
-            this.actionList.convertedVideo = analysis.videoAnalysis.convertedVideo
+
+            //KEY ANALYSIS PART
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
             const loudness = analysis.audioAnalysis.loudness;
 
-            //KEY ANALYSIS PART
             if (this.actionList.audioSegmentEmpty) {
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
@@ -292,7 +292,6 @@ const app = Vue.createApp({
                 console.log("APPENDED ANIMATION")
                 this.videoAnalysis.logo_start = this.audioDuration - 1.04
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
-                this.actionList.convertedVideo = analysis.videoAnalysis.convertedVideo;
             }
 
             //CONVERTED VIDEO PART
