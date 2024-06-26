@@ -64,10 +64,10 @@ const app = Vue.createApp({
     
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
     
-        eventSource.onmessage = (event) => {
+        eventSource.onmessage = async (event) => {
             this.progressBar.eventSource = true
             const data = JSON.parse(event.data);
-            this.setProgress_API(data.message);
+            await this.setProgress_API(data.message);
         };
     
         eventSource.onerror = (err) => {
@@ -100,7 +100,7 @@ const app = Vue.createApp({
             console.log("ACTION LIST:", this.actionList)
 
         },
-        setProgress_API(message){
+        async setProgress_API(message){
             console.log("Progress message:", message)
             switch (message) {
                 case 'Uploading Video...':
@@ -189,18 +189,18 @@ const app = Vue.createApp({
             if (this.actionList.commonFiletype){
                 try {
                     this.isLoadingAnalysis = true;
-                    this.setProgress_API('Uploading Video...');
+                    await this.setProgress_API('Uploading Video...');
                     this.initProgressBar()
                     const analysis = await uploadVideo_API(this.video_file);
                     if (analysis.error) {
                         throw new Error(analysis.error)
                     }
 
-                    this.setProgress_API("Loading Video...")
+                    await this.setProgress_API("Loading Video...")
                     await this.createVideoSources(analysis.videoOutputFile);
                     await this.loadVideoPlayer();
                     await this.extractAudioBuffer();
-                    this.setProgress_API('Done (on Client-side).')
+                    await this.setProgress_API('Done (on Client-side).')
                     
                     await this.analysisHandler(analysis);
                     await this.actionListModal()
