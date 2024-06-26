@@ -103,22 +103,22 @@ const app = Vue.createApp({
             console.log("Progress message from API:", message)
             switch (message) {
                 case 'Retrieving Video Data...':
-                    this.progressBar.phase = 0
-                  break;
-                case 'Converting Video Format...':
                     this.progressBar.phase = 1
                   break;
-                case 'Splitting Audio from Video...':
+                case 'Converting Video Format...':
                     this.progressBar.phase = 2
                   break;
-                case 'Retrieving Key and Loudness...':
+                case 'Splitting Audio from Video...':
                     this.progressBar.phase = 3
+                  break;
+                case 'Retrieving Key and Loudness...':
+                    this.progressBar.phase = 4
                     break;
                 case 'Detecting T-Outro Animation...':
-                    this.progressBar.phase = 4
+                    this.progressBar.phase = 5
                   break;
                 case 'Appending T-Outro Animation...':
-                    this.progressBar.phase = 5
+                    this.progressBar.phase = 6
                   break;
                 case 'Done.':
                     clearInterval(this.progressBar.timer);
@@ -131,8 +131,8 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [15, 30, 40, 60, 80, 100, 105],
-                texts: ['Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
+                phaseValues: [10, 20, 30, 40, 60, 80, 100, 105],
+                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -148,8 +148,10 @@ const app = Vue.createApp({
 
             if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
+            } else {
+                this.progressBar.percentage = clamp(this.progressBar.percentage, 0, this.progressBar.phaseValues[this.progressBar.phase])
             }
-
+            
             //If eventSource / SSE connection fails: fake progressBar phases
             if (!this.progressBar.eventSource && this.progressBar.phase!= 2 && percentDifference < 5) {
                 this.progressBar.phase += 1
