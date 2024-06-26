@@ -13,6 +13,7 @@ const app = Vue.createApp({
             progressBar: {
                 phase: 0,
                 phaseValues: [],
+                hasBeenActive: [],
                 texts: [],
                 percentage: 0,
                 timer: null,
@@ -31,9 +32,9 @@ const app = Vue.createApp({
             isLoadingAnalysis: false,
             isLoadingResult: false,
             soundlogoKeys: [
-                { id: '0', key: 'X' },
-                { id: '1', key: 'X' },
-                { id: '2', key: 'X' }
+                'X',
+                'X',
+                'X',
             ],
 
             selectedKey: { id: '1', key: 'X' },
@@ -131,14 +132,16 @@ const app = Vue.createApp({
                     this.progressBar.phase = 8
                     this.progressBar.percentage = 101
                   break;
-
               }
+
+              this.progressBar.hasBeenActive += this.progressBar.phase
         },
         initProgressBar(){
             this.progressBar={
                 phase: 0,
                 phaseValues: [10, 20, 30, 40, 60, 80, 95, 100, 105],
                 texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
+                hasBeenActive: [],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -147,6 +150,15 @@ const app = Vue.createApp({
 
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
+        getPhaseStyle(index){
+            if (index == this.progressBar.phase) {
+                return 'current-phase'
+            } else {
+                return 'previous-phase'
+
+            }
+        },
+
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
@@ -173,7 +185,7 @@ const app = Vue.createApp({
             if (this.actionList.commonFiletype){
                 try {
                     this.isLoadingAnalysis = true;
-                    this.setProgress_API("Uploading Video...")
+                    this.setProgress_API('Uploading Video...');
                     this.initProgressBar()
                     const analysis = await uploadVideo_API(this.video_file);
                     if (analysis.error) {
@@ -240,11 +252,11 @@ const app = Vue.createApp({
             if (this.actionList.audioSegmentEmpty) {
                 await this.setKeys("C major")
                 this.measuredLUFS = -20
-                console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1].key}, ${this.measuredLUFS} LUFS`);
+                console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1]}, ${this.measuredLUFS} LUFS`);
             }
             else if (likely_key == null){
                 await this.setKeys("C major")
-                console.log(`No Key Detected. Standardized Values: ${this.soundlogoKeys[1].key}.`);
+                console.log(`No Key Detected. Standardized Values: ${this.soundlogoKeys[1]}.`);
             } else
             {
                 this.actionList.keyDetected=true
@@ -391,14 +403,14 @@ const app = Vue.createApp({
             const key = logoKeyMap[keyName];
             const scale = keyToScale(key);
             for (let x = 0; x < this.soundlogoKeys.length; x++) {
-                this.soundlogoKeys[x].key = scale[x];
+                this.soundlogoKeys[x] = scale[x];
             }
             console.log("this.soundlogoKeys",this.soundlogoKeys)
             this.updateLogoKey()
         },
         updateLogoKey(id='1'){
             this.selectedKey.id = id;
-            this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id].key;
+            this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id];
             console.log("Selected Key", this.selectedKey.key);
             //updateLogoBuffer(this.selectedKey.key )
         },

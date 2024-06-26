@@ -147,6 +147,26 @@
             --color-status: #000
         }
 
+        .progress-bar-subtitles {
+            display: flex;
+            flex-direction: column-reverse;
+            margin-top: 20px;
+            margin-bottom: -15px;
+        }
+
+        .current-phase {
+            margin-top: -5px;
+            color: var(--telekom-color-text-and-icon-additional);
+            font-size: var(--telekom-color-text-and-icon-additional);      
+        }
+
+        .previous-phase {
+            margin-top: -8px;
+            color: var(--telekom-color-text-and-icon-disabled);
+            font-size: var(--telekom-color-text-and-icon-additional)-4px;   
+            font-weight: var(--telekom-typography-font-weight-thin);
+        }
+
         .layer {
             position: relative;
             top: 0;
@@ -392,14 +412,11 @@
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
 
-
         <div class="title-container">
             <div class="title">Soundlogo Tool</div>
             <div class="description">Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything
                 on brand with the help of AI.</div>
         </div>
-
-
 
         <!-- First Layer: Upload Area -->
         <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
@@ -441,8 +458,13 @@
                         <h4 style="margin: 10px 0 0 0; font: var(--telekom-text-style-heading-4);">Analyzing...</h4>
                         <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error"
                             :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error"
-                            label="Audiovisual Analysis" :status-description="progressBar.texts[progressBar.phase]"
-                            show-status="true"></scale-progress-bar>
+                            label="Audiovisual Analysis" show-status="true"></scale-progress-bar>
+
+                        <div class="progress-bar-subtitles">
+                            <transition name="fade" v-for="(phase, index) in progressBar.texts" >
+                                <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)">{{phase}}</p>
+                            </transition>    
+                        </div>
 
                         <scale-notification v-if="progressBar.error"
                             style="color:--telekom-color-text-and-icon-standard; margin: 10px"
@@ -553,8 +575,8 @@
                                 Recommended
                             </span>
                             <scale-segmented-button id="keyDisplay" size="medium">
-                                <scale-segment v-for="item in soundlogoKeys" :selected="item.id === selectedKey.id"
-                                    @click="updateLogoKey(item.id)">{{item.key}}</option>
+                                <scale-segment v-for="(key, index) in soundlogoKeys" :selected="index == selectedKey.id"
+                                    @click="updateLogoKey(index)">{{key}}</option>
                             </scale-segmented-button>
                         </scale-tooltip>
                     </div>
