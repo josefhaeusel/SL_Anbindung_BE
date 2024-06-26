@@ -12,8 +12,8 @@ const app = Vue.createApp({
 
             progressBar: {
                 phase: 0,
-                phaseValues: [15, 30, 40, 60, 80, 100, 105],
-                texts: ['Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
+                phaseValues: [],
+                texts: [],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -100,7 +100,7 @@ const app = Vue.createApp({
 
         },
         setProgress_API(message){
-            console.log("Progress message from API:", message)
+            console.log("Progress message:", message)
             switch (message) {
                 case 'Retrieving Video Data...':
                     this.progressBar.phase = 1
@@ -120,9 +120,12 @@ const app = Vue.createApp({
                 case 'Appending T-Outro Animation...':
                     this.progressBar.phase = 6
                   break;
-                case 'Done.':
-                    clearInterval(this.progressBar.timer);
+                case 'Loading Video...':
                     this.progressBar.phase = 7
+                    break
+                case 'Done (on Client-side).':
+                    clearInterval(this.progressBar.timer);
+                    this.progressBar.phase = 8
                     this.progressBar.percentage = 101
                   break;
 
@@ -131,8 +134,8 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [10, 20, 30, 40, 60, 80, 100, 105],
-                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Done."],
+                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100, 105],
+                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 percentage: 0,
                 timer: null,
                 error: false,
@@ -163,7 +166,6 @@ const app = Vue.createApp({
             this.video_file = event.target.files[0];
             console.log(this.video_file)
             this.actionList.commonFiletype = await this.checkFiletype()
-
             
             if (this.actionList.commonFiletype){
                 try {
@@ -174,9 +176,11 @@ const app = Vue.createApp({
                         throw new Error(analysis.error)
                     }
 
+                    this.setProgress_API("Loading Video...")
                     await this.createVideoSources(analysis.videoOutputFile);
                     await this.loadVideoPlayer();
                     await this.extractAudioBuffer();
+                    this.setProgress_API('Done (on Client-side).')
                     
                     await this.analysisHandler(analysis);
                     await this.actionListModal()

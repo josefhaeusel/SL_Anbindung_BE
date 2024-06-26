@@ -75,7 +75,7 @@ export class AudioVideoService {
       this._initFfmpeg();
 
       ffmpeg(inputPath)
-        .outputOptions(['-pix_fmt yuv420p'])
+        .outputOptions(['-pix_fmt yuv420p -preset medium'])
         .output(videoOutputPath)
         .on('error', (error) => {
           this.logger.error('error:', error);

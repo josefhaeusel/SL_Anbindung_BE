@@ -139,7 +139,7 @@ export class ChordRetrievalAiController {
       (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
       (request.session as ISession).appendedAnimation = videoAnalysisResult.appendAnimation;
 
-      sendProgress('Done.');
+      sendProgress('Done (on server-side).');
       this.logger.log('Processing done');
       response.json(analysisResult);
     } catch (error) {
