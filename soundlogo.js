@@ -496,19 +496,24 @@ const app = Vue.createApp({
 
         },
         async renderAudio() {
-            const renderedBuffer = await Tone.Offline(async ({ transport }) => {
-                await setupAudioNodes(transport.context);
-                await this.extractAudioBuffer()
-                //await updateLogoBuffer(this.selectedKey.key)
-                await this.setLoudness()
+            try {
+                const renderedBuffer = await Tone.Offline(async ({ transport }) => {
+                    await setupAudioNodes(transport.context);
+                    await this.extractAudioBuffer();
+                    //await updateLogoBuffer(this.selectedKey.key)
+                    await this.setLoudness();
 
-                scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
-                scheduleFilter(this.audioDuration, 0, this.soundlogoPosition, transport)
-                scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
-                transport.start();
-            }, this.audioDuration)
+                    scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
+                    scheduleFilter(this.audioDuration, 0, this.soundlogoPosition, transport);
+                    scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
+                    transport.start();
+                }, this.audioDuration)
+            
 
-            console.log(renderedBuffer)
+            console.log(renderedBuffer)}
+            catch (error) {
+                console.log("Error during renderAudio()", error)
+            }
 
             //Reinitialize regular Tone.Context
             await setupAudioNodes(Tone.getContext());
