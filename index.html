@@ -218,7 +218,7 @@
         .controls-container {
             display: flex;
             flex-wrap: nowrap;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             padding-top: 20px;
             position: relative;
@@ -229,8 +229,9 @@
         .av-actions-container {
             display: flex;
             flex-wrap: nowrap;
-            align-items: center;
+            align-items: flex-start;
             justify-content: flex-start;
+            flex-direction: column;
             padding: 50px 0 50px 0;
             position: relative;
             height: auto;
@@ -621,6 +622,8 @@
 
 
             <div class="av-actions-container">
+                <h1 style="margin-bottom: 3px;">What we did:</h2>
+
                 <scale-tab-nav size="large">
                     <scale-tab-header slot="tab">
                         <scale-icon-action-show-password></scale-icon-action-show-password>

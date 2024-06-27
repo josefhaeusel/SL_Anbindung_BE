@@ -88,8 +88,8 @@ export class AudioVideoService {
         })
         .on('end', () => {
           this.logger.debug('Converting done');
-
           resolve(videoOutputPath);
+          fs.unlinkSync(inputPath)
         })
         .run();
     });
@@ -172,6 +172,8 @@ export class AudioVideoService {
       .on('end', () => {
         this.logger.debug('Appending animation done:', videoOutputPath);
         resolve(basenameOnly ? path.basename(videoOutputPath) : videoOutputPath);
+        fs.unlinkSync(inputVideoPath)
+        this.logger.log(`Deleted ${inputVideoPath}`)
       })
       .save(videoOutputPath);
 
@@ -205,18 +207,9 @@ export class AudioVideoService {
 
     const videoInputAudioCodec =
       await this._getAudioCodecSettings(videoInputPath);
-
-    const audioOutputPath = this._getAudioPath(
-      inputVideoPathName,
-      inputVideoPathExt,
-      videoInputAudioCodec,
-    );
+      this.logger.debug(`videoAudioCodec: ${videoInputAudioCodec}`);
 
     this.logger.debug(`videoInputPath: ${videoInputPath}`);
-    this.logger.debug(`audioOutputPath: ${audioOutputPath}`);
-
-    const audioCodec = await this._getAudioCodecSettings(audioOutputPath);
-    this.logger.debug(`audioCodec: ${audioCodec.codec_name}`);
 
     return new Promise((resolve, reject) => {
       this._initFfmpeg();
@@ -225,7 +218,7 @@ export class AudioVideoService {
         .addInput(videoInputPath)
         .addInput(inputAudioPath)
         .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
-        .audioCodec(audioCodec.codec_name)
+        .audioCodec(videoInputAudioCodec.codec_name)
         .format(inputVideoPathExt.replace('.', ''))
         .on('error', (error) => {
           this.logger.error('error:', error);

@@ -148,6 +148,13 @@ export class ChordRetrievalAiController {
       sendProgress('Done (on server-side).');
       this.logger.log('Processing done');
       response.json(analysisResult);
+
+      fs.unlinkSync(tempAudioFilePath);
+      this.logger.warn(`Deleted ${tempAudioFilePath}`)
+
+      fs.unlinkSync(tempOriginalVideoFilePath);
+      this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`)
+
     } catch (error) {
       this.logger.warn('Error during video handling', error.stack);
       if (error.message === 'ResolutionAndRatioNotSupported') {
@@ -197,10 +204,16 @@ export class ChordRetrievalAiController {
         appendedAnimation,
       );
 
-      //fs.unlinkSync(tempAudioFilePath);
+      fs.unlinkSync(tempAudioFilePath);
+      this.logger.warn(`Deleted ${tempAudioFilePath}`);
 
       this.logger.log(`Audio ${tempAudioFilePath} and Video ${tempVideoFilePath} joined as ${renderedResult}`);
-      response.json({ renderedResult: renderedResult });
+      response.json({ renderedResult: renderedResult })
+
+      /*fs.unlinkSync(tempOriginalVideoFilePath);
+      this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`);*/
+
+
     } catch (error) {
       this.logger.error('Error during audio handling', error.stack);
       response.status(500).json({ error: error.message });

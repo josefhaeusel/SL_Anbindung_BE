@@ -290,7 +290,7 @@ const app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.04
+                this.videoAnalysis.logo_start = this.audioDuration - 1.2 //Original Timing -1.04
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
