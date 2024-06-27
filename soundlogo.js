@@ -484,7 +484,6 @@ const app = Vue.createApp({
         async downloadVideo() {
             this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
-            console.log(this.video_file)
             const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
             this.isLoadingResult = false;
         },
@@ -510,16 +509,14 @@ const app = Vue.createApp({
                 }, this.audioDuration)
             
 
-            console.log(renderedBuffer)}
+                console.log(renderedBuffer)
+                //Reinitialize regular Tone.Context
+                await setupAudioNodes(Tone.getContext());
+                return renderedBuffer }
+                
             catch (error) {
                 console.log("Error during renderAudio()", error)
             }
-
-            //Reinitialize regular Tone.Context
-            await setupAudioNodes(Tone.getContext());
-
-            return renderedBuffer
-
         }
 
     }
