@@ -18,7 +18,7 @@ import { AudioVideoService } from '../audio-video/audio-video.service';
 import { ComputerVisionService } from '../computer_vision/computer_vision.service';
 
 export interface ISession extends Session {
-  tempVideoFilePath?: string;
+  tempOriginalVideoFilePath?: string;
   appendedAnimation?: boolean;
   convertedVideo?: boolean;
 }
@@ -69,17 +69,20 @@ export class ChordRetrievalAiController {
     try {
       this.logger.log('Starting video upload handling');
 
-      let tempVideoFilePath = path.join(
+      let tempOriginalVideoFilePath = path.join(
         __dirname,
         '../../temp_uploads/video',
         file.originalname,
       );
+      let tempVideoOutputFilePath
 
-      await fs.writeFileSync(tempVideoFilePath, file.buffer);
+
+      this.logger.log(tempOriginalVideoFilePath)
+      await fs.writeFileSync(tempOriginalVideoFilePath, file.buffer);
 
       this.logger.log('Retrieving Video Data...');
       sendProgress('Retrieving Video Data...');
-      const videoData = await this.audioVideoService.getVideoData(tempVideoFilePath);
+      const videoData = await this.audioVideoService.getVideoData(tempOriginalVideoFilePath);
       this.logger.debug(videoData);
 
       switch (true) {
@@ -91,8 +94,8 @@ export class ChordRetrievalAiController {
           throw new Error('RatioNotSupported');
       }
 
-      if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempVideoFilePath.endsWith(".mp4")) {
-        tempVideoFilePath = await this.audioVideoService.convert(tempVideoFilePath);
+      if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempOriginalVideoFilePath.endsWith(".mp4")) {
+        tempOriginalVideoFilePath = await this.audioVideoService.convert(tempOriginalVideoFilePath);
         (request.session as ISession).convertedVideo = true;
         this.logger.log('Converting Video Format...');
         sendProgress('Converting Video Format...');
@@ -104,7 +107,9 @@ export class ChordRetrievalAiController {
       sendProgress('Splitting Audio from Video...');
 
       try {
-        tempAudioFilePath = await this.audioVideoService.split(tempVideoFilePath);
+        const splitFiles = await this.audioVideoService.split(tempOriginalVideoFilePath);
+        tempVideoOutputFilePath = splitFiles.video
+        tempAudioFilePath = splitFiles.audio
       } catch (error) {
         this.logger.error('Error during audio/video splitting', error.stack);
       }
@@ -115,12 +120,12 @@ export class ChordRetrievalAiController {
       if (tempAudioFilePath != null) {
         audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
       } else {
-        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempVideoFilePath);
+        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempOriginalVideoFilePath);
       }
 
       sendProgress('Detecting T-Outro Animation...');
       this.logger.log('Detecting T-Outro Animation...');
-      videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoFilePath);
+      videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoOutputFilePath);
       videoAnalysisResult.inputVideoData = videoData;
 
       this.logger.debug(videoAnalysisResult);
@@ -128,16 +133,17 @@ export class ChordRetrievalAiController {
       if (videoAnalysisResult.appendAnimation == true) {
         this.logger.log("Appending T-Outro Animation...");
         sendProgress("Appending T-Outro Animation...");
-        tempVideoFilePath = await this.audioVideoService.appendAnimation(tempVideoFilePath, videoData, true);
+        tempVideoOutputFilePath = await this.audioVideoService.appendAnimation(tempVideoOutputFilePath, videoData, true);
       }
 
       analysisResult.audioAnalysis = audioAnalysisResult;
       analysisResult.videoAnalysis = videoAnalysisResult;
-      analysisResult.videoAnalysis.convertedVideo = (request.session as ISession).convertedVideo
-      analysisResult.videoOutputFile = tempVideoFilePath;
+      analysisResult.videoOutputFile = tempVideoOutputFilePath;
+      analysisResult.videoAnalysis.convertedVideo = (request.session as ISession).convertedVideo;
 
-      (request.session as ISession).tempVideoFilePath = tempVideoFilePath;
+      (request.session as ISession).tempOriginalVideoFilePath = tempOriginalVideoFilePath;
       (request.session as ISession).appendedAnimation = videoAnalysisResult.appendAnimation;
+
 
       sendProgress('Done (on server-side).');
       this.logger.log('Processing done');
@@ -165,6 +171,7 @@ export class ChordRetrievalAiController {
   ) {
     try {
       this.logger.log('Starting audio upload handling');
+      this.logger.log(file.originalname)
 
       const tempAudioFilePath = path.join(
         __dirname,
@@ -175,14 +182,19 @@ export class ChordRetrievalAiController {
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
       const appendedAnimation = (request.session as ISession).appendedAnimation;
-      const tempVideoFilePath = (request.session as ISession).tempVideoFilePath;
+      const tempOriginalVideoFilePath = (request.session as ISession).tempOriginalVideoFilePath;
+
+      const tempVideoFilePath = path.join(
+        __dirname,
+        '../../temp_uploads/video',
+        tempOriginalVideoFilePath,
+      );
 
       const renderedResult = await this.audioVideoService.join(
-        tempVideoFilePath,
+        tempOriginalVideoFilePath,
         tempAudioFilePath,
         true,
-        appendedAnimation
-
+        appendedAnimation,
       );
 
       //fs.unlinkSync(tempAudioFilePath);

@@ -484,8 +484,8 @@ const app = Vue.createApp({
         async downloadVideo() {
             this.isLoadingResult = true;
             const renderedBuffer = await this.renderAudio();
-            const basename = this.video_file.name.split(".")[0]
-            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, basename);
+            console.log(this.video_file)
+            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
             this.isLoadingResult = false;
         },
         async downloadAudio() {
@@ -879,8 +879,10 @@ async function updateLogoBuffer(key) {
 }
 
 
-async function uploadRenderedAudio_API(buffer, name) {
+async function uploadRenderedAudio_API(buffer, video_file_name) {
 
+    const name = video_file_name.split('.').slice(0, -1).join('.')
+    console.log(name)
     const formData = await audioToWavFile(buffer, name);
 
     try {

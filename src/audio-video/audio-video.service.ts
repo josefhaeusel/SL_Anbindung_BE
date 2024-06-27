@@ -4,7 +4,6 @@ import * as ffprobePath from 'ffprobe-static';
 import * as ffprobeLinuxPath from '@ffprobe-installer/ffprobe'
 import * as path from 'path';
 import * as fs from 'fs';
-import { throwError } from 'rxjs';
 
 export interface VideoData {
   ratio: string;
@@ -20,11 +19,16 @@ export interface VideoData {
   audio: string | null;
 }
 
+export interface splitFiles {
+  audio: string;
+  video: string;
+}
+
 @Injectable()
 export class AudioVideoService {
   private readonly logger = new Logger(AudioVideoService.name);
 
-  public async split(inputPath: string): Promise<string> {
+  public async split(inputPath: string): Promise<splitFiles> {
     const audioCodec = await this._getAudioCodecSettings(inputPath);
 
     const inputPathParsed = path.parse(inputPath);
@@ -32,7 +36,7 @@ export class AudioVideoService {
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
     const inputPathExt = inputPathParsed.ext;
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true, false);
     const audioOutputPath = this._getAudioPath(
       inputPathName,
       inputPathExt,
@@ -57,7 +61,7 @@ export class AudioVideoService {
         .on('end', () => {
           this.logger.debug('Splitting done');
 
-          resolve(audioOutputPath);
+          resolve({audio: audioOutputPath, video: videoOutputPath});
         })
         .run();
     });
@@ -67,7 +71,7 @@ export class AudioVideoService {
 
     const inputPathParsed = path.parse(inputPath);
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
-    const videoOutputPath = this._getVideoPath(inputPathName, '.mp4', false);
+    const videoOutputPath = this._getVideoPath(inputPathName, '.mp4', false, false);
 
     this.logger.debug(`videoOutputPath: ${videoOutputPath}`);
 
@@ -88,71 +92,6 @@ export class AudioVideoService {
           resolve(videoOutputPath);
         })
         .run();
-    });
-  }
-
-  public async join(
-    outputVideoPath: string,
-    inputAudioPath: string,
-    basenameOnly = false,
-    animationAppended = false,
-  ): Promise<string> {
-    this.logger.debug(`outputVideoPath: ${outputVideoPath}`);
-    this.logger.debug(`inputAudioPath: ${inputAudioPath}`);
-
-    const outputVideoPathParsed = path.parse(outputVideoPath);
-
-    const inputVideoPathName = path.join(
-      outputVideoPathParsed.dir,
-      outputVideoPathParsed.name,
-    );
-    const inputVideoPathExt = outputVideoPathParsed.ext;
-
-    const videoInputPath = this._getVideoPath(
-      inputVideoPathName,
-      inputVideoPathExt,
-      animationAppended
-    );
-
-    const videoInputAudioCodec =
-      await this._getAudioCodecSettings(videoInputPath);
-
-    const audioOutputPath = this._getAudioPath(
-      inputVideoPathName,
-      inputVideoPathExt,
-      videoInputAudioCodec,
-    );
-
-    this.logger.debug(`videoInputPath: ${videoInputPath}`);
-    this.logger.debug(`audioOutputPath: ${audioOutputPath}`);
-
-    const audioCodec = await this._getAudioCodecSettings(audioOutputPath);
-    this.logger.debug(`audioCodec: ${audioCodec.codec_name}`);
-
-    return new Promise((resolve, reject) => {
-      this._initFfmpeg();
-
-      ffmpeg()
-        .addInput(videoInputPath)
-        .addInput(inputAudioPath)
-        .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
-        .audioCodec(audioCodec.codec_name)
-        .format(inputVideoPathExt.replace('.', ''))
-        .on('error', (error) => {
-          this.logger.error('error:', error);
-
-          reject(error);
-        })
-        .on('end', () => {
-          this.logger.debug('Joining done');
-
-          resolve(
-            basenameOnly
-              ? path.basename(outputVideoPath)
-              : outputVideoPath,
-          );
-        })
-        .saveToFile(outputVideoPath);
     });
   }
 
@@ -210,7 +149,7 @@ export class AudioVideoService {
     const inputPathExt = inputPathParsed.ext;
 
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false, true);
 
     const appendAnimationPath = path.resolve(`.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`)
 
@@ -239,6 +178,73 @@ export class AudioVideoService {
     });
   }
 
+
+  public async join(
+    outputVideoPath: string,
+    inputAudioPath: string,
+    basenameOnly = false,
+    appendedAnimation = false,
+  ): Promise<string> {
+    this.logger.debug(`outputVideoPath: ${outputVideoPath}`);
+    this.logger.debug(`inputAudioPath: ${inputAudioPath}`);
+
+    const outputVideoPathParsed = path.parse(outputVideoPath);
+
+    const inputVideoPathName = path.join(
+      outputVideoPathParsed.dir,
+      outputVideoPathParsed.name,
+    );
+    const inputVideoPathExt = outputVideoPathParsed.ext;
+
+    const videoInputPath = this._getVideoPath(
+      inputVideoPathName,
+      inputVideoPathExt,
+      true,
+      appendedAnimation,
+    );
+
+    const videoInputAudioCodec =
+      await this._getAudioCodecSettings(videoInputPath);
+
+    const audioOutputPath = this._getAudioPath(
+      inputVideoPathName,
+      inputVideoPathExt,
+      videoInputAudioCodec,
+    );
+
+    this.logger.debug(`videoInputPath: ${videoInputPath}`);
+    this.logger.debug(`audioOutputPath: ${audioOutputPath}`);
+
+    const audioCodec = await this._getAudioCodecSettings(audioOutputPath);
+    this.logger.debug(`audioCodec: ${audioCodec.codec_name}`);
+
+    return new Promise((resolve, reject) => {
+      this._initFfmpeg();
+
+      ffmpeg()
+        .addInput(videoInputPath)
+        .addInput(inputAudioPath)
+        .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
+        .audioCodec(audioCodec.codec_name)
+        .format(inputVideoPathExt.replace('.', ''))
+        .on('error', (error) => {
+          this.logger.error('error:', error);
+
+          reject(error);
+        })
+        .on('end', () => {
+          this.logger.debug('Joining done');
+
+          resolve(
+            basenameOnly
+              ? path.basename(outputVideoPath)
+              : outputVideoPath,
+          );
+        })
+        .saveToFile(outputVideoPath);
+    });
+  }
+
   private _checkResolution(videoStream) {
     let supportedRatio = true
     let supportedResolution = true
@@ -254,12 +260,15 @@ export class AudioVideoService {
     return { supportedRatio:supportedRatio, supportedResolution: supportedResolution }
     
   }
-  private _getVideoPath(inputPathName: string, inputPathExt: string, appendedAnimation: boolean) {
-    if (appendedAnimation) {
-      return `${inputPathName}-animation${inputPathExt}`;
-    } else {
-      return `${inputPathName}-video${inputPathExt}`;
+  private _getVideoPath(inputPathName: string, inputPathExt: string, splitVideo: boolean, appendAnimation: boolean) {
+    let insertedString = ""
+    if (splitVideo){
+      insertedString += "-video"
     }
+    if (appendAnimation){
+      insertedString += "-animation"
+    }
+      return `${inputPathName}${insertedString}${inputPathExt}`;
   }
 
   private _getAudioPath(
