@@ -482,10 +482,15 @@ const app = Vue.createApp({
             stopTransports();
         },
         async downloadVideo() {
-            this.isLoadingResult = true;
-            const renderedBuffer = await this.renderAudio();
-            const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
-            this.isLoadingResult = false;
+            try {
+                this.isLoadingResult = true;
+                const renderedBuffer = await this.renderAudio();
+                const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
+                this.isLoadingResult = false;
+            } catch (error) {
+                console.log("Error during downloadVideo()", error)
+                this.isLoadingResult = false;
+            }
         },
         async downloadAudio() {
             this.isLoadingResult = true;
@@ -513,7 +518,7 @@ const app = Vue.createApp({
                 //Reinitialize regular Tone.Context
                 await setupAudioNodes(Tone.getContext());
                 return renderedBuffer }
-                
+
             catch (error) {
                 console.log("Error during renderAudio()", error)
             }
