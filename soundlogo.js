@@ -414,7 +414,7 @@ const app = Vue.createApp({
                     throw new Error('Unsupported video format');
                 }
             
-                videoPlayer.src({
+                await videoPlayer.src({
                     type: type,
                     src: this.video_path
                 });
