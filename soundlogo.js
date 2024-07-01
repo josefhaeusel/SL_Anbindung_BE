@@ -414,18 +414,20 @@ const app = Vue.createApp({
                     throw new Error('Unsupported video format');
                 }
             
-                await videoPlayer.src({
+                videoPlayer.src({
                     type: type,
                     src: this.video_path
                 });
-                await videoPlayer.load();
+                //await videoPlayer.load();
+                await videoPlayer.ready(function () {
+
+                    console.log("Video player loaded", videoPlayer)
+                })
 
                 this.videoPlayerLUFS = -26.71;
                 this.setLoudness()
                 this.volumeElement = document.querySelector('.vjs-volume-level');
                 this.volumeElement.style.width = "70%"
-
-                console.log("Video player loaded", videoPlayer)
 
             } catch (error) {
                 console.error("Error loading video-player",error)
