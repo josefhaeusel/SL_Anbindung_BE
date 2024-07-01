@@ -9,7 +9,6 @@ let video_url
 let audioPlayer
 let audioBuffer
 let envelope
-let videoPlayer
 let master
 
 const app = Vue.createApp({
@@ -74,31 +73,31 @@ const app = Vue.createApp({
     },
 
     async mounted() {
-
         await setup();
-
-        this.videoPlayer = videojs("myVideo")
-        console.log("VIDEO PLAYER", this.videoPlayer)
-
-        this.$refs.myVideo.addEventListener('play', this.startPlayback);
-        this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
-        this.$refs.myVideo.addEventListener('volumechange', this.updateListeningVolume);
+    
+        this.videoPlayer = videojs("myVideo");
+        console.log("VIDEO PLAYER", this.videoPlayer);
+    
+        this.videoPlayer.ready(() => {
+            console.log("Video player is ready");
+            this.videoPlayer.on('play', this.startPlayback);
+            this.videoPlayer.on('pause', this.stopPlayback);
+            this.videoPlayer.on('volumechange', this.updateListeningVolume);
+        });
     
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
     
         eventSource.onmessage = async (event) => {
-            this.progressBar.eventSource = true
+            this.progressBar.eventSource = true;
             const data = JSON.parse(event.data);
             await this.setProgress_API(data.message);
         };
     
         eventSource.onerror = (err) => {
-            this.progressBar.eventSource = false
+            this.progressBar.eventSource = false;
             console.error('EventSource failed:', err);
             eventSource.close();
-
         };
-    
     },
 
     methods: {
@@ -418,11 +417,9 @@ const app = Vue.createApp({
             //updateLogoBuffer(this.selectedKey.key )
         },
         async loadVideoPlayer() {
-
-
+            console.log("Loading", this.video_path);
+    
             let type = '';
-            console.log("Loading", this.video_path)
-
             try {
                 if (this.video_file.name.endsWith('.mp4')) {
                     type = 'video/mp4';
@@ -433,27 +430,30 @@ const app = Vue.createApp({
                 } else {
                     throw new Error('Unsupported video format');
                 }
-            
+    
+                // Ensure video path is unique to prevent caching issues
+                const videoUrl = `${this.video_path}?${new Date().getTime()}`;
+    
                 this.videoPlayer.src({
                     type: type,
-                    src: this.video_path
+                    src: videoUrl
                 });
-                //await videoPlayer.load();
-                await this.videoPlayer.ready(function () {
-
-                    console.log("Video player loaded", this.videoPlayer)
-                })
-
-                this.videoPlayerLUFS = -26.71;
-                this.setLoudness()
-                this.volumeElement = document.querySelector('.vjs-volume-level');
-                this.volumeElement.style.width = "70%"
-
+    
+                // Ensure the video is loaded before playing
+                this.videoPlayer.on('loadeddata', () => {
+                    console.log("Video data loaded");
+                    this.videoPlayerLUFS = -26.71;
+                    this.setLoudness();
+                    this.volumeElement = document.querySelector('.vjs-volume-level');
+                    this.volumeElement.style.width = "70%";
+                });
+    
+                this.videoPlayer.load();
+    
             } catch (error) {
-                console.error("Error loading videoPlayer",error)
+                console.error("Error loading videoPlayer", error);
             }
         },
-
         async setLoudness(){
 
             const soundlogoDb = this.measuredLUFS - this.soundlogoLUFS;
