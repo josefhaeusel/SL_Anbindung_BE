@@ -74,18 +74,18 @@ const I18n = VueI18n.createI18n({
             },
             actions: {
                 title: 'Was wir erledigt haben:',
-                appendedAnimation: 'Animation Angebunden',
-                logoDetected: 'Animation Erkannt',
+                appendedAnimation: 'Animation angebunden',
+                logoDetected: 'Animation erkannt',
                 appendedDescription: 'Da die T-Outro-Animation nicht erkannt werden konnte, wurde sie an das Videoende angehängt.',
                 detectedDescription: 'Die T-Outro-Animation wurde durch Computer-Vision AI erkannt.',
-                setSoundlogo: 'Soundlogo festlegen',
+                setSoundlogo: 'Soundlogo festgelegt',
                 synchronized: 'Das Telekom-Soundlogo wurde mit der T-Outro-Animation synchronisiert.',
                 matched: 'Seine Tonalität und Lautstärke wurden an die von der KI erkannte Musik angepasst. Die Musik wurde gefiltert und für einen sanften Übergang ausgeblendet.',
                 audioEmpty: 'Die Audiospur Ihres Videos ist leer oder existiert nicht. Die Tonalität und Lautstärke des Soundlogos wurden auf standardisierte Werte eingestellt.',
                 silentEnding: 'Ihr Videoende (außer Animation) ist still. Die Tonalität des Soundlogos wurde auf standardisierte Werte eingestellt.',
-                convertedFormat: 'Konvertiertes Format',
+                convertedFormat: 'Format konvertiert',
                 convertedDescription: 'Videocodec konvertiert von',
-                masteredLoudness: 'Gemasterte Lautstärke',
+                masteredLoudness: 'Lautstärke gemastered',
                 loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte Werte gesetzt'
             }
         }

@@ -19,6 +19,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 130px 0 0
+
         }
         .layer{
             display: flex;
@@ -34,7 +36,6 @@
         .title-container {
             display: flex;
             flex-direction: column;
-            padding: 90px 0 0
         }
 
         .title {
@@ -380,8 +381,13 @@
         }
 
         .language-selector {
-            padding: 30px 0 0;
             align-self: flex-end;
+            position: absolute;
+            top:150px;
+            right:0;
+            z-index: 1000;
+            padding: 0 30px 0
+
         }
 
     </style>
@@ -391,9 +397,12 @@
         <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
+        <scale-segmented-button class="language-selector">
+            <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
+            <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
+        </scale-segmented-button>
 
         <div class="wrapper">
-
 
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
@@ -527,10 +536,7 @@
                 </div>
 
             </div>
-            <scale-segmented-button class="language-selector">
-                <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
-                <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
-            </scale-segmented-button>
+
             
         </div>
         <script src="multilingual_content.js"></script>
