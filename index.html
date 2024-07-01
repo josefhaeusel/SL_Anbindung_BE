@@ -15,7 +15,6 @@
 
     <style>
         .wrapper {
-            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -374,27 +373,35 @@
         }
 
 
-    .feedback-container {
-        display:flex;
-        flex-direction: row;
-        gap: 20px
-    }
+        .feedback-container {
+            display:flex;
+            flex-direction: row;
+            gap: 20px
+        }
+
+        .language-selector {
+            padding: 30px 0 0;
+            align-self: flex-end;
+        }
 
     </style>
 </head>
 <body>
-    <div id="app" style="display: flex;">
+    <div id="app" style="display: flex; justify-content: center;">
         <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
 
         <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
 
         <div class="wrapper">
+
+
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
                 <div class="description" v-html="$t('title.sub')"></div>
             </div>
 
             <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
+                
                 <transition name="fade-in-in">
                     <div class="upload-container" v-if="!isLoadingAnalysis">
                         <div class="dropzone">
@@ -478,7 +485,7 @@
                 </div>
 
                 <div class="av-actions-container">
-                    <h1 style="padding-bottom: 5px;">{{$t('actions.title')}}</h1>
+                    <h1>{{$t('actions.title')}}</h1>
 
                     <scale-tab-nav size="large">
                         <scale-tab-header slot="tab">
@@ -518,7 +525,13 @@
                     <scale-icon-action-thumbs-up :size="feedback.thumbsup.hover ? '30' : '28'" @mouseover="feedback.thumbsup.hover = true" @mouseleave="feedback.thumbsup.hover = false" :fill="feedback.thumbs === 'up' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'up'; console.log('up')" style="padding:5px"></scale-icon-action-thumbs-up>
                     <scale-icon-action-thumbs-down :size="feedback.thumbsdown.hover ? '30' : '28'" @mouseover="feedback.thumbsdown.hover = true" @mouseleave="feedback.thumbsdown.hover = false" :fill="feedback.thumbs === 'down' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'down'; console.log('down')" style="padding:5px"></scale-icon-action-thumbs-down>
                 </div>
+
             </div>
+            <scale-segmented-button class="language-selector">
+                <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
+                <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
+            </scale-segmented-button>
+            
         </div>
         <script src="multilingual_content.js"></script>
         <script src="soundlogo.js"></script>

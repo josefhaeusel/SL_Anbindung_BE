@@ -1,7 +1,7 @@
 const I18n = VueI18n.createI18n({
-    locale: 'en',
+    locale: 'English',
     messages: {
-        en: {
+        English: {
             title: {
                 main: 'Soundlogo Tool',
                 sub: 'Add the iconic Telekom soundlogo at the end of all videos. <br> Keep everything on brand with the help of AI.'
@@ -45,10 +45,10 @@ const I18n = VueI18n.createI18n({
                 loudness: 'The overall loudness of the audio track has been set to standardized'
             }
         },
-        de: {
+        Deutsch: {
             title: {
-                main: 'Soundlogo Werkzeug',
-                sub: 'Fügen Sie das kultige Telekom-Soundlogo am Ende aller Videos ein.<br>Mit Hilfe von KI bleibt alles beim Alten.'
+                main: 'Soundlogo Tool',
+                sub: 'Binden Sie das ikonische Telekom-Soundlogo an das Ende aller Videos an.<br>Mithilfe von KI bleibt on-Brand.'
             },
             upload: {
                 instructions: 'Laden Sie ein Video hoch oder ziehen Sie die Datei hierher',
@@ -58,6 +58,7 @@ const I18n = VueI18n.createI18n({
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
                 supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.'
             },
+            progressTexts: ['Video hochladen...', 'Videodaten abrufen...', 'Videoformat konvertieren...', "Audio vom Video trennen...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation ermitteln...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
             analyzing: 'Analysieren...',
             error: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut hochzuladen.',
             video: {
@@ -65,16 +66,16 @@ const I18n = VueI18n.createI18n({
                 upgrade: 'HTML5-Video unterstützt'
             },
             download: {
-                result: 'Ergebnis herunterladen'
+                result: 'Video Herunterladen'
             },
             soundlogo: {
-                key: 'Soundlogo-Schlüssel',
+                key: 'Soundlogo Tonart',
                 recommended: 'Empfohlen'
             },
             actions: {
-                title: 'Was wir getan haben:',
-                appendedAnimation: 'Angehängte Animation',
-                logoDetected: 'Erkannte Animation',
+                title: 'Was wir erledigt haben:',
+                appendedAnimation: 'Animation Angebunden',
+                logoDetected: 'Animation Erkannt',
                 appendedDescription: 'Da die T-Outro-Animation nicht erkannt werden konnte, wurde sie an das Videoende angehängt.',
                 detectedDescription: 'Die T-Outro-Animation wurde durch Computer-Vision AI erkannt.',
                 setSoundlogo: 'Soundlogo festlegen',
@@ -84,7 +85,7 @@ const I18n = VueI18n.createI18n({
                 silentEnding: 'Ihr Videoende (außer Animation) ist still. Die Tonalität des Soundlogos wurde auf standardisierte Werte eingestellt.',
                 convertedFormat: 'Konvertiertes Format',
                 convertedDescription: 'Videocodec konvertiert von',
-                masteredLoudness: 'Gemassterte Lautstärke',
+                masteredLoudness: 'Gemasterte Lautstärke',
                 loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte Werte gesetzt'
             }
         }

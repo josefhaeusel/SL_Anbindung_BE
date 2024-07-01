@@ -182,7 +182,12 @@ const app = Vue.createApp({
                 this.progressBar.phase += 1
             }
         },
-        
+        updateLanguage(locale) {
+            console.log(locale)
+            this.$i18n.locale = locale
+            console.log(this.$i18n)
+        },
+
         async handleFileUpload(event) {
 
             this.video_file = event.target.files[0];
