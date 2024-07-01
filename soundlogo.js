@@ -438,6 +438,8 @@ const app = Vue.createApp({
                     type: type,
                     src: videoUrl
                 });
+
+                await this.videoPlayer.load();
     
                 // Ensure the video is loaded before playing
                 this.videoPlayer.on('loadeddata', () => {
@@ -447,9 +449,7 @@ const app = Vue.createApp({
                     this.volumeElement = document.querySelector('.vjs-volume-level');
                     this.volumeElement.style.width = "70%";
                 });
-    
-                this.videoPlayer.load();
-    
+        
             } catch (error) {
                 console.error("Error loading videoPlayer", error);
             }
