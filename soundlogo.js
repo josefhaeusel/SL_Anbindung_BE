@@ -1,4 +1,16 @@
 
+//Global Audio Players and Buffers
+let logoPlayer
+let logoBuffers
+let filter
+let filterEnvelope
+let audioPlayerCrossFade
+let video_url
+let audioPlayer
+let audioBuffer
+let envelope
+let videoPlayer
+let master
 
 const app = Vue.createApp({
 
@@ -27,7 +39,8 @@ const app = Vue.createApp({
             sliderValue: 0,
             audioDuration: 0,
             soundlogoPosition: 0,
-            
+            videoPlayer: null,
+
             animationLength: null,
             animationMinimumLength: 1, //01:00:01:04 rest length from "T" logo detection
 
@@ -60,7 +73,13 @@ const app = Vue.createApp({
         }
     },
 
-    mounted() {
+    async mounted() {
+
+        await setup();
+
+        this.videoPlayer = videojs("myVideo")
+        console.log("VIDEO PLAYER", this.videoPlayer)
+
         this.$refs.myVideo.addEventListener('play', this.startPlayback);
         this.$refs.myVideo.addEventListener('pause', this.stopPlayback);
         this.$refs.myVideo.addEventListener('volumechange', this.updateListeningVolume);
@@ -370,10 +389,10 @@ const app = Vue.createApp({
                 this.marker.element.setAttribute('data-time', this.soundlogoPosition);
                 this.marker.element.innerHTML = '<span>' + this.marker.label + '</span>';
                 this.marker.element.addEventListener('click', () => {
-                    videoPlayer.setCurrentTime = this.soundlogoPosition;
+                    this.videoPlayer.setCurrentTime = this.soundlogoPosition;
                 });
 
-                const progressControl = videoPlayer.controlBar.progressControl.children_[0].el_;
+                const progressControl = this.videoPlayer.controlBar.progressControl.children_[0].el_;
                 progressControl.appendChild(this.marker.element);
             }
                 
@@ -400,6 +419,7 @@ const app = Vue.createApp({
         },
         async loadVideoPlayer() {
 
+
             let type = '';
             console.log("Loading", this.video_path)
 
@@ -414,14 +434,14 @@ const app = Vue.createApp({
                     throw new Error('Unsupported video format');
                 }
             
-                videoPlayer.src({
+                this.videoPlayer.src({
                     type: type,
                     src: this.video_path
                 });
                 //await videoPlayer.load();
-                await videoPlayer.ready(function () {
+                await this.videoPlayer.ready(function () {
 
-                    console.log("Video player loaded", videoPlayer)
+                    console.log("Video player loaded", this.videoPlayer)
                 })
 
                 this.videoPlayerLUFS = -26.71;
@@ -430,7 +450,7 @@ const app = Vue.createApp({
                 this.volumeElement.style.width = "70%"
 
             } catch (error) {
-                console.error("Error loading video-player",error)
+                console.error("Error loading videoPlayer",error)
             }
         },
 
@@ -469,7 +489,7 @@ const app = Vue.createApp({
             }
         },
         updateListeningVolume(event){
-            videoPlayer.muted(true)
+            this.videoPlayer.muted(true)
             this.videoPlayerLUFS = scaleValue(event.target.volume)
             this.setLoudness()
 
@@ -479,13 +499,13 @@ const app = Vue.createApp({
         },
 
         startPlayback() {
-            this.playbackPosition = videoPlayer.currentTime();
-            startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
+            this.playbackPosition = this.videoPlayer.currentTime();
+            this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
             console.log("Start Playback")
         },
         stopPlayback() {
             console.log("Stop Playback")
-            stopTransports();
+            this.stopTransports();
         },
         async downloadVideo() {
             try {
@@ -528,6 +548,32 @@ const app = Vue.createApp({
             catch (error) {
                 console.log("Error during renderAudio()", error)
             }
+        },
+
+        startTransports(currentPosition, audioDuration, logoStart) {
+
+            const transport = Tone.Transport
+        
+            scheduleAudio(audioDuration, currentPosition, logoStart, transport);
+            scheduleLogoSound(audioDuration, currentPosition, logoStart, transport);
+            scheduleFilter(audioDuration, currentPosition, logoStart, transport)
+        
+            this.videoPlayer.setCurrentTime = currentPosition;
+            this.videoPlayer.play();
+            transport.start();
+        
+            audioPlayer.onstop = () => {
+                this.stopTransports();
+            }
+        },
+        
+        stopTransports() {
+            Tone.Transport.stop();
+            Tone.Transport.cancel()
+            audioPlayer.stop();
+            logoPlayer.stop();
+            filterEnvelope.cancel();
+            this.videoPlayer.pause();
         }
 
     },
@@ -538,20 +584,6 @@ app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-')
 app.use(I18n)
 app.mount('#app')
 
-
-//Global Audio Players and Buffers
-let logoPlayer
-let logoBuffers
-let filter
-let filterEnvelope
-let audioPlayerCrossFade
-let video_url
-let audioPlayer
-let audioBuffer
-let envelope
-let videoPlayer
-let master
-
 async function setup() {
 
     //Start Web-Audio Context w. User Gesture
@@ -559,10 +591,7 @@ async function setup() {
         await Tone.start();
         await Tone.context.resume();
 
-    }
-
-    videoPlayer = videojs('myVideo');
-    
+    }    
     await setupAudioNodes(Tone.getContext());
 }
 
@@ -666,32 +695,6 @@ function writeString(view, offset, string) {
     for (let i = 0; i < string.length; i++) {
         view.setUint8(offset + i, string.charCodeAt(i));
     }
-}
-
-function startTransports(currentPosition, audioDuration, logoStart) {
-
-    const transport = Tone.Transport
-
-    scheduleAudio(audioDuration, currentPosition, logoStart, transport);
-    scheduleLogoSound(audioDuration, currentPosition, logoStart, transport);
-    scheduleFilter(audioDuration, currentPosition, logoStart, transport)
-
-    videoPlayer.setCurrentTime = currentPosition;
-    videoPlayer.play();
-    transport.start();
-
-    audioPlayer.onstop = function () {
-        stopTransports()
-    }
-}
-
-function stopTransports() {
-    Tone.Transport.stop();
-    Tone.Transport.cancel()
-    audioPlayer.stop();
-    logoPlayer.stop();
-    filterEnvelope.cancel();
-    videoPlayer.pause();
 }
 
 let filterSettings = {attack: 1, start:20000, frequency:1000, rampTime:1.75, delay:1.25}
@@ -1048,4 +1051,3 @@ const logoKeyMap = {
 }
 
 
-setup();
