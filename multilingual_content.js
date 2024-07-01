@@ -48,7 +48,7 @@ const I18n = VueI18n.createI18n({
         Deutsch: {
             title: {
                 main: 'Soundlogo Tool',
-                sub: 'Binden Sie das ikonische Telekom-Soundlogo an das Ende aller Videos an.<br>Mithilfe von KI bleibt on-Brand.'
+                sub: 'Binden Sie das ikonische Telekom-Soundlogo an das Ende aller Videos an.<br>Bleibe mithilfe KI on-Brand.'
             },
             upload: {
                 instructions: 'Laden Sie ein Video hoch oder ziehen Sie die Datei hierher',
