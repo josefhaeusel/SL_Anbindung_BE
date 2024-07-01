@@ -1,3 +1,5 @@
+
+
 const app = Vue.createApp({
 
     data() {
@@ -524,10 +526,12 @@ const app = Vue.createApp({
             }
         }
 
-    }
+    },
+    
 })
 
 app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-')
+app.use(I18n)
 app.mount('#app')
 
 
