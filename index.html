@@ -451,7 +451,14 @@
 
             <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
                 <div class="video-container" @click="this.playerHasBeenClicked = true">
-                    <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest" style="border-radius: 10px; object-fit: contain; max-width:800px; max-height:450px" data-setup='{"font-family": "TeleNeo"}' controls muted>
+                    <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
+                    data-setup='{"font-family": "TeleNeo"}' style="border-radius: 10px; object-fit: contain; max-width:800px; max-height:450px"
+                    controls muted>
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a
+                            web browser that
+                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                        </p>
                     </video>
                     <div class="shadow-fade-bottom"></div>
                     <transition name="fade">
