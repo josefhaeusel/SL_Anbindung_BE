@@ -139,7 +139,7 @@
             align-items: center;
             display: flex;
 
-            color: var(--telekom-color-text-and-icon-disabled);
+            color: var(--telekom-color-text-and-icon-functional-success);
             font-size: var(--telekom-color-text-and-icon-additional);   
             font-weight: var(--telekom-typography-font-weight-thin);
         }
@@ -298,10 +298,9 @@
             align-items: flex-start;
             justify-content: flex-start;
             flex-direction: column;
+            width: 800px;
             padding: 0 0 50px 0;
             position: relative;
-            height: auto;
-            width: 810px;
         }
 
         .disabled {
@@ -454,6 +453,7 @@
                     <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
                     data-setup='{"font-family": "TeleNeo"}' style="border-radius: 10px; object-fit: contain; max-width:800px; max-height:450px"
                     controls muted>
+                        <!--source></source-->
                         <p class="vjs-no-js">
                             To view this video please enable JavaScript, and consider upgrading to a
                             web browser that
@@ -495,10 +495,11 @@
                     <scale-divider></scale-divider>
                 </div>
 
-                <div class="av-actions-container">
-                    <h1>{{$t('actions.title')}}</h1>
+                <h1>{{$t('actions.title')}}</h1>
 
-                    <scale-tab-nav size="large">
+                <div class="av-actions-container">
+
+                    <scale-tab-nav size="small">
                         <scale-tab-header slot="tab">
                             <scale-icon-action-show-password></scale-icon-action-show-password>
                             <span v-if="actionList.appendedAnimation">{{$t('actions.appendedAnimation')}}</span>
@@ -513,8 +514,8 @@
                         </scale-tab-header>
                         <scale-tab-panel slot="panel">
                             <span>{{$t('actions.synchronized')}}</span>
-                            <span v-if="!this.actionList.audioSegmentEmpty">{{$t('actions.matched')}}</span>
-                            <span v-if="actionList.audioEmpty">{{$t('actions.audioEmpty')}}</span>
+                            <span v-if="!this.actionList.audioSegmentEmpty"><br>{{$t('actions.matched')}}</span>
+                            <span v-if="actionList.audioEmpty"><br>{{$t('actions.audioEmpty')}}</span>
                             <span v-if="!actionList.audioEmpty && this.actionList.audioSegmentEmpty && !actionList.keyDetected">{{$t('actions.silentEnding')}}</span>
                         </scale-tab-panel>
                         <scale-tab-header v-show="actionList.convertedVideo" slot="tab">

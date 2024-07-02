@@ -78,7 +78,7 @@ const I18n = VueI18n.createI18n({
                 logoDetected: 'Animation erkannt',
                 appendedDescription: 'Da die T-Outro-Animation nicht erkannt werden konnte, wurde sie an das Videoende angehängt.',
                 detectedDescription: 'Die T-Outro-Animation wurde durch Computer-Vision AI erkannt.',
-                setSoundlogo: 'Soundlogo festgelegt',
+                setSoundlogo: 'Soundlogo platziert',
                 synchronized: 'Das Telekom-Soundlogo wurde mit der T-Outro-Animation synchronisiert.',
                 matched: 'Seine Tonalität und Lautstärke wurden an die von der KI erkannte Musik angepasst. Die Musik wurde gefiltert und für einen sanften Übergang ausgeblendet.',
                 audioEmpty: 'Die Audiospur Ihres Videos ist leer oder existiert nicht. Die Tonalität und Lautstärke des Soundlogos wurden auf standardisierte Werte eingestellt.',
