@@ -5,13 +5,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="node_modules/@telekom/scale-components/dist/scale-components/scale-components.css" />
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link href="https://vjs.zencdn.net/8.12.0/video-js.css" rel="stylesheet" />
     <link href="https://unpkg.com/@videojs/themes@1/dist/forest/index.css" rel="stylesheet">
     <script type="module" src="node_modules/@telekom/scale-components/dist/scale-components/scale-components.esm.js"></script>
     <script src="https://unpkg.com/vue@3.4.31/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/vue-i18n@9.13.1/dist/vue-i18n.global.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
 
     <style>
         .wrapper {
@@ -464,7 +464,7 @@
                     <transition name="fade">
                         <div v-if="!playerHasBeenClicked" class="shadow-fade-overall"></div>
                     </transition>
-                </div>
+            </div>
 
                 <transition name="fade">
                     <div class="controls-container" v-if="!isLoadingAnalysis">
