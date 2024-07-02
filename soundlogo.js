@@ -312,7 +312,7 @@ const app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.2 //Original Timing -1.04
+                this.videoAnalysis.logo_start = this.audioDuration - 1.0 //Original Timing -1.04
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
@@ -325,7 +325,6 @@ const app = Vue.createApp({
             if (this.actionList.logoDetected && this.actionList.keyDetected || this.actionList.appendedAnimation && this.actionList.keyDetected){
                 this.actionList.success = true;
             }
-
 
 
             this.setSoundlogoPosition()
@@ -398,7 +397,7 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.25 //Hardcut: 4.25, Besser in Sync: 3.7
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.05 //Hardcut: 4.25, Besser in Sync: 3.7
             
         },
         async setKeys(keyName){

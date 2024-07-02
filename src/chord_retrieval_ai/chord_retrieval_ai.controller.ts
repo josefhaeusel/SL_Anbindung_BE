@@ -76,7 +76,6 @@ export class ChordRetrievalAiController {
       );
       let tempVideoOutputFilePath
 
-
       this.logger.log(tempOriginalVideoFilePath)
       await fs.writeFileSync(tempOriginalVideoFilePath, file.buffer);
 
@@ -93,13 +92,13 @@ export class ChordRetrievalAiController {
         case videoData.supported_resolution === true && videoData.supported_ratio === false:
           throw new Error('RatioNotSupported');
       }
-
       if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempOriginalVideoFilePath.endsWith(".mp4")) {
-        tempOriginalVideoFilePath = await this.audioVideoService.convert(tempOriginalVideoFilePath);
-        (request.session as ISession).convertedVideo = true;
         this.logger.log('Converting Video Format...');
         sendProgress('Converting Video Format...');
+        tempVideoOutputFilePath = await this.audioVideoService.convert(tempOriginalVideoFilePath);
+        (request.session as ISession).convertedVideo = true;
       } else {
+        tempVideoOutputFilePath = tempOriginalVideoFilePath;
         (request.session as ISession).convertedVideo = false;
       }
 
@@ -107,7 +106,7 @@ export class ChordRetrievalAiController {
       sendProgress('Splitting Audio from Video...');
 
       try {
-        const splitFiles = await this.audioVideoService.split(tempOriginalVideoFilePath);
+        const splitFiles = await this.audioVideoService.split(tempVideoOutputFilePath);
         tempVideoOutputFilePath = splitFiles.video
         tempAudioFilePath = splitFiles.audio
       } catch (error) {
@@ -152,9 +151,6 @@ export class ChordRetrievalAiController {
       fs.unlinkSync(tempAudioFilePath);
       this.logger.warn(`Deleted ${tempAudioFilePath}`)
 
-      fs.unlinkSync(tempOriginalVideoFilePath);
-      this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`)
-
     } catch (error) {
       this.logger.warn('Error during video handling', error.stack);
       if (error.message === 'ResolutionAndRatioNotSupported') {
@@ -189,6 +185,7 @@ export class ChordRetrievalAiController {
       fs.writeFileSync(tempAudioFilePath, file.buffer);
 
       const appendedAnimation = (request.session as ISession).appendedAnimation;
+      const convertedVideo = (request.session as ISession).convertedVideo;
       const tempOriginalVideoFilePath = (request.session as ISession).tempOriginalVideoFilePath;
 
       const tempVideoFilePath = path.join(
@@ -201,6 +198,7 @@ export class ChordRetrievalAiController {
         tempOriginalVideoFilePath,
         tempAudioFilePath,
         true,
+        convertedVideo,
         appendedAnimation,
       );
 

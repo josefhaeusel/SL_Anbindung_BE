@@ -36,7 +36,7 @@ export class AudioVideoService {
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
     const inputPathExt = inputPathParsed.ext;
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, true, false);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false, true, false);
     const audioOutputPath = this._getAudioPath(
       inputPathName,
       inputPathExt,
@@ -60,8 +60,9 @@ export class AudioVideoService {
         })
         .on('end', () => {
           this.logger.debug('Splitting done');
-
           resolve({audio: audioOutputPath, video: videoOutputPath});
+          fs.unlinkSync(inputPath)
+          this.logger.warn(`Deleted ${inputPath}`)
         })
         .run();
     });
@@ -71,7 +72,7 @@ export class AudioVideoService {
 
     const inputPathParsed = path.parse(inputPath);
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name);
-    const videoOutputPath = this._getVideoPath(inputPathName, '.mp4', false, false);
+    const videoOutputPath = this._getVideoPath(inputPathName, '.mp4', true, false, false);
 
     this.logger.debug(`videoOutputPath: ${videoOutputPath}`);
 
@@ -149,7 +150,7 @@ export class AudioVideoService {
     const inputPathExt = inputPathParsed.ext;
 
 
-    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false, true);
+    const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false, false, true);
 
     const appendAnimationPath = path.resolve(`.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`)
 
@@ -173,7 +174,7 @@ export class AudioVideoService {
         this.logger.debug('Appending animation done:', videoOutputPath);
         resolve(basenameOnly ? path.basename(videoOutputPath) : videoOutputPath);
         fs.unlinkSync(inputVideoPath)
-        this.logger.log(`Deleted ${inputVideoPath}`)
+        this.logger.warn(`Deleted ${inputVideoPath}`)
       })
       .save(videoOutputPath);
 
@@ -185,6 +186,7 @@ export class AudioVideoService {
     outputVideoPath: string,
     inputAudioPath: string,
     basenameOnly = false,
+    convertedVideo = false,
     appendedAnimation = false,
   ): Promise<string> {
     this.logger.debug(`outputVideoPath: ${outputVideoPath}`);
@@ -201,6 +203,7 @@ export class AudioVideoService {
     const videoInputPath = this._getVideoPath(
       inputVideoPathName,
       inputVideoPathExt,
+      convertedVideo,
       true,
       appendedAnimation,
     );
@@ -253,14 +256,18 @@ export class AudioVideoService {
     return { supportedRatio:supportedRatio, supportedResolution: supportedResolution }
     
   }
-  private _getVideoPath(inputPathName: string, inputPathExt: string, splitVideo: boolean, appendAnimation: boolean) {
+  private _getVideoPath(inputPathName: string, inputPathExt: string, convertVideo: boolean, splitVideo: boolean, appendAnimation: boolean) {
     let insertedString = ""
+    if (convertVideo){
+      insertedString += "-converted"
+    }
     if (splitVideo){
-      insertedString += "-video"
+      insertedString += "-split"
     }
     if (appendAnimation){
       insertedString += "-animation"
     }
+
       return `${inputPathName}${insertedString}${inputPathExt}`;
   }
 
