@@ -40,9 +40,9 @@ const I18n = VueI18n.createI18n({
                 audioEmpty: 'Your video\'s audio track is empty or doesn\'t exist. The Soundlogo\'s tonality and loudness have been set to standardized values.',
                 silentEnding: 'Your video ending (except animation) is silent. The Soundlogo\'s tonality has been set to standardized values.',
                 convertedFormat: 'Converted Format',
-                convertedDescription: 'Converted video codec from',
+                convertedDescription: 'Converted video codec from {codec} to H264 (.mp4).',
                 masteredLoudness: 'Mastered Loudness',
-                loudness: 'The overall loudness of the audio track has been set to standardized'
+                loudness: 'The overall loudness of the audio track has been set to standardized {loudness}LUFS.'
             }
         },
         Deutsch: {
@@ -84,9 +84,9 @@ const I18n = VueI18n.createI18n({
                 audioEmpty: 'Die Audiospur Ihres Videos ist leer oder existiert nicht. Die Tonalität und Lautstärke des Soundlogos wurden auf standardisierte Werte eingestellt.',
                 silentEnding: 'Ihr Videoende (außer Animation) ist still. Die Tonalität des Soundlogos wurde auf standardisierte Werte eingestellt.',
                 convertedFormat: 'Format konvertiert',
-                convertedDescription: 'Videocodec konvertiert von',
+                convertedDescription: 'Videocodec konvertiert von {codec} zu H264 (.mp4).',
                 masteredLoudness: 'Lautstärke gemastered',
-                loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte Werte gesetzt'
+                loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte {loudness}LUFS gesetzt.'
             }
         }
     }

@@ -521,13 +521,13 @@
                             <scale-icon-user-file-videos></scale-icon-user-file-videos> {{$t('actions.convertedFormat')}}
                         </scale-tab-header>
                         <scale-tab-panel v-show="actionList.convertedVideo" slot="panel">
-                            {{$t('actions.convertedDescription')}} <strong>{{inputVideoData.codec_name}}</strong> to <strong>H264</strong> (.mp4).
+                            {{ $t('actions.convertedDescription', {codec: inputVideoData.codec_name} ) }}
                         </scale-tab-panel>
                         <scale-tab-header slot="tab">
                             <scale-icon-t-product-usage></scale-icon-t-product-usage> {{$t('actions.masteredLoudness')}}
                         </scale-tab-header>
                         <scale-tab-panel slot="panel">
-                            {{$t('actions.loudness')}} {{formatNumber(desiredMasterLUFS)}}LUFS.
+                            {{ $t('actions.loudness', {loudness: formatNumber(desiredMasterLUFS)} ) }}.
                         </scale-tab-panel>
                     </scale-tab-nav>
                 </div>

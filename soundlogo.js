@@ -487,9 +487,11 @@ const app = Vue.createApp({
                 console.error("Failed to load audio buffer:", error);
             }
         },
-        updateListeningVolume(event){
+        updateListeningVolume(){
+            const volume = this.videoPlayer.cache_.lastVolume
+            console.log(volume)
             this.videoPlayer.muted(true)
-            this.videoPlayerLUFS = scaleValue(event.target.volume)
+            this.videoPlayerLUFS = scaleValue(volume)
             this.setLoudness()
 
             if (this.volumeElement) {

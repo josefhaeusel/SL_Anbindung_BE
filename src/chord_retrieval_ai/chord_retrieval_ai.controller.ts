@@ -92,6 +92,8 @@ export class ChordRetrievalAiController {
         case videoData.supported_resolution === true && videoData.supported_ratio === false:
           throw new Error('RatioNotSupported');
       }
+
+      
       if (videoData.codec_name != "h264" && videoData.codec_name != "h265" || !tempOriginalVideoFilePath.endsWith(".mp4")) {
         this.logger.log('Converting Video Format...');
         sendProgress('Converting Video Format...');
