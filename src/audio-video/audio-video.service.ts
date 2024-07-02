@@ -129,6 +129,10 @@ export class AudioVideoService {
       videoData.fidelity = "low"
     }
 
+    if (!videoData.supported_resolution || !videoData.supported_ratio) {
+      fs.unlinkSync(inputVideoPath);
+      this.logger.warn(`Deletet ${inputVideoPath}`);
+    }
 
     return new Promise((resolve) => {
           resolve(
