@@ -399,25 +399,26 @@
     }
 
     .language-selector {
-        align-self: flex-end;
-        position: absolute;
-        top:130px;
-        right:0;
-        padding: 0 30px 0
+        margin: -20px;
 
     }
-
+   
     </style>
 </head>
 <body>
     <div id="app" style="display: flex; justify-content: center;">
         <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
 
-        <scale-telekom-header style="position:absolute;width: 100%;left:0;"></scale-telekom-header>
-        <scale-segmented-button class="language-selector">
-            <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
-            <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
-        </scale-segmented-button>
+        <scale-telekom-header style="position:absolute;width: 100%;left:0;">
+            <scale-telekom-nav-list  slot="lang-switcher"> 
+                <scale-segmented-button class="language-selector">
+                    <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
+                    <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
+                </scale-segmented-button>
+            </scale-telekom-nav-list>
+        </scale-telekom-header>
+
+
 
         <div class="wrapper">
 
