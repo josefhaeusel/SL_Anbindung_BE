@@ -156,15 +156,19 @@ const app = Vue.createApp({
                     break;
               }
 
-              this.progressBar.hasBeenActive.push(this.progressBar.phase)
-              if (this.progressBar.hasBeenActive.length > 3) {
-                this.progressBar.hasBeenActive.shift()
-              }
+            if (this.progressBar.phase != this.progressBar.hasBeenActive[2]){
+                this.progressBar.hasBeenActive.push(this.progressBar.phase)
+                if (this.progressBar.hasBeenActive.length > 3) {
+                    this.progressBar.hasBeenActive.shift()
+                }
+            }
+
+              console.log("this.progressBar.hasBeenActive", this.progressBar.hasBeenActive)
         },
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100],
+                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100, 100],
                 texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 hasBeenActive: [0],
                 percentage: 0,

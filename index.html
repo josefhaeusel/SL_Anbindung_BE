@@ -120,7 +120,7 @@
         }
 
         .scale-progress-bar {
-            width: 480px;
+            max-width: 480px;
             --color-status: #000;
         }
         label.progress-bar__label {
@@ -459,7 +459,7 @@
 
                         <div class="progress-bar-subtitles">
                             <transition name="subtitle-fade" v-for="(phase, index) in $tm('progressTexts')">
-                                <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)"><scale-icon-action-success size="14" v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length-1)"></scale-icon-action-success><span v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length-1)">&nbsp;&nbsp;</span>{{phase}}</p>
+                                <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)"><scale-icon-action-success size="14" v-if="index != progressBar.phase"></scale-icon-action-success><span v-if="index != progressBar.phase">&nbsp;&nbsp;</span>{{phase}}</p>
                             </transition>
                         </div>
 
