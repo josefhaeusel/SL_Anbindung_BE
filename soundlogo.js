@@ -495,7 +495,7 @@ const app = Vue.createApp({
             this.setLoudness()
 
             if (this.volumeElement) {
-                this.volumeElement.style.width = event.target.volume*100 + '%';
+                this.volumeElement.style.width = volume*100 + '%';
             }
         },
 

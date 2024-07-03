@@ -12,21 +12,24 @@
     <script src="https://unpkg.com/vue-i18n@9.13.1/dist/vue-i18n.global.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
-
     <style>
         .wrapper {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 130px 0 0
-
+            padding: 130px 0 0;
+            max-width: 950px;
+            width: 95vw;
+            height: 95vh;
+            margin: 10px
         }
         .layer{
             display: flex;
             align-items: center;
             flex-direction: column;
             position: relative;
+            width:100%;
         }
         .title,
         .description {
@@ -58,14 +61,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%
         }
         .dropzone {
             cursor: pointer;
             background-color: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
             border-width: 1.5px;
-            height: 300px;
-            width: 550px;
+            max-height: 250px;
+            max-width: 530px;
+            width: 100%;
+            height: 250px;
             border-color: #ABABAB;
             border-style: dashed;
             transition: background-color 0.3s ease;
@@ -110,6 +116,11 @@
             opacity: 0;
         }
 
+        .scale-card{
+            width:100%;
+            max-width: 530px; 
+        }
+
         .scale-progress-bar {
             width: 480px;
             --color-status: #000;
@@ -144,7 +155,7 @@
             font-weight: var(--telekom-typography-font-weight-thin);
         }
 
-        .video-container {
+    .video-container {
         position: relative;
         border-radius: 10px;
     }
@@ -171,7 +182,10 @@
         border-radius: 10px;
 
     }
-
+        .video-js.vjs-theme-forest {
+            width:95vw;
+            height:51.25vh;
+            max-width: 950px;}
         .video-js.vjs-theme-forest .vjs-play-progress {
             background-color: #ffffff
         }
@@ -201,8 +215,12 @@
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            width: 65px;
-            height: 65px;
+            max-width: 65px;
+            max-height: 65px;
+            min-width:40px;
+            min-height:40px;
+            width: 100%;
+            height: 100%;
             z-index:2;
         }
 
@@ -224,7 +242,6 @@
             background-repeat: no-repeat;
             background-position: center;
             background-size: 28px 28px;
-
         }
 
         .video-js.vjs-theme-forest .vjs-play-control.vjs-control.vjs-button.vjs-paused:hover {
@@ -289,7 +306,7 @@
             padding-top: 20px;
             position: relative;
             height: auto;
-            width: 800px;
+            width: 100%;
         }
 
         .av-actions-container {
@@ -298,7 +315,7 @@
             align-items: flex-start;
             justify-content: flex-start;
             flex-direction: column;
-            width: 800px;
+            width: 100%;
             padding: 0 0 50px 0;
             position: relative;
         }
@@ -382,7 +399,7 @@
         .language-selector {
             align-self: flex-end;
             position: absolute;
-            top:150px;
+            top:130px;
             right:0;
             padding: 0 30px 0
 
@@ -415,7 +432,7 @@
                             <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*" />
 
                             <span class="upload-instructions">{{$t('upload.instructions')}}</span>
-                            <scale-icon-action-drag-and-drop fill="var(--telekom-color-text-and-icon-additional)"></scale-icon-action-drag-and-drop>
+                            <scale-icon-action-drag-and-drop style="padding-bottom: 30px;" fill="var(--telekom-color-text-and-icon-additional)"></scale-icon-action-drag-and-drop>
                         </div>
 
                         <scale-button class="upload-button" onclick="document.getElementById('fileInput').click()">
@@ -433,8 +450,8 @@
                 </transition>
 
                 <transition name="fade-in">
-                    <scale-card v-show="isLoadingAnalysis">
-                        <img style="margin-bottom: -4px; width: 550px;margin: -24px -24px 0 -24px" src="assets/patterns/T_pattern_2023_organic_canyon_rgb.png" alt="placeholder" />
+                    <scale-card class="scale-card"v-show="isLoadingAnalysis">
+                        <img style="width:120%;margin: -25px -25px 0" src="assets/patterns/T_pattern_2023_organic_canyon_rgb.png" alt="placeholder" />
                         <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error" :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error" :label="$t('analyzing')" show-status="true"></scale-progress-bar>
 
                         <div class="progress-bar-subtitles">
@@ -449,9 +466,9 @@
             </div>
 
             <div v-show="currentLayer === 'layer2'" id="layer2" class="layer">
-                <div class="video-container" @click="this.playerHasBeenClicked = true">
+                <div class="video-container"@click="this.playerHasBeenClicked = true">
                     <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
-                    style="object-fit:contain; border-radius: 10px; max-width:800px; max-height:450px"
+                    style="border-radius: 10px;"
                     controls muted>
                         <p class="vjs-no-js">
                             To view this video please enable JavaScript, and consider upgrading to a
