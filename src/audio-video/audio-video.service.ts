@@ -131,7 +131,7 @@ export class AudioVideoService {
 
     if (!videoData.supported_resolution || !videoData.supported_ratio) {
       fs.unlinkSync(inputVideoPath);
-      this.logger.warn(`Deletet ${inputVideoPath}`);
+      this.logger.warn(`Deleted ${inputVideoPath}`);
     }
 
     return new Promise((resolve) => {
@@ -253,7 +253,7 @@ export class AudioVideoService {
       supportedRatio = false
     } 
 
-    if (videoStream.width < 1080 || videoStream.heigth < 1080){
+    if (videoStream.width < 1080 || videoStream.height < 1080){
       supportedResolution = false
     }
 
