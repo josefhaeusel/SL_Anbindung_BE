@@ -168,7 +168,7 @@ const app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100, 100],
+                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100],
                 texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 hasBeenActive: [0],
                 percentage: 0,
@@ -180,7 +180,11 @@ const app = Vue.createApp({
             this.progressBar.timer = setInterval(this.updateProgressBar, 100)
         },
         getPhaseStyle(index){
-            if (index == this.progressBar.phase) {
+            
+            if (index==this.progressBar.phaseValues.length) {
+                return 'previous-phase'
+            }
+            else if (index == this.progressBar.phase) {
                 return 'current-phase'
             } else {
                 return 'previous-phase'
