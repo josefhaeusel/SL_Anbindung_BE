@@ -533,9 +533,9 @@
                         </scale-tab-header>
                         <scale-tab-panel slot="panel">
                             <span>{{$t('actions.synchronized')}}</span>
-                            <span v-if="!this.actionList.audioSegmentEmpty"><br>{{$t('actions.matched')}}</span>
-                            <span v-if="actionList.audioEmpty"><br>{{$t('actions.audioEmpty')}}</span>
-                            <span v-if="!actionList.audioEmpty && this.actionList.audioSegmentEmpty && !actionList.keyDetected">{{$t('actions.silentEnding')}}</span>
+                            <span v-if="!this.actionList.audioSegmentEmpty">&nbsp;{{$t('actions.matched')}}</span>
+                            <span v-if="actionList.audioEmpty">&nbsp;{{$t('actions.audioEmpty')}}</span>
+                            <span v-if="!actionList.audioEmpty && this.actionList.audioSegmentEmpty && !actionList.keyDetected">&nbsp;{{$t('actions.silentEnding')}}</span>
                         </scale-tab-panel>
                         <scale-tab-header v-show="actionList.convertedVideo" slot="tab">
                             <scale-icon-user-file-videos></scale-icon-user-file-videos> {{$t('actions.convertedFormat')}}
@@ -547,7 +547,7 @@
                             <scale-icon-t-product-usage></scale-icon-t-product-usage> {{$t('actions.masteredLoudness')}}
                         </scale-tab-header>
                         <scale-tab-panel slot="panel">
-                            {{ $t('actions.loudness', {loudness: formatNumber(desiredMasterLUFS)} ) }}.
+                            {{ $t('actions.loudness', {loudness: formatNumber(desiredMasterLUFS)} ) }}
                         </scale-tab-panel>
                     </scale-tab-nav>
                 </div>

@@ -162,8 +162,6 @@ const app = Vue.createApp({
                     this.progressBar.hasBeenActive.shift()
                 }
             }
-
-              console.log("this.progressBar.hasBeenActive", this.progressBar.hasBeenActive)
         },
         initProgressBar(){
             this.progressBar={

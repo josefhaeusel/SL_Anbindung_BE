@@ -4,7 +4,7 @@ const I18n = VueI18n.createI18n({
         English: {
             title: {
                 main: 'Soundlogo Tool',
-                sub: 'Add the iconic Telekom soundlogo at the end of all videos. <br> Keep everything on brand with the help of AI.'
+                sub: 'Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.'
             },
             upload: {
                 instructions: 'Upload a Video or Drop the File Here',

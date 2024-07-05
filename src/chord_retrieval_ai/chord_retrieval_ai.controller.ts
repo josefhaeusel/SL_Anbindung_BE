@@ -148,6 +148,7 @@ export class ChordRetrievalAiController {
 
       sendProgress('Done (on server-side).');
       this.logger.log('Processing done');
+      this.logger.log(analysisResult);
       response.json(analysisResult);
 
       fs.unlinkSync(tempAudioFilePath);
