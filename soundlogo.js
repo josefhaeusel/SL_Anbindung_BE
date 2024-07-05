@@ -80,13 +80,11 @@ const app = Vue.createApp({
     
         this.videoPlayer.ready(() => {
             console.log("Video player is ready");
-            this.videoPlayer.on('play', this.startPlayback);
+            //this.videoPlayer.on('play', this.startPlayback);
+            this.videoPlayer.on('playing', this.startPlayback);
             this.videoPlayer.on('pause', this.stopPlayback);
+            this.videoPlayer.on('waiting', this.interruptPlayback);
             this.videoPlayer.on('volumechange', this.updateListeningVolume);
-            this.videoPlayer.on('playing', this.startPlayback)
-            this.videoPlayer.on('waiting', this.stopPlayback)
-
-
 
         });
     
@@ -511,12 +509,21 @@ const app = Vue.createApp({
         },
 
         startPlayback() {
+            console.log(`Start Playback`)
             this.playbackPosition = this.videoPlayer.currentTime();
             this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
-            console.log("Start Playback")
+        },
+        continuePlayback() {
+            console.log(`Continue Playback`)
+            this.playbackPosition = this.videoPlayer.currentTime();
+            this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
         },
         stopPlayback() {
-            console.log("Stop Playback")
+            console.log(`Stop Playback`)
+            this.stopTransports();
+        },
+        interruptPlayback() {
+            console.log(`Interrupt Playback`)
             this.stopTransports();
         },
         async downloadVideo() {
