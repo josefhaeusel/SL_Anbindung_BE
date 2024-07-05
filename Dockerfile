@@ -1,4 +1,4 @@
-FROM node:16-bullseye-slim AS build
+FROM node:20-bullseye-slim AS build
 
 WORKDIR /usr/src/app
 
@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-FROM node:16-bullseye-slim AS runtime
+FROM node:20-bullseye-slim AS runtime
 
 WORKDIR /usr/src/app
 
