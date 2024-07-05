@@ -83,6 +83,11 @@ const app = Vue.createApp({
             this.videoPlayer.on('play', this.startPlayback);
             this.videoPlayer.on('pause', this.stopPlayback);
             this.videoPlayer.on('volumechange', this.updateListeningVolume);
+            this.videoPlayer.on('playing', this.startPlayback)
+            this.videoPlayer.on('waiting', this.stopPlayback)
+
+
+
         });
     
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
