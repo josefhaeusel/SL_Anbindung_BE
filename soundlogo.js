@@ -905,9 +905,8 @@ async function updateLogoBuffer(key) {
 
 
 async function uploadRenderedAudio_API(buffer, video_file_name) {
-
-    const name = video_file_name.split('.').slice(0, -1).join('.')
-    console.log(name)
+    const name = video_file_name.split('.').slice(0, -1).join('.');
+    console.log(name);
     const formData = await audioToWavFile(buffer, name);
 
     try {
@@ -919,12 +918,16 @@ async function uploadRenderedAudio_API(buffer, video_file_name) {
         const data = await response.json();
         console.log('Audio uploaded successfully:', data);
 
-        await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
+        const downloadSuccess = await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
 
-        console.log('Downloaded successfully:', data);
+        if (downloadSuccess) {
+            console.log('Downloaded successfully:', data);
+        } else {
+            console.log('Download failed:', data);
+        }
 
     } catch (error) {
-        console.error('Error during download:', error);
+        console.error('Error during upload or download:', error);
     }
 
 
@@ -938,18 +941,50 @@ async function uploadRenderedAudio_API(buffer, video_file_name) {
         return formData
     }
 
-    function downloadFile(url, filename) {
-        fetch(url)
-            .then(response => response.blob())
-            .then(blob => {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                document.body.appendChild(link); // Append to the body to trigger the download
-                link.click();
-                document.body.removeChild(link); // Optionally remove the link from the DOM
-            })
-            .catch(console.error);
+    async function downloadFile(url, filename) {
+        try {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const reader = response.body.getReader();
+            const contentLength = +response.headers.get('Content-Length');
+            let receivedLength = 0; // bytes received
+            const chunks = []; // array of received binary chunks
+    
+            while(true) {
+                const {done, value} = await reader.read();
+    
+                if (done) {
+                    break;
+                }
+    
+                chunks.push(value);
+                receivedLength += value.length;
+    
+                //console.log(`Received ${receivedLength} of ${contentLength}`);
+            }
+    
+            const blob = new Blob(chunks);
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl; 
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            
+            // Clean up URL object
+            URL.revokeObjectURL(downloadUrl);
+    
+            console.log('File download completed');
+            return true;
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            return false;
+        }
     }
 }
 
