@@ -406,7 +406,7 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.1 //Hardcut: 4.25, Besser in Sync: 3.7
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.07 //Hardcut: 4.25, Besser in Sync: 3.7
             
         },
         async setKeys(keyName){
@@ -566,6 +566,8 @@ const app = Vue.createApp({
 
             catch (error) {
                 console.log("Error during renderAudio()", error)
+                await setupAudioNodes(Tone.getContext());
+
             }
         },
 
@@ -606,12 +608,15 @@ app.mount('#app')
 async function setup() {
 
     //Start Web-Audio Context w. User Gesture
-    document.body.onclick = async () => {
+    document.body.addEventListener('click', async function handler() {
         await Tone.start();
         await Tone.context.resume();
+        await setupAudioNodes(Tone.getContext());
+    
+        // Remove the event listener after the first interaction
+        document.body.removeEventListener('click', handler);
+    });
 
-    }    
-    await setupAudioNodes(Tone.getContext());
 }
 
 async function setupAudioNodes(context) {
