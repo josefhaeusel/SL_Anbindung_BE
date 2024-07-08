@@ -249,6 +249,18 @@ export class AudioVideoService {
     let supportedRatio = true
     let supportedResolution = true
 
+    if(videoStream.display_aspect_ratio == "N/A"){
+      const ratio = videoStream.width / videoStream.height;
+      switch(ratio) {
+        case (16/9):
+          videoStream.display_aspect_ratio = "16:9"
+        case (9/16):
+          videoStream.display_aspect_ratio = "9:16"
+        case 1:
+          videoStream.display_aspect_ratio = "1:1"
+      }
+    }
+
     if (videoStream.display_aspect_ratio != "1:1" && videoStream.display_aspect_ratio != "16:9" && videoStream.display_aspect_ratio != "9:16") {
       supportedRatio = false
     } 

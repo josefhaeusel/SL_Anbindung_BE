@@ -41,7 +41,7 @@ const app = Vue.createApp({
             videoPlayer: null,
 
             animationLength: null,
-            animationMinimumLength: 1, //01:00:01:04 rest length from "T" logo detection
+            animationMinimumLength: 0.8, //01:00:01:04 rest length from "T" logo detection
 
             isLoadingAnalysis: false,
             isLoadingResult: false,
@@ -406,7 +406,7 @@ const app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.05 //Hardcut: 4.25, Besser in Sync: 3.7
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.1 //Hardcut: 4.25, Besser in Sync: 3.7
             
         },
         async setKeys(keyName){
