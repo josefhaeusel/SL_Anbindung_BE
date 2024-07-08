@@ -5,7 +5,7 @@ import cv2
 class ComputerVision:
     def __init__(self, videoPath):
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        self.templatePath = f'{script_dir}/template5.png'
+        self.templatePath = f'{script_dir}/template.png'
         self.template = cv2.imread(self.templatePath, 0)
         self.videoPath = videoPath
         self.video = cv2.VideoCapture(self.videoPath)
@@ -21,11 +21,11 @@ class ComputerVision:
         self.analysisAbortBeforeEnd = 0.5
         
         self.setVideoBeforeEnd()
-        self.methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,
-                        cv2.TM_CCORR_NORMED, cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]
-        self.method = self.methods[1]
-
-        self.detectedTime = None
+        self.method = cv2.TM_CCOEFF_NORMED
+        self.detection_scales = np.linspace(0.4, 1.0, 7)[::-1]  # 10 scales from 0.1 to 1.0
+        self.logo_scale = None
+        self.logo_scale_id = None
+        self.detected_time = None
 
     def checkUHD(self):
         if self.frame_width == 3840 and self.frame_height == 2160 or self.frame_height == 3840 and self.frame_width == 2160:
@@ -62,26 +62,24 @@ class ComputerVision:
         start_frame = int(start_time * self.fps)
         self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
-    def matchTemplateMultiScale(self, frame, template, method, scales):
+    def matchTemplateMultiScale(self, frame):
         found = None
-        h, w = template.shape[:2]
+        h, w = self.template.shape[:2]
 
-        for scale in scales:
-            resized_template = cv2.resize(template, (int(w * scale), int(h * scale)))
-            result = cv2.matchTemplate(frame, resized_template, method)
+        for scale_id, scale in enumerate(self.detection_scales):
+            resized_template = cv2.resize(self.template, (int(w * scale), int(h * scale)))
+            result = cv2.matchTemplate(frame, resized_template, self.method)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
-            if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-                if found is None or min_val < found[0]:
-                    found = (min_val, min_loc, scale)
-            else:
-                if found is None or max_val > found[0]:
-                    found = (max_val, max_loc, scale)
+            if found is None or max_val > found[0]:
+                found = (max_val, max_loc, scale, scale_id)
 
         return found
 
+    def scaleDropout(self):
+        self.detection_scales = np.linspace((self.logo_scale-0.1), (self.logo_scale+0.1), 3)[::-1]
+        self.detection_scales = self.detection_scales[self.detection_scales<=1.0]
+        
     def matchVideoFrames(self, showVideoPlayer=False):
-        scales = np.linspace(0.1, 1.0, 10)[::-1]  # 10 scales from 0.1 to 1.0
         isDetecting = True
 
         while isDetecting:
@@ -99,26 +97,28 @@ class ComputerVision:
                 if self.isUHD:
                     self.resizeUHDtoHD(frame2)
 
-                found = self.matchTemplateMultiScale(frame2, self.template, self.method, scales)
-                #print("Current Frame", self.video.get(cv2.CAP_PROP_POS_FRAMES))
-                #print("Detection", found)
+                found = self.matchTemplateMultiScale(frame2)
 
                 # Dropout Condition
                 if (self.duration_secs - self.getCurrentTime()) < self.analysisAbortBeforeEnd:
                     isDetecting = False
 
                 if found:
-                    detection_value, location, scale = found
-                    if self.method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-                        match_found = detection_value <= (1 - self.threshold)
-                    else:
-                        match_found = detection_value >= self.threshold
+                    detection_value, location, self.logo_scale, self.logo_scale_id = found
+                    match_found = detection_value >= self.threshold
+
+
+                    # print(self.detection_scales)
+                    # self.detection_scales = self.detection_scales[(logo_scale_id-1):(logo_scale_id+2)]
+                    # print(self.detection_scales)
 
                     if showVideoPlayer:
                         print("Logo Detection Accuracy", detection_value)
 
                     if match_found:
                         self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
+                        self.scaleDropout()
+
                         for i in range(self.frameSearchSkip + 1):
                             ret, frame = self.video.read()
                             if not ret:
@@ -128,26 +128,22 @@ class ComputerVision:
                             if self.isUHD:
                                 self.resizeUHDtoHD(frame2)
 
-                            found = self.matchTemplateMultiScale(frame2, self.template, self.method, scales)
+                            found = self.matchTemplateMultiScale(frame2)
                             if found:
-                                detection_value, location, scale = found
-                                #print("Current Frame", self.video.get(cv2.CAP_PROP_POS_FRAMES))
-                                #print("Detection", found)
+                                detection_value, location, self.logo_scale, self.logo_scale_id = found
 
-                                if self.method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-                                    match_found = detection_value <= (1 - self.threshold)
-                                else:
-                                    match_found = detection_value >= self.threshold
+                                match_found = detection_value >= self.threshold
+
 
                                 if showVideoPlayer:
                                     print("Logo Detection Accuracy", detection_value)
 
                                 if match_found:
-                                    self.detectedTime = self.getCurrentTime()
+                                    self.detected_time = self.getCurrentTime()
                                     if showVideoPlayer:
                                         h, w = self.template.shape[:2]
                                         top_left = location
-                                        bottom_right = (int(top_left[0] + w * scale), int(top_left[1] + h * scale))
+                                        bottom_right = (int(top_left[0] + w * self.logo_scale), int(top_left[1] + h * self.logo_scale))
                                         cv2.rectangle(frame, top_left, bottom_right, 255, 5)
                                         message = f"Logo Frame Matched. Accuracy: {detection_value * 100:.2f}%"
                                         cv2.putText(frame, message, (top_left[0], bottom_right[1] + 50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
@@ -169,10 +165,11 @@ class ComputerVision:
         self.video.release()
         cv2.destroyAllWindows()
 
-        if self.detectedTime is not None:
-            response = {"logo_start": self.detectedTime,
-                        "positionBeforeEnd": self.duration_secs - self.detectedTime,
-                        "videoResolution": [self.frame_width, self.frame_height]
+        if self.detected_time is not None:
+            response = {"logo_start": self.detected_time,
+                        "logo_scale": self.logo_scale,
+                        "positionBeforeEnd": self.duration_secs - self.detected_time,
+                        "videoResolution": [self.frame_width, self.frame_height],
                         }
             return response
         else:
