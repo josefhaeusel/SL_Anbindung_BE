@@ -100,7 +100,7 @@ export class AudioVideoService {
     inputVideoPath:string
   ): Promise<VideoData> {
 
-    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec_name: null, codec_name_long:null,profile:null, pixel_format: null, supported_ratio: null, supported_resolution: null, audio: null}
+    let videoData = {ratio:"", width: null, height: null, fidelity: "", codec_name: null, codec_name_long:null,profile:null, pixel_format: null, supported_ratio: null, supported_resolution: null, audio: null, duration_ms: null}
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath);
     this.logger.debug(videoStream)
@@ -118,6 +118,7 @@ export class AudioVideoService {
     videoData.codec_name_long = videoStream.codec_long_name
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
+    videoData.duration_ms = audioStream.duration * 1000
     videoData.audio = audioStream.codec_long_name
 
 

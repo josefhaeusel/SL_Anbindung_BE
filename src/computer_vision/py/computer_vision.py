@@ -13,29 +13,25 @@ class ComputerVision:
         self.threshold = 0.85
 
         self.secSearchSkip = 0.1
-        self.frameSearchSkip = 10 #self.fps*self.secSearchSkip
-
-        self.isUHD = self.checkUHD()
-
+        self.frameSearchSkip = 10 
         self.analysisStartBeforeEnd = 6
         self.analysisAbortBeforeEnd = 0.5
         
         self.setVideoBeforeEnd()
         self.method = cv2.TM_CCOEFF_NORMED
-        self.detection_scales = np.linspace(0.4, 1.0, 7)[::-1]  # 10 scales from 0.1 to 1.0
+        self.detection_scales = np.linspace(0.4, 1.0, 7)[::-1]
+        self.isUHD = self.checkUHDResize()
+
         self.logo_scale = None
         self.logo_scale_id = None
         self.detected_time = None
 
-    def checkUHD(self):
-        if self.frame_width == 3840 and self.frame_height == 2160 or self.frame_height == 3840 and self.frame_width == 2160:
+    def checkUHDResize(self):
+        if (self.frame_width + self.frame_height) == 6000 or (self.frame_width + self.frame_height) == 4320:
+            self.detection_scales *= 2
             return True
         else:
             return False
-
-    def resizeUHDtoHD(self, frame):
-        frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-        return frame
 
     def getCurrentTime(self):
         currentFrame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
@@ -76,8 +72,12 @@ class ComputerVision:
         return found
 
     def scaleDropout(self):
-        self.detection_scales = np.linspace((self.logo_scale-0.1), (self.logo_scale+0.1), 3)[::-1]
-        self.detection_scales = self.detection_scales[self.detection_scales<=1.0]
+        UHDScaleFactor = 1
+        if (self.isUHD):
+            UHDScaleFactor=2
+            
+        self.detection_scales = np.linspace((self.logo_scale-(0.1*UHDScaleFactor)), (self.logo_scale+(0.1*UHDScaleFactor)), 3)[::-1]
+        self.detection_scales = self.detection_scales[self.detection_scales<=1.0*UHDScaleFactor]
         
     def matchVideoFrames(self, showVideoPlayer=False):
         isDetecting = True
@@ -93,10 +93,6 @@ class ComputerVision:
                 if not ret:
                     break
                 frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
-
-                if self.isUHD:
-                    self.resizeUHDtoHD(frame2)
-
                 found = self.matchTemplateMultiScale(frame2)
 
                 # Dropout Condition
@@ -106,11 +102,6 @@ class ComputerVision:
                 if found:
                     detection_value, location, self.logo_scale, self.logo_scale_id = found
                     match_found = detection_value >= self.threshold
-
-
-                    # print(self.detection_scales)
-                    # self.detection_scales = self.detection_scales[(logo_scale_id-1):(logo_scale_id+2)]
-                    # print(self.detection_scales)
 
                     if showVideoPlayer:
                         print("Logo Detection Accuracy", detection_value)
@@ -124,9 +115,6 @@ class ComputerVision:
                             if not ret:
                                 break
                             frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
-
-                            if self.isUHD:
-                                self.resizeUHDtoHD(frame2)
 
                             found = self.matchTemplateMultiScale(frame2)
                             if found:

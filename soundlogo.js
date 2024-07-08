@@ -11,7 +11,7 @@ let audioBuffer
 let envelope
 let master
 
-const app = Vue.createApp({
+window.app = Vue.createApp({
 
     data() {
         return {
@@ -370,7 +370,7 @@ const app = Vue.createApp({
 
             let left
             if (this.soundlogoPosition < 0) {
-                left = "0%"}
+                left = "5%"}
             else {
                 left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
                 }
@@ -407,7 +407,6 @@ const app = Vue.createApp({
 
         setSoundlogoPosition(){
             this.soundlogoPosition = this.videoAnalysis.logo_start - 4.07 //Hardcut: 4.25, Besser in Sync: 3.7
-            
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -485,12 +484,12 @@ const app = Vue.createApp({
         async extractAudioBuffer() {
 
             try {
-                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url);
-                console.log("Audio buffer loaded:", audioBuffer);
-                audioPlayer.buffer = audioBuffer;
-                this.audioDuration = audioPlayer.buffer.duration;
-                console.log("AUDIO DURATION:", this.audioDuration)
+                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url)
+                audioPlayer.buffer = audioBuffer
+                this.audioDuration = audioPlayer.buffer.duration
 
+                console.log("Audio buffer loaded:", audioBuffer)
+                console.log("AUDIO DURATION:", this.audioDuration)
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
