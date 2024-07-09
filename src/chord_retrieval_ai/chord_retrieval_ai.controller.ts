@@ -115,21 +115,22 @@ export class ChordRetrievalAiController {
         this.logger.error('Error during audio/video splitting', error.stack);
       }
 
-      sendProgress('Retrieving Key and Loudness...');
-      this.logger.log('Retrieving Key and Loudness...');
-
-      if (tempAudioFilePath != null) {
-        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath);
-      } else {
-        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempOriginalVideoFilePath);
-      }
-
       sendProgress('Detecting T-Outro Animation...');
       this.logger.log('Detecting T-Outro Animation...');
       videoAnalysisResult = await this.computerVisionService.analyzeVideo(tempVideoOutputFilePath);
       videoAnalysisResult.inputVideoData = videoData;
 
       this.logger.debug(videoAnalysisResult);
+
+      sendProgress('Retrieving Key and Loudness...');
+      this.logger.log('Retrieving Key and Loudness...');
+
+      if (tempAudioFilePath != null) {
+        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempAudioFilePath, videoAnalysisResult.appendAnimation);
+      } else {
+        audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(tempOriginalVideoFilePath, videoAnalysisResult.appendAnimation);
+      }
+
 
       if (videoAnalysisResult.appendAnimation == true) {
         this.logger.log("Appending T-Outro Animation...");

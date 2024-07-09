@@ -7,15 +7,15 @@ import * as path from 'path';
 export class ChordRetrievalAiService {
   private readonly logger = new Logger(ChordRetrievalAiService.name);
 
-  analyzeSong(songPath: string): Promise<any> {
+  analyzeSong(songPath: string, animationAppended: boolean): Promise<any> {
     return new Promise((resolve, reject) => {
       const pythonPath = path.join(
         process.cwd(),
         'src/chord_retrieval_ai/py/keyfinderChildProcess.py',
       );
-      this.logger.debug(`python3 ${pythonPath} ${songPath}`);
+      this.logger.debug(`python3 ${pythonPath} ${songPath} ${animationAppended}`);
 
-      const pythonProcess = spawn('python3', [pythonPath, songPath]);
+      const pythonProcess = spawn('python3', [pythonPath, songPath, animationAppended.toString()]);
 
       pythonProcess.stdout.on('data', (data) => {
         try {

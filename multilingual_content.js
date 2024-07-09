@@ -3,8 +3,8 @@ const I18n = VueI18n.createI18n({
     messages: {
         English: {
             title: {
-                main: 'Soundlogo Tool',
-                sub: 'Add the iconic Telekom soundlogo at the end of all videos.<br>Keep everything on brand with the help of AI.'
+                main: 'Sound Logo Wizzard',
+                sub: 'Add the iconic Telekom Sound Logo at the end of all videos.<br>Keep everything on brand with the help of AI.'
             },
             upload: {
                 instructions: 'Upload a Video or Drop the File Here',
@@ -14,7 +14,7 @@ const I18n = VueI18n.createI18n({
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
                 supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.'
             },
-            progressTexts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
+            progressTexts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Detecting T-Outro Animation...", "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
             analyzing: 'Analyzing...',
             error: 'Something went wrong. Please try uploading again.',
             video: {
@@ -24,8 +24,8 @@ const I18n = VueI18n.createI18n({
             download: {
                 result: 'Download Result'
             },
-            soundlogo: {
-                key: 'Soundlogo Key',
+            Soundlogo: {
+                key: 'Sound Logo Key',
                 recommended: 'Recommended'
             },
             actions: {
@@ -34,11 +34,11 @@ const I18n = VueI18n.createI18n({
                 logoDetected: 'Detected Animation',
                 appendedDescription: 'Because the T-Outro Animation could not be detected, it was appended to the video\'s ending.',
                 detectedDescription: 'The T-Outro Animation was detected by Computer-Vision AI.',
-                setSoundlogo: 'Set Soundlogo',
-                synchronized: 'The Telekom Soundlogo has been synchronized to the T-Outro animation.',
+                setSoundlogo: 'Set Sound Logo',
+                synchronized: 'The Telekom Sound Logo has been synchronized to the T-Outro animation.',
                 matched: 'Its tonality and loudness have been matched to the AI-detected music. The music has been filtered and faded for a smooth transition.',
-                audioEmpty: 'Your video\'s audio track is empty or doesn\'t exist. The Soundlogo\'s tonality and loudness have been set to standardized values.',
-                silentEnding: 'Your video ending (except animation) is silent. The Soundlogo\'s tonality has been set to standardized values.',
+                audioEmpty: 'Your video\'s audio track is empty or doesn\'t exist. The Sound Logo\'s tonality and loudness have been set to standardized values.',
+                silentEnding: 'Your video ending (except animation) is silent. The Sound Logo\'s tonality has been set to standardized values.',
                 convertedFormat: 'Converted Format',
                 convertedDescription: 'Converted video codec from {codec} to H264 (.mp4).',
                 masteredLoudness: 'Mastered Loudness',
@@ -47,8 +47,8 @@ const I18n = VueI18n.createI18n({
         },
         Deutsch: {
             title: {
-                main: 'Soundlogo Tool',
-                sub: 'Binden Sie das ikonische Telekom Soundlogo an das Ende aller Videos an.<br>Bleibe mithilfe von KI on-Brand.'
+                main: 'Sound Logo Wizzard',
+                sub: 'Binden Sie das ikonische Telekom Sound Logo an das Ende aller Videos an.<br>Bleibe mithilfe von KI on-Brand.'
             },
             upload: {
                 instructions: 'Laden Sie ein Video hoch oder ziehen Sie die Datei hierher',
@@ -58,7 +58,7 @@ const I18n = VueI18n.createI18n({
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
                 supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.'
             },
-            progressTexts: ['Video hochladen...', 'Videodaten abrufen...', 'Videoformat konvertieren...', "Audio vom Video trennen...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation ermitteln...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
+            progressTexts: ['Video hochladen...', 'Videodaten abrufen...', 'Videoformat konvertieren...', "Audio vom Video trennen...", "T-Outro-Animation ermitteln...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
             analyzing: 'Analysieren...',
             error: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut hochzuladen.',
             video: {
@@ -69,20 +69,20 @@ const I18n = VueI18n.createI18n({
                 result: 'Video Herunterladen'
             },
             soundlogo: {
-                key: 'Soundlogo Tonart',
+                key: 'Sound Logo Tonart',
                 recommended: 'Empfohlen'
             },
             actions: {
                 title: 'Was wir erledigt haben:',
                 appendedAnimation: 'Animation angebunden',
                 logoDetected: 'Animation erkannt',
-                appendedDescription: 'Da die T-Outro-Animation nicht erkannt werden konnte, wurde sie an das Videoende angehängt.',
-                detectedDescription: 'Die T-Outro-Animation wurde durch Computer-Vision AI erkannt.',
-                setSoundlogo: 'Soundlogo platziert',
-                synchronized: 'Das Telekom-Soundlogo wurde mit der T-Outro-Animation synchronisiert.',
+                appendedDescription: 'Da die T-Outro Animation nicht erkannt werden konnte, wurde sie an das Videoende angehängt.',
+                detectedDescription: 'Die T-Outro Animation wurde durch Computer-Vision AI erkannt.',
+                setSoundlogo: 'Sound Logo platziert',
+                synchronized: 'Das Telekom Sound Logo wurde mit der T-Outro Animation synchronisiert.',
                 matched: 'Seine Tonalität und Lautstärke wurden an die von der KI erkannte Musik angepasst. Die Musik wurde gefiltert und für einen sanften Übergang ausgeblendet.',
-                audioEmpty: 'Die Audiospur Ihres Videos ist leer oder existiert nicht. Die Tonalität und Lautstärke des Soundlogos wurden auf standardisierte Werte eingestellt.',
-                silentEnding: 'Ihr Videoende (außer Animation) ist still. Die Tonalität des Soundlogos wurde auf standardisierte Werte eingestellt.',
+                audioEmpty: 'Die Audiospur Ihres Videos ist leer oder existiert nicht. Die Tonalität und Lautstärke des Sound Logos wurden auf standardisierte Werte eingestellt.',
+                silentEnding: 'Ihr Videoende (außer Animation) ist still. Die Tonalität des Sound Logos wurde auf standardisierte Werte eingestellt.',
                 convertedFormat: 'Format konvertiert',
                 convertedDescription: 'Videocodec konvertiert von {codec} zu H264 (.mp4).',
                 masteredLoudness: 'Lautstärke gemastered',

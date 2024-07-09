@@ -51,9 +51,9 @@ window.app = Vue.createApp({
                 'X',
             ],
 
-            selectedKey: { id: '1', key: 'X' },
+            selectedKey: { id: '1', key: 'A' },
             measuredLUFS: 0,
-            soundlogoLUFS:-16,
+            soundlogoLUFS:-11.5,
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
@@ -139,10 +139,10 @@ window.app = Vue.createApp({
                 case 'Splitting Audio from Video...':
                     this.progressBar.phase = 3
                   break;
-                case 'Retrieving Key and Loudness...':
-                    this.progressBar.phase = 4
-                    break;
                 case 'Detecting T-Outro Animation...':
+                    this.progressBar.phase = 4
+                  break;
+                case 'Retrieving Key and Loudness...':
                     this.progressBar.phase = 5
                   break;
                 case 'Appending T-Outro Animation...':
@@ -170,7 +170,7 @@ window.app = Vue.createApp({
             this.progressBar={
                 phase: 0,
                 phaseValues: [10, 20, 30, 40, 60, 80, 95, 100],
-                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Retrieving Key and Loudness...", "Detecting T-Outro Animation...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
+                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...","Detecting T-Outro Animation...",  "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 hasBeenActive: [0],
                 percentage: 0,
                 timer: null,
@@ -321,7 +321,7 @@ window.app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.75 //No Claim Timing -1.02
+                this.videoAnalysis.logo_start = this.audioDuration - 1.7 //No Claim Timing -1.02
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
@@ -406,7 +406,7 @@ window.app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 4.07 //Hardcut: 4.25, Besser in Sync: 3.7
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 2.57 //Hardcut: 4.25, Besser in Sync: 4.07
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -420,8 +420,10 @@ window.app = Vue.createApp({
         updateLogoKey(id='1'){
             this.selectedKey.id = id;
             this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id];
-            console.log("Selected Key", this.selectedKey.key);
-            //updateLogoBuffer(this.selectedKey.key )
+            // console.log("Selected Key", this.selectedKey.key);
+            updateLogoBuffer(this.selectedKey.key)
+            loadLogoPlayer(Tone.getContext())
+
         },
         async loadVideoPlayer() {
             console.log("Loading", this.video_path);
@@ -508,21 +510,21 @@ window.app = Vue.createApp({
         },
 
         startPlayback() {
-            console.log(`Start Playback`)
+            // console.log(`Start Playback`)
             this.playbackPosition = this.videoPlayer.currentTime();
             this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
         },
         continuePlayback() {
-            console.log(`Continue Playback`)
+            // console.log(`Continue Playback`)
             this.playbackPosition = this.videoPlayer.currentTime();
             this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
         },
         stopPlayback() {
-            console.log(`Stop Playback`)
+            // console.log(`Stop Playback`)
             this.stopTransports();
         },
         interruptPlayback() {
-            console.log(`Interrupt Playback`)
+            // console.log(`Interrupt Playback`)
             this.stopTransports();
         },
         async downloadVideo() {
@@ -546,9 +548,8 @@ window.app = Vue.createApp({
         async renderAudio() {
             try {
                 const renderedBuffer = await Tone.Offline(async ({ transport }) => {
-                    await setupAudioNodes(transport.context);
+                    await setupAudioNodes(transport.context, this.selectedKey.key);
                     await this.extractAudioBuffer();
-                    //await updateLogoBuffer(this.selectedKey.key)
                     await this.setLoudness();
 
                     scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
@@ -560,12 +561,12 @@ window.app = Vue.createApp({
 
                 console.log(renderedBuffer)
                 //Reinitialize regular Tone.Context
-                await setupAudioNodes(Tone.getContext());
+                await setupAudioNodes(Tone.getContext(), this.selectedKey.key);
                 return renderedBuffer }
 
             catch (error) {
                 console.log("Error during renderAudio()", error)
-                await setupAudioNodes(Tone.getContext());
+                await setupAudioNodes(Tone.getContext(), this.selectedKey.key);
 
             }
         },
@@ -617,7 +618,7 @@ async function setup() {
     });
 }
 
-async function setupAudioNodes(context) {
+async function setupAudioNodes(context, key='A') {
     try {
         console.log('Setting up audio nodes...');
 
@@ -637,7 +638,7 @@ async function setupAudioNodes(context) {
         console.log('Filter initialized:', filter);
 
         await loadLogoBuffers();
-        logoPlayer = await loadLogoPlayer(context);
+        logoPlayer = await loadLogoPlayer(context, key);
         console.log('Logo player initialized:', logoPlayer);
 
         console.log('Audio nodes setup complete.');
@@ -725,7 +726,7 @@ function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
 
     filter.set({frequency: filterSettings.start})
 
-    const secondsTillLogoStart = calculateLogoScheduleTime(audioDuration, currentPosition, logoStart);
+    const secondsTillLogoStart = calculateEnvScheduleTime(audioDuration, currentPosition, logoStart)-1;
     if (secondsTillLogoStart >= 0) {
 
         transport.schedule((time) => {
@@ -780,7 +781,7 @@ function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
 }
 
 function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart + 1) - currentPosition;
+    const secondsTillStart = (logoStart - 0.5) - currentPosition;
     return secondsTillStart;
 }
 
@@ -795,14 +796,24 @@ async function loadMasterGain(Context) {
 
 async function loadLogoBuffers() {
     logoBuffers = new Tone.ToneAudioBuffers({
-        A: "samples/soundlogos/TLS_A-3.wav",
-        C: "samples/soundlogos/TLS_C-3.wav"
-    })
+        'A': "samples/soundlogos/TLS_A-3.wav",
+        'A#': "samples/soundlogos/TLS_A#-3.wav",
+        'B': "samples/soundlogos/TLS_B-3.wav",
+        'C': "samples/soundlogos/TLS_C-3.wav",
+        'C#': "samples/soundlogos/TLS_C#-3.wav",
+        'D': "samples/soundlogos/TLS_D-3.wav",
+        'D#': "samples/soundlogos/TLS_D#-3.wav",
+        'E': "samples/soundlogos/TLS_E-3.wav",
+        'F': "samples/soundlogos/TLS_F-3.wav",
+        'F#': "samples/soundlogos/TLS_F#-3.wav",
+        'G': "samples/soundlogos/TLS_G-3.wav",
+        'G#': "samples/soundlogos/TLS_G#-3.wav"
+    });
 }
 
-async function loadLogoPlayer(Context, tonality = 'A') {
+async function loadLogoPlayer(Context, key = 'A') {
 
-    const logoBuffer = logoBuffers.get('A');
+    const logoBuffer = logoBuffers.get(key);
     const newLogoPlayer = new Tone.Player({ url: logoBuffer, context: Context, volume: 0 });
 
     newLogoPlayer.connect(master)
@@ -901,8 +912,9 @@ async function updateMainAudioBuffer(filepath) {
 
 async function updateLogoBuffer(key) {
     console.log("Updated Logo Buffer Key:", key);
-    const logoBuffer = logoBuffers.get(key);
-    logoPlayer.buffer = logoBuffer;
+    // const logoBuffer = logoBuffers.get(key);
+    // logoPlayer.buffer = logoBuffer;
+    logoPlayer = await loadLogoPlayer(Tone.getContext(), key)
 }
 
 
