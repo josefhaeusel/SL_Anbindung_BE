@@ -321,7 +321,7 @@ window.app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.02 //Original Timing -1.04
+                this.videoAnalysis.logo_start = this.audioDuration - 1.75 //No Claim Timing -1.02
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
@@ -615,7 +615,6 @@ async function setup() {
         // Remove the event listener after the first interaction
         document.body.removeEventListener('click', handler);
     });
-
 }
 
 async function setupAudioNodes(context) {
@@ -783,19 +782,6 @@ function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
 function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
     const secondsTillStart = (logoStart + 1) - currentPosition;
     return secondsTillStart;
-}
-
-function forceStartBeforeLogo(audioDuration, currentPosition) {
-    const timeTillStart = calculateLogoScheduleTime(audioDuration, currentPosition);
-    let positionAtLogoStart;
-
-    if (timeTillStart < 0) {
-        positionAtLogoStart = currentPosition + timeTillStart;
-        return positionAtLogoStart
-    }
-    else {
-        return currentPosition
-    }
 }
 
 async function loadMasterGain(Context) {

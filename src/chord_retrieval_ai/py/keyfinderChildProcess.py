@@ -18,6 +18,9 @@ if len(sys.argv) > 1:
         if duration > 4.5:
             analysis_start = librosa.time_to_samples(duration - 4.5, sr=sr)
             analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
+        elif duration <= 2.5:
+            analysis_start = librosa.time_to_samples(0, sr=sr)
+            analysis_end = librosa.time_to_samples(duration-0.1, sr=sr)
         else:
             analysis_start = librosa.time_to_samples(0, sr=sr)
             analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)

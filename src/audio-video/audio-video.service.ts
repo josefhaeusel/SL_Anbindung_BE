@@ -157,7 +157,7 @@ export class AudioVideoService {
 
     const videoOutputPath = this._getVideoPath(inputPathName, inputPathExt, false, false, true);
 
-    const appendAnimationPath = path.resolve(`.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`)
+    const appendAnimationPath = path.resolve(`.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`)
 
     return new Promise((resolve, reject) => {
       this._initFfmpeg();
