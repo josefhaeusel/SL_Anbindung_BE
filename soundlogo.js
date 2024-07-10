@@ -53,7 +53,7 @@ window.app = Vue.createApp({
 
             selectedKey: { id: '1', key: 'A' },
             measuredLUFS: 0,
-            soundlogoLUFS:-11.5,
+            soundlogoLUFS:-11,
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
@@ -80,7 +80,6 @@ window.app = Vue.createApp({
     
         this.videoPlayer.ready(() => {
             console.log("Video player is ready");
-            //this.videoPlayer.on('play', this.startPlayback);
             this.videoPlayer.on('playing', this.startPlayback);
             this.videoPlayer.on('pause', this.stopPlayback);
             this.videoPlayer.on('waiting', this.interruptPlayback);
@@ -417,12 +416,12 @@ window.app = Vue.createApp({
             console.log("this.soundlogoKeys",this.soundlogoKeys)
             this.updateLogoKey()
         },
-        updateLogoKey(id='1'){
+        async updateLogoKey(id='1'){
             this.selectedKey.id = id;
             this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id];
-            // console.log("Selected Key", this.selectedKey.key);
-            updateLogoBuffer(this.selectedKey.key)
-            loadLogoPlayer(Tone.getContext())
+            console.log("Selected Key", this.selectedKey.key);
+            logoPlayer = await loadLogoPlayer(Tone.getContext(), this.selectedKey.key)
+            this.setLoudness()
 
         },
         async loadVideoPlayer() {
@@ -932,7 +931,6 @@ async function updateLogoBuffer(key) {
     console.log("Updated Logo Buffer Key:", key);
     // const logoBuffer = logoBuffers.get(key);
     // logoPlayer.buffer = logoBuffer;
-    logoPlayer = await loadLogoPlayer(Tone.getContext(), key)
 }
 
 
