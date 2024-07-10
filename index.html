@@ -498,9 +498,13 @@
                         <div class="right-controls">
                             <div class="key-label">{{$t('soundlogo.key')}}:</div>
                             <scale-tooltip placement="bottom" style="--font-size: 12">
-                                <span slot="content">
+                                <span v-if="!actionList.altKeyDetected" slot="content">
                                     <scale-icon-content-heart size="12" selected></scale-icon-content-heart>
                                     {{$t('soundlogo.recommended')}}
+                                </span>
+                                <span v-if="actionList.altKeyDetected" slot="content">
+                                    <scale-icon-content-music size="12" selected></scale-icon-content-music>
+                                    {{$t('soundlogo.bothKeysPossible')}}
                                 </span>
                                 <scale-segmented-button id="keyDisplay" size="medium">
                                     <scale-segment v-for="(key, index) in soundlogoKeys" :selected="index == selectedKey.id" @click="updateLogoKey(index)">{{key}}</option>

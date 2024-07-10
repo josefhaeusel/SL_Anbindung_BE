@@ -56,7 +56,7 @@ window.app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false,logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -298,6 +298,15 @@ window.app = Vue.createApp({
                 this.actionList.keyDetected=true
                 this.measuredLUFS = loudness
                 await this.setKeys(likely_key.key)
+            }
+            if (analysis.audioAnalysis.analysis.also_possible){
+                this.actionList.altKeyDetected=true
+
+                const alt_logo_key = logoKeyMap[analysis.audioAnalysis.analysis.also_possible.key]    
+                if (this.soundlogoKeys[1] != alt_logo_key){
+                    this.soundlogoKeys[0] = alt_logo_key
+                    this.soundlogoKeys.pop() 
+                }
             }
 
             //T-OUTRO ANALYSIS PART
@@ -885,13 +894,6 @@ async function updateMainAudioBuffer(filepath) {
     const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
 }
-
-async function updateLogoBuffer(key) {
-    console.log("Updated Logo Buffer Key:", key);
-    // const logoBuffer = logoBuffers.get(key);
-    // logoPlayer.buffer = logoBuffer;
-}
-
 
 async function uploadRenderedAudio_API(buffer, video_file_name) {
     const name = video_file_name.split('.').slice(0, -1).join('.');

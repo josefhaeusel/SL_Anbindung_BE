@@ -26,7 +26,8 @@ const I18n = VueI18n.createI18n({
             },
             soundlogo: {
                 key: 'Soundlogo Key',
-                recommended: 'Recommended'
+                recommended: 'Recommended',
+                bothKeysPossible: 'Both possible'
             },
             actions: {
                 title: 'What we did:',
@@ -70,7 +71,8 @@ const I18n = VueI18n.createI18n({
             },
             soundlogo: {
                 key: 'Soundlogo Tonart',
-                recommended: 'Empfohlen'
+                recommended: 'Empfohlen',
+                bothKeysPossible: 'Beide Möglich'
             },
             actions: {
                 title: 'Was wir erledigt haben:',
