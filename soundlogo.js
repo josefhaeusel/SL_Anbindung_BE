@@ -609,13 +609,26 @@ async function setup() {
 
     //Start Web-Audio Context w. User Gesture
     document.body.addEventListener('click', async function handler() {
-        await Tone.start();
-        await Tone.context.resume();
-        await setupAudioNodes(Tone.getContext());
-    
-        // Remove the event listener after the first interaction
+        await setupAudioContextAndNodes()
         document.body.removeEventListener('click', handler);
     });
+
+    document.getElementById("fileInputBig").addEventListener('change', async function handler() {
+        await setupAudioContextAndNodes()
+        document.body.removeEventListener('click', handler);
+    });
+
+    document.getElementById("fileInput").addEventListener('change', async function handler() {
+        await setupAudioContextAndNodes()
+        document.body.removeEventListener('click', handler);
+
+    });
+}
+
+async function setupAudioContextAndNodes(){
+    await Tone.start();
+    await Tone.context.resume();
+    await setupAudioNodes(Tone.getContext());
 }
 
 async function setupAudioNodes(context, key='A') {
