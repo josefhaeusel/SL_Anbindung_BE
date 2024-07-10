@@ -17,13 +17,13 @@ if len(sys.argv) > 1:
         duration = librosa.get_duration(y=y, sr=sr)
 
         if animation_appended == "true":
-            if duration > 1.5:
-                analysis_start = librosa.time_to_samples(duration - 1.5, sr=sr)
+            if duration > 1:
+                analysis_start = librosa.time_to_samples(duration - 1, sr=sr) #1.4s from SL start till end 
                 analysis_end = librosa.time_to_samples(duration, sr=sr)
             else:
                 analysis_start = librosa.time_to_samples(0, sr=sr)
                 analysis_end = librosa.time_to_samples(duration, sr=sr)
-        else:
+        else: #Calculate with logo detection time!!!
             if duration > 4.5:
                 analysis_start = librosa.time_to_samples(duration - (4.5), sr=sr)
                 analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
@@ -33,6 +33,8 @@ if len(sys.argv) > 1:
             else:
                 analysis_start = librosa.time_to_samples(0, sr=sr)
                 analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
+
+        
 
         y_harmony_segment = y[analysis_start:analysis_end]
         y_loudness_segment =  y[librosa.time_to_samples(0, sr=sr):analysis_end]

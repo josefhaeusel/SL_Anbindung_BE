@@ -60,7 +60,7 @@ class Tonal_Fragment(object):
         self.altbestcorr = None
 
         for key, corr in self.key_dict.items():
-            if corr > self.bestcorr*0.9 and corr != self.bestcorr:
+            if corr > self.bestcorr*0.8 and corr != self.bestcorr:
                 self.altkey = key
                 self.altbestcorr = corr
    

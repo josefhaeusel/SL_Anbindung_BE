@@ -535,13 +535,6 @@ window.app = Vue.createApp({
                 this.isLoadingResult = false;
             }
         },
-        async downloadAudio() {
-            this.isLoadingResult = true;
-            const renderedBuffer = await this.renderAudio();
-            downloadAudio(renderedBuffer, this.video_file.name);
-            this.isLoadingResult = false;
-
-        },
         async renderAudio() {
             try {
                 const renderedBuffer = await Tone.Offline(async ({ transport }) => {
@@ -559,6 +552,7 @@ window.app = Vue.createApp({
                 console.log(renderedBuffer)
                 // Reinitialize regular Tone.Context
                 await setupAudioNodes(Tone.getContext(), this.selectedKey.key);
+                this.setLoudness()
                 return renderedBuffer }
 
             catch (error) {
@@ -598,7 +592,7 @@ window.app = Vue.createApp({
             this.setLoudness()
         },
         async setup() {
-            if (Tone.getContext().state === "running") {
+            if (Tone.getContext().state == "running") {
                 await this.setupAudioContextAndNodes();
             } else {
 
@@ -783,7 +777,7 @@ function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
 }
 
 function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart - 0.75) - currentPosition;
+    const secondsTillStart = (logoStart - 1) - currentPosition;
     return secondsTillStart;
 }
 
@@ -866,7 +860,7 @@ async function loadAudioplayer(Context) {
 async function loadFilter(Context){
     const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
 
-    audioPlayer.chain(filterEffect, envelope, master);
+    audioPlayer.chain(/*filterEffect,*/ envelope, master);
 
     return filterEffect
 
@@ -877,7 +871,7 @@ async function ampEnvelope() {
         attack: 0,
         decay: 0,
         sustain: 1.0,
-        release: 2.2
+        release: 2.4
 
     });
 
