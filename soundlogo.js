@@ -607,22 +607,27 @@ app.mount('#app')
 
 async function setup() {
 
-    //Start Web-Audio Context w. User Gesture
-    document.body.addEventListener('click', async function handler() {
+    if (Tone.getContext().state == "running"){
         await setupAudioContextAndNodes()
-        document.body.removeEventListener('click', handler);
-    });
+    } else {
+        //Start Web-Audio Context w. User Gesture
+        document.body.addEventListener('click', async function handler() {
+            await setupAudioContextAndNodes()
+            document.body.removeEventListener('click', handler);
+        });
 
-    document.getElementById("fileInputBig").addEventListener('change', async function handler() {
-        await setupAudioContextAndNodes()
-        document.body.removeEventListener('click', handler);
-    });
+        document.getElementById("fileInputBig").addEventListener('change', async function handler() {
+            await setupAudioContextAndNodes()
+            document.body.removeEventListener('click', handler);
+        });
 
-    document.getElementById("fileInput").addEventListener('change', async function handler() {
-        await setupAudioContextAndNodes()
-        document.body.removeEventListener('click', handler);
+        document.getElementById("fileInput").addEventListener('change', async function handler() {
+            await setupAudioContextAndNodes()
+            document.body.removeEventListener('click', handler);
+        });
+    }
 
-    });
+    
 }
 
 async function setupAudioContextAndNodes(){
