@@ -52,6 +52,7 @@ class Tonal_Fragment(object):
         # this attribute represents the key determined by the algorithm
         self.key = max(self.key_dict, key=self.key_dict.get)
         self.bestcorr = max(self.key_dict.values())
+        self.sorted_keys = sorted(self.key_dict.items(), key=lambda item: item[1], reverse=True)
         
         # this attribute represents the second-best key determined by the algorithm,
         # if the correlation is close to that of the actual key determined
@@ -83,8 +84,8 @@ class Tonal_Fragment(object):
     #Added by Josef
     def get_key_info(self):
         key_info = {
-            "likely_key": self.key,
-            "correlation": self.bestcorr,
+            "likely_key": {"key":self.key, "correlation": self.bestcorr},
+            "correlation_table": self.sorted_keys,
         }
         if self.altkey is not None:
             key_info["also_possible"] = {

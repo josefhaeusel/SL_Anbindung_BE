@@ -1,9 +1,8 @@
 
-//Global Audio Players and Buffers
+//Audio Nodes
 let logoPlayer
 let logoBuffers
 let filter
-let filterEnvelope
 let audioPlayerCrossFade
 let video_url
 let audioPlayer
@@ -73,7 +72,7 @@ window.app = Vue.createApp({
     },
 
     async mounted() {
-        await setup();
+        await this.setup();
     
         this.videoPlayer = videojs("myVideo");
         console.log("VIDEO PLAYER", this.videoPlayer);
@@ -267,7 +266,6 @@ window.app = Vue.createApp({
                 this.progressBar.error = true
             }
 
-            //TBD TOAST DISPLAY SEPARATE FROM FILETYPE
             this.handleReturn()
             this.showResolutionHint = true
             this.showInvalidFormatToast = true
@@ -292,14 +290,14 @@ window.app = Vue.createApp({
                 this.measuredLUFS = -20
                 console.log(`Audio Empty. Standardized Values: ${this.soundlogoKeys[1]}, ${this.measuredLUFS} LUFS`);
             }
-            else if (likely_key == null){
+            else if (likely_key.key == null){
                 await this.setKeys("C major")
                 console.log(`No Key Detected. Standardized Values: ${this.soundlogoKeys[1]}.`);
             } else
             {
                 this.actionList.keyDetected=true
                 this.measuredLUFS = loudness
-                await this.setKeys(likely_key)
+                await this.setKeys(likely_key.key)
             }
 
             //T-OUTRO ANALYSIS PART
@@ -320,7 +318,7 @@ window.app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.7 //No Claim Timing -1.02
+                this.videoAnalysis.logo_start = this.audioDuration - 1.85 //No Claim Timing -1.02
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
@@ -369,7 +367,7 @@ window.app = Vue.createApp({
 
             let left
             if (this.soundlogoPosition < 0) {
-                left = "5%"}
+                left = "1%"}
             else {
                 left = (this.soundlogoPosition / this.audioDuration * 100) + '%';
                 }
@@ -405,7 +403,7 @@ window.app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 2.57 //Hardcut: 4.25, Besser in Sync: 4.07
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 2.55 //Hardcut: 4.25, Besser in Sync: 4.07
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -420,7 +418,7 @@ window.app = Vue.createApp({
             this.selectedKey.id = id;
             this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id];
             console.log("Selected Key", this.selectedKey.key);
-            logoPlayer = await loadLogoPlayer(Tone.getContext(), this.selectedKey.key)
+            logoPlayer = await loadLogoPlayer(Tone.getContext(), this.selectedKey.key, )
             this.setLoudness()
 
         },
@@ -559,7 +557,7 @@ window.app = Vue.createApp({
             
 
                 console.log(renderedBuffer)
-                //Reinitialize regular Tone.Context
+                // Reinitialize regular Tone.Context
                 await setupAudioNodes(Tone.getContext(), this.selectedKey.key);
                 return renderedBuffer }
 
@@ -586,17 +584,39 @@ window.app = Vue.createApp({
                 this.stopTransports();
             }
         },
-        
         stopTransports() {
             Tone.Transport.stop();
             Tone.Transport.cancel()
             audioPlayer.stop();
             logoPlayer.stop();
-            filterEnvelope.cancel();
             this.videoPlayer.pause();
-        }
+        },
+        async setupAudioContextAndNodes(){
+            await Tone.start();
+            await Tone.context.resume();
+            await setupAudioNodes(Tone.getContext());
+            this.setLoudness()
+        },
+        async setup() {
+            if (Tone.getContext().state === "running") {
+                await this.setupAudioContextAndNodes();
+            } else {
 
-    },
+                const setupHandler = async () => {
+                    await this.setupAudioContextAndNodes();
+                    document.body.removeEventListener('click', setupHandler);
+                    document.getElementById("fileInputBig").removeEventListener('change', setupHandler);
+                    document.getElementById("fileInput").removeEventListener('change', setupHandler);
+                };
+
+                document.body.addEventListener('click', setupHandler);
+                document.getElementById("fileInputBig").addEventListener('change', setupHandler);
+                document.getElementById("fileInput").addEventListener('change', setupHandler);
+            }
+        },
+
+    }
+    
     
 })
 
@@ -604,36 +624,9 @@ app.config.compilerOptions.isCustomElement = (tag) => tag.startsWith('scale-')
 app.use(I18n)
 app.mount('#app')
 
-async function setup() {
 
-    if (Tone.getContext().state == "running"){
-        await setupAudioContextAndNodes()
-    } else {
-        //Start Web-Audio Context w. User Gesture
-        document.body.addEventListener('click', async function handler() {
-            await setupAudioContextAndNodes()
-            document.body.removeEventListener('click', handler);
-        });
 
-        document.getElementById("fileInputBig").addEventListener('change', async function handler() {
-            await setupAudioContextAndNodes()
-            document.body.removeEventListener('click', handler);
-        });
 
-        document.getElementById("fileInput").addEventListener('change', async function handler() {
-            await setupAudioContextAndNodes()
-            document.body.removeEventListener('click', handler);
-        });
-    }
-
-    
-}
-
-async function setupAudioContextAndNodes(){
-    await Tone.start();
-    await Tone.context.resume();
-    await setupAudioNodes(Tone.getContext());
-}
 
 async function setupAudioNodes(context, key='A') {
     try {
@@ -647,9 +640,6 @@ async function setupAudioNodes(context, key='A') {
 
         audioPlayer = await loadAudioplayer(context);
         console.log('Audio player initialized:', audioPlayer);
-
-        filterEnvelope = await loadFilterEnvelope();
-        console.log('Filter-Envelope initialized:', filterEnvelope);
 
         filter = await loadFilter(context)
         console.log('Filter initialized:', filter);
@@ -685,7 +675,7 @@ function downloadAudio(buffer, writeName) {
 // Simple WAV encoder function
 // This is a basic example and might need adjustments based on your specific needs
 function convertToWav(buffer) {
-    const numChannels = buffer.numberOfChannels;
+    const numChannels = 2;
     const sampleRate = buffer.sampleRate;
     const format = 1; // PCM
     const subChunk1Size = 16; // for PCM
@@ -737,7 +727,7 @@ function writeString(view, offset, string) {
     }
 }
 
-let filterSettings = {attack: 1, start:20000, frequency:1000, rampTime:1.75, delay:1.25}
+let filterSettings = {start:20000, frequency:2000, rampTime:2, delay:1.25}
 
 function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
 
@@ -745,11 +735,6 @@ function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
 
     const secondsTillLogoStart = calculateEnvScheduleTime(audioDuration, currentPosition, logoStart)-1;
     if (secondsTillLogoStart >= 0) {
-
-        transport.schedule((time) => {
-            filterEnvelope.triggerAttack(time);
-            console.log("Go Filter!");
-        }, `+${secondsTillLogoStart}`);
 
         transport.schedule((time) => {
             filter.frequency.exponentialRampTo(filterSettings.frequency, filterSettings.rampTime, time)
@@ -798,7 +783,7 @@ function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
 }
 
 function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart - 0.5) - currentPosition;
+    const secondsTillStart = (logoStart - 0.75) - currentPosition;
     return secondsTillStart;
 }
 
@@ -881,38 +866,18 @@ async function loadAudioplayer(Context) {
 async function loadFilter(Context){
     const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
 
-    audioPlayerCrossFade = new Tone.CrossFade()
-    audioPlayerCrossFade.fade.value = 1;
-    audioPlayerCrossFade.chain(envelope, master);
-    audioPlayer.fan(audioPlayerCrossFade.a, filterEffect);
-
-    filterEffect.connect(audioPlayerCrossFade.b);
-    //filterEnvelope.connect(audioPlayerCrossFade.fade)
+    audioPlayer.chain(filterEffect, envelope, master);
 
     return filterEffect
 
 }
-
-async function loadFilterEnvelope(){
-    const ampEnv = new Tone.Envelope({
-        attack: filterSettings.attack,
-        decay: 0,
-        sustain: 1,
-        release: 0
-    });
-
-    ampEnv.set({attackCurve:"linear"});
-
-    return ampEnv
-}
-
 
 async function ampEnvelope() {
     const ampEnv = new Tone.AmplitudeEnvelope({
         attack: 0,
         decay: 0,
         sustain: 1.0,
-        release: 2.4
+        release: 2.2
 
     });
 
