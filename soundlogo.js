@@ -85,7 +85,8 @@ window.app = Vue.createApp({
             this.videoPlayer.on('volumechange', this.updateListeningVolume);
 
         });
-    
+
+        // TODO: 2024-07-11, add csrf use @microsoft/fetch-event-source
         const eventSource = new EventSource('/chord-retrieval-ai/progress');
     
         eventSource.onmessage = async (event) => {
@@ -99,6 +100,17 @@ window.app = Vue.createApp({
             console.error('EventSource failed:', err);
             eventSource.close();
         };
+
+        // 2024-07-11, moved event handler from index.html due to csp
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadButtons = document.querySelectorAll('.upload-button');
+            uploadButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    document.getElementById('fileInput').click();
+                });
+            });
+        });
+
     },
 
     methods: {
@@ -351,7 +363,7 @@ window.app = Vue.createApp({
 
             console.log("Creating Video Sources...")
 
-            const parsedPath = video_name.split("/");
+            const parsedPath = video_name.replaceAll('\\', '/').split("/");
             this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-1]}`
 
             const response = await fetch(this.video_path);
@@ -904,6 +916,7 @@ async function uploadRenderedAudio_API(buffer, video_file_name) {
         const response = await fetch('/chord-retrieval-ai/uploadRenderedAudio', {
             method: 'POST',
             body: formData,
+            headers: getCsrfHeader(),
         });
 
         const data = await response.json();
@@ -934,7 +947,9 @@ async function uploadRenderedAudio_API(buffer, video_file_name) {
 
     async function downloadFile(url, filename) {
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: getCsrfHeader(),
+            });
             
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -990,6 +1005,7 @@ async function uploadVideo_API(file) {
         const response = await fetch('/chord-retrieval-ai/uploadVideo', {
             method: 'POST',
             body: formData,
+            headers: getCsrfHeader(),
         });
 
         const data = await response.json();
@@ -1011,20 +1027,13 @@ async function uploadVideo_API(file) {
 function keyToScale(key) {
     console.log("KEY TO SCALE", key)
     const keyArray = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    let keyIndex
-    for (x = 0; x < keyArray.length; x++) {
-        if (key === keyArray[x]) {
-            keyIndex = x
-        }
-    };
+    const keyIndex = keyArray.indexOf(key);
 
-    const subdominant_id = ((keyIndex + 5) % keyArray.length);
-    const dominant_id = ((keyIndex + 7) % keyArray.length);
-
-    const subdominant = keyArray[subdominant_id];
-    const dominant = keyArray[dominant_id];
-
-    const scale = [subdominant, key, dominant]
+    const scale = [
+        keyArray[(keyIndex + 5) % keyArray.length], // Subdominant
+        key, // Key itself
+        keyArray[(keyIndex + 7) % keyArray.length] // Dominant
+    ];
     console.log("Scale", scale)
 
     return scale
@@ -1081,6 +1090,14 @@ const logoKeyMap = {
     'G major': 'G',
     'G# major': 'G#',
 
+}
+
+function getCsrfHeader() {
+    const headers = {};
+    if (document.body && document.body.dataset && document.body.dataset.csrfToken) {
+        headers['x-csrf-token'] = document.body.dataset.csrfToken;
+    }
+    return headers;
 }
 
 

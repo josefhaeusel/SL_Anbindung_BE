@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ComputerVisionService } from './computer_vision.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { ComputerVisionService } from './computer_vision.service'
 
 describe('ComputerVisionService', () => {
-  let service: ComputerVisionService;
+  let service: ComputerVisionService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [ComputerVisionService],
-    }).compile();
+    }).compile()
 
-    service = module.get<ComputerVisionService>(ComputerVisionService);
-  });
+    service = module.get<ComputerVisionService>(ComputerVisionService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+    expect(service).toBeDefined()
+  })
+})
