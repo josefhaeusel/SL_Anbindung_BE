@@ -52,7 +52,7 @@ window.app = Vue.createApp({
 
             selectedKey: { id: '1', key: 'A' },
             measuredLUFS: 0,
-            soundlogoLUFS:-11,
+            soundlogoLUFS:-10,
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
@@ -327,7 +327,7 @@ window.app = Vue.createApp({
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
                 console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.85 //No Claim Timing -1.02
+                this.videoAnalysis.logo_start = this.audioDuration - 1.55 //No Claim Timing -1.02
                 this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
@@ -412,7 +412,7 @@ window.app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 2.55 //Hardcut: 4.25, Besser in Sync: 4.07
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 3.8 //Hardcut: 4.25, Besser in Sync: 4.07 // 2.55
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -785,10 +785,7 @@ function calculateLogoScheduleTime(audioDuration, currentPosition, logoStart) {
     return secondsTillStart;
 }
 
-function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart - 1) - currentPosition;
-    return secondsTillStart;
-}
+
 
 async function loadMasterGain(Context) {
 
@@ -804,7 +801,7 @@ async function loadLogoBuffers() {
         'A': "samples/soundlogos/TLS_A-3.wav",
         'A#': "samples/soundlogos/TLS_A#-3.wav",
         'B': "samples/soundlogos/TLS_B-3.wav",
-        'C': "samples/soundlogos/TLS_C-3.wav",
+        'C': "samples/soundlogos/TLS_C-3_lang.wav",
         'C#': "samples/soundlogos/TLS_C#-3.wav",
         'D': "samples/soundlogos/TLS_D-3.wav",
         'D#': "samples/soundlogos/TLS_D#-3.wav",
@@ -875,12 +872,17 @@ async function loadFilter(Context){
 
 }
 
+function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
+    const secondsTillStart = (logoStart - 0.4) - currentPosition;
+    return secondsTillStart;
+}
+
 async function ampEnvelope() {
     const ampEnv = new Tone.AmplitudeEnvelope({
         attack: 0,
         decay: 0,
         sustain: 1.0,
-        release: 2.4
+        release: 2.8
 
     });
 
