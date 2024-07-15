@@ -47,10 +47,9 @@ window.app = Vue.createApp({
             soundlogoKeys: [
                 'X',
                 'X',
-                'X',
             ],
 
-            selectedKey: { id: '1', key: 'A' },
+            selectedKey: { id: '0', key: 'A' },
             measuredLUFS: 0,
             soundlogoLUFS:-10,
             videoPlayerLUFS:-26.71,
@@ -316,8 +315,8 @@ window.app = Vue.createApp({
 
                 const alt_logo_key = logoKeyMap[analysis.audioAnalysis.analysis.also_possible.key]    
                 if (this.soundlogoKeys[1] != alt_logo_key){
-                    this.soundlogoKeys[0] = alt_logo_key
-                    this.soundlogoKeys.pop() 
+                    this.soundlogoKeys[1] = alt_logo_key
+                    // this.soundlogoKeys.pop() 
                 }
             }
 
@@ -334,7 +333,6 @@ window.app = Vue.createApp({
                         console.log(`FATAL ANIMATION LENGTH (${this.animationMinimumLength}):`, this.animationLength)
                     }
             }
-
 
             //APPENDED ANIMATION PART
             if (analysis.videoAnalysis.appendAnimation == true) {
@@ -424,7 +422,7 @@ window.app = Vue.createApp({
             },
 
         setSoundlogoPosition(){
-            this.soundlogoPosition = this.videoAnalysis.logo_start - 3.8 //Hardcut: 4.25, Besser in Sync: 4.07 // 2.55
+            this.soundlogoPosition = this.videoAnalysis.logo_start - 3.55 //Hardcut: 4.25, Besser in Sync: 4.07 // 2.55
         },
         async setKeys(keyName){
             const key = logoKeyMap[keyName];
@@ -435,7 +433,7 @@ window.app = Vue.createApp({
             console.log("this.soundlogoKeys",this.soundlogoKeys)
             this.updateLogoKey()
         },
-        async updateLogoKey(id='1'){
+        async updateLogoKey(id='0'){
             this.selectedKey.id = id;
             this.selectedKey.key = this.soundlogoKeys[this.selectedKey.id];
             console.log("Selected Key", this.selectedKey.key);
@@ -813,7 +811,7 @@ async function loadLogoBuffers() {
         'A': "samples/soundlogos/TLS_A-3.wav",
         'A#': "samples/soundlogos/TLS_A#-3.wav",
         'B': "samples/soundlogos/TLS_B-3.wav",
-        'C': "samples/soundlogos/TLS_C-3_lang.wav",
+        'C': "samples/soundlogos/TLS_C-3.wav",
         'C#': "samples/soundlogos/TLS_C#-3.wav",
         'D': "samples/soundlogos/TLS_D-3.wav",
         'D#': "samples/soundlogos/TLS_D#-3.wav",
@@ -1026,15 +1024,15 @@ async function uploadVideo_API(file) {
 
 
 
-function keyToScale(key) {
+function keyToScale(key, gender="major") {
     console.log("KEY TO SCALE", key)
     const keyArray = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     const keyIndex = keyArray.indexOf(key);
 
     const scale = [
-        keyArray[(keyIndex + 5) % keyArray.length], // Subdominant
         key, // Key itself
-        keyArray[(keyIndex + 7) % keyArray.length] // Dominant
+        // keyArray[(keyIndex + 5) % keyArray.length], // Subdominant
+        keyArray[(keyIndex + 7) % keyArray.length], // Dominant
     ];
     console.log("Scale", scale)
 
