@@ -571,7 +571,7 @@ window.app = Vue.createApp({
                 console.log(renderedBuffer)
                 // Reinitialize regular Tone.Context
                 await setupAudioNodes(Tone.getContext(), this.selectedKey.key);
-                this.setLoudness()
+                this.setLoudness();
                 return renderedBuffer }
 
             catch (error) {
