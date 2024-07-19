@@ -14,6 +14,9 @@ const I18n = VueI18n.createI18n({
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
                 supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.'
             },
+            header: {
+                contact: 'Contact Brand Design team'
+            },
             progressTexts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Detecting T-Outro Animation...", "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
             analyzing: 'Analyzing...',
             error: 'Something went wrong. Please try uploading again.',
@@ -44,7 +47,40 @@ const I18n = VueI18n.createI18n({
                 convertedDescription: 'Converted video codec from {codec} to H264 (.mp4).',
                 masteredLoudness: 'Mastered Loudness',
                 loudness: 'The overall loudness of the audio track has been set to standardized {loudness}LUFS.'
-            }
+            },
+            relatedLinks: {
+                title: 'Related links',
+                subtitle: 'Do you have any questions or want to find out more about Telekom Magenta? Let our brand design team help you further.',
+                guidelines: {
+                    title: 'All about Magenta',
+                    description: 'Do you have any questions or want to find out more about Telekom Magenta? Let our brand design team help you further.',
+                    button: 'Our brand design guidelines',
+                },
+                dialog: {
+                    title: 'Brand design approvals',
+                    description: 'Do you need help with creating communication or need your designs approved? The Brand Dialog online platform is the right place for you.',
+                    button: 'Visit Brand Dialog',
+                },
+                support: {
+                    title: 'Get personal support',
+                    description: 'Take advantage of the personal support our Brand Design Team for all questions related to the Group\'s brand design and for individual expert advice on your project.',
+                    button: 'Contact the Brand Design Team',
+                },
+            },
+            footer: {
+                impressum: {
+                    name: 'Imprint',
+                    href: "https://content.brand-dialog.telekom.com/en/magenta-colorfix-nutzungsbestimmungen/"
+                },
+                terms: {
+                    name: 'Terms of Use',
+                    href: "https://content.brand-dialog.telekom.com/en/magenta-colorfix-terms-of-use/"
+                },
+                data: {
+                    name: 'Data Privacy',
+                    href: "https://content.brand-dialog.telekom.com/en/magenta-colorfix-data-privacy/"
+                }
+            },
         },
         Deutsch: {
             title: {
@@ -58,6 +94,9 @@ const I18n = VueI18n.createI18n({
                 supportedFormats: 'Unterstützte Formate: MP4, WebM, OGG.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
                 supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.'
+            },
+            header: {
+                contact: 'Brand Design Team kontaktieren'
             },
             progressTexts: ['Video hochladen...', 'Videodaten abrufen...', 'Videoformat konvertieren...', "Audio vom Video trennen...", "T-Outro-Animation ermitteln...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
             analyzing: 'Analysieren...',
@@ -89,7 +128,41 @@ const I18n = VueI18n.createI18n({
                 convertedDescription: 'Videocodec konvertiert von {codec} zu H264 (.mp4).',
                 masteredLoudness: 'Lautstärke gemastered',
                 loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte {loudness}LUFS gesetzt.'
-            }
+            },
+            relatedLinks: {
+                title: 'Weiterführende Links',
+                subtitle: 'Du hast Fragen oder möchtest mehr über Telekom Magenta erfahren? Unser Brand Design Team hilft dir gerne weiter.',
+                guidelines: {
+                    title: 'Alles über Magenta',
+                    description: 'Die Telekom ist eines der wenigen Unternehmen, das man international über seine Markenfarbe erkennt. Alle Gestaltungsvorgaben und fünf Prinzipien für den Einsatz von Magenta.',
+                    button: 'Unsere Brand Design-Guidelines',
+                },
+                dialog: {
+                    title: 'Brand Design-Freigaben',
+                    description: 'Du benötigst Hilfe bei der Erstellung von Kommunikation oder möchtest deine Artworks freigeben lassen? Dann nutze dazu unsere Online-Plattform Brand Dialog.',
+                    button: 'Brand Dialog-Plattform öffnen',
+                },
+                support: {
+                    title: 'Persönlicher Support',
+                    description: 'Nutze den persönlichen Austausch mit dem Brand Design Team für alle Fragen rund um den Markenauftritt des Konzerns und für eine individuelle Beratung zu deinem Projekt.',
+                    button: 'Brand Design Team kontaktieren',
+                },
+            },
+            footer: {
+                impressum: {
+                    name: 'Impressum',
+                    href: "https://content.brand-dialog.telekom.com/de/magenta-colorfix-nutzungsbestimmungen/"
+                },
+                terms: {
+                    name: 'Nutzungsbestimmungen',
+                    href: "https://content.brand-dialog.telekom.com/de/magenta-colorfix-terms-of-use/"
+                },
+                data: {
+                    name: 'Datenschutz',
+                    href: "https://content.brand-dialog.telekom.com/de/magenta-colorfix-data-privacy/"
+                }
+            },
+
         }
     }
 })

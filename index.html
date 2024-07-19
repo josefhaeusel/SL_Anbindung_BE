@@ -13,13 +13,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
     <style>
+        .app-container {
+            display: flex;
+            justify-content: center
+        }
         .wrapper {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 130px 0 0;
-            max-width: 950px;
             width: 95vw;
         }
         .layer{
@@ -28,6 +31,7 @@
             flex-direction: column;
             position: relative;
             width:100%;
+            max-width: 950px;
         }
         .title,
         .description {
@@ -421,23 +425,75 @@
         margin: -20px;
 
     }
+    .related-links-container {
+        display: flex;
+        flex-direction: column; 
+        width: 100%;
+        margin: 2.5rem;
+        max-width: 1300px;
+        padding-left:  1.25rem;
+        padding-right:  1.25rem;
+    }
+
+    .links-card-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 2.5%;
+    }
+    .links-card {
+        max-width: 400px;
+    }
+
+
    
     </style>
 </head>
 <body>
-    <div id="app" style="display: flex; justify-content: center;">
-        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
 
-        <scale-telekom-header style="position:absolute;width: 100%;left:0;">
-            <scale-telekom-nav-list  slot="lang-switcher"> 
-                <scale-segmented-button class="language-selector">
-                    <scale-segment @click="updateLanguage($i18n.availableLocales[0])" />{{ $i18n.availableLocales[0] }}</scale-segment>
-                    <scale-segment selected @click="updateLanguage($i18n.availableLocales[1])" />{{ $i18n.availableLocales[1] }}</scale-segment>
-                </scale-segmented-button>
+    <div id="app">
+
+        <scale-telekom-header>
+            <!-- main-nav (desktop) -->
+            <scale-telekom-nav-list slot="main-nav" aria-label="Main Navigation Links">
+                <scale-telekom-nav-item active="" aria-label="Topic One">
+                  <a href="#">Sound Logo Wizard</a>
+                </scale-telekom-nav-item>
+              </scale-telekom-nav-list>
+
+            <!-- meta-nav (desktop) -->
+            <scale-telekom-nav-list variant="meta-nav-external" slot="meta-nav-external" class="scale-telekom-nav-list hydrated" role="menu" alignment="left"><!---->
+                <scale-telekom-nav-item variant="meta-nav-external" class="scale-telekom-nav-item hydrated" role="none"><!---->
+                <a href="https://www.brand-design.telekom.com/artikel/magenta/" target="_blank" role="menuitem"> Brand &amp; Design <scale-icon-navigation-external-link size="11" class="hydrated" style="display: inline-flex;"></scale-icon-navigation-external-link>
+                </a>
+                </scale-telekom-nav-item>
+                <scale-telekom-nav-item variant="meta-nav-external" class="scale-telekom-nav-item hydrated" role="none"><!---->
+                <a href="https://brand-dialog.telekom.com/" target="_blank" role="menuitem"> Brand Dialog <scale-icon-navigation-external-link size="11" class="hydrated" style="display: inline-flex;"></scale-icon-navigation-external-link>
+                </a>
+                </scale-telekom-nav-item>
             </scale-telekom-nav-list>
+            <scale-telekom-nav-list variant="meta-nav" slot="meta-nav" class="scale-telekom-nav-list hydrated" role="menu" alignment="left"><!---->
+                <scale-telekom-nav-item variant="meta-nav" class="scale-telekom-nav-item hydrated" role="none"><!---->
+                <a href="mailto:contact@brand-design.telekom.com" role="menuitem">{{ $t('header.contact')}}</a>
+                </scale-telekom-nav-item>
+            </scale-telekom-nav-list>
+
+              <scale-telekom-nav-list variant="lang-switcher" slot="lang-switcher" alignment="right" class="scale-telekom-nav-list hydrated" role="menu"><!---->
+                <scale-telekom-nav-item  @click="updateLanguage($i18n.availableLocales[0])"><!---->
+                  <a :aria-current="selectedLanguage==$i18n.availableLocales[0]" role="menuitem">DE</a>
+                </scale-telekom-nav-item>
+                <scale-telekom-nav-item active="" @click="updateLanguage($i18n.availableLocales[1])"><!---->
+                  <a :aria-current="selectedLanguage==$i18n.availableLocales[1]" role="menuitem">EN</a>
+                </scale-telekom-nav-item>
+              </scale-telekom-nav-list>
+
+
         </scale-telekom-header>
 
+    <div class="app-container">
+        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
 
+        
 
         <div class="wrapper">
 
@@ -591,9 +647,87 @@
 
             </div>
 
-            
+
+
+            <div class="related-links-container">
+
+                <div class="related-links-title">
+                    <h2>{{$t('relatedLinks.title')}}</h2>
+                    <p><strong>{{$t('relatedLinks.subtitle')}}</strong></p>
+                </div>
+
+                <div class="links-card-container">
+                    <div class="links-card">
+                        <scale-card class="links-card"to="https://www.brand-design.telekom.com/artikel/magenta/" target="_blank" ><template shadowrootmode="open"><div class="card-border" part="border"><a class="card card--interactive" part="base interactive" href="https://www.brand-design.telekom.com/artikel/magenta/" target="_blank"><div class="card__body" part="body"><slot></slot></div></a></div></template>
+                        <div style="margin: -24px">
+                            <img style="margin-bottom: -4px; width:100%"  src="./assets/card_pics/teaser_images_1_girl.jpg" alt="Alles über Magenta">
+                            <div style="padding: 24px;">
+                            <h4 style="margin: 0px 0 16px 0; font: var(--telekom-text-style-heading-4);">{{$t('relatedLinks.guidelines.title')}}</h4>
+                            <p>{{$t('relatedLinks.guidelines.description')}}</p>
+                            <scale-button size="small" href="https://www.brand-design.telekom.com/artikel/magenta/" target="_blank" icon-position="before" class="hydrated"><template shadowrootmode="open"><a class="button button--size-small button--variant-primary button--icon-before" href="https://www.brand-design.telekom.com/artikel/magenta/" target="_blank" rel="noopener noreferrer" part="base variant-primary before" role="link"><slot></slot></a></template>{{$t('relatedLinks.guidelines.button')}}</scale-button>
+                            </div>
+                        </div>
+                        </scale-card>
+                    </div>
+          
+                    <div class="links-card">
+                        <scale-card to="https://brand-dialog.telekom.com/" target="_blank" class="links-card"><template shadowrootmode="open"><div class="card-border" part="border"><a class="card card--interactive" part="base interactive" href="https://brand-dialog.telekom.com/" target="_blank"><div class="card__body" part="body"><slot></slot></div></a></div></template>
+                        <div style="margin: -24px;">
+                            <img style="margin-bottom: -4px; width:100%;" src="./assets/card_pics/teaser_images_2_branddesign.jpg" alt="Brand Design-Freigaben">
+                            <div style="padding: 24px;">
+                            <h4 style="margin: 0px 0 16px 0; font: var(--telekom-text-style-heading-4);">{{$t('relatedLinks.dialog.title')}}</h4>
+                            <p>{{$t('relatedLinks.dialog.description')}}</p>
+                            <scale-button size="small" href="https://brand-dialog.telekom.com/" target="_blank" icon-position="before" class="hydrated"><template shadowrootmode="open"><a class="button button--size-small button--variant-primary button--icon-before" href="https://brand-dialog.telekom.com/" target="_blank" rel="noopener noreferrer" part="base variant-primary before" role="link"><slot></slot></a></template>{{$t('relatedLinks.dialog.button')}}</scale-button>
+                            </div>
+                        </div>
+                        </scale-card>
+                    </div>
+    
+                    <div class="links-card">
+                        <scale-card to="mailto:contact@brand-design.telekom.com" class="links-card"><template shadowrootmode="open"><div class="card-border" part="border"><a class="card card--interactive" part="base interactive" href="mailto:contact@brand-design.telekom.com" target="_self"><div class="card__body" part="body"><slot></slot></div></a></div></template>
+                        <div style="margin: -24px;">
+                            <img style="margin-bottom: -4px; width:100%;" src="./assets/card_pics/teaser_images_3_help.jpg" alt="Persönlicher Support">
+                            <div style="padding: 24px;">
+                            <h4 style="margin: 0px 0 16px 0; font: var(--telekom-text-style-heading-4);">{{$t('relatedLinks.support.title')}}</h4>
+                            <p>{{$t('relatedLinks.support.description')}}</p>
+                            <scale-button size="small" href="mailto:contact@brand-design.telekom.com" icon-position="before" class="hydrated"><template shadowrootmode="open"><a class="button button--size-small button--variant-primary button--icon-before" href="mailto:contact@brand-design.telekom.com" target="_self" part="base variant-primary before" role="link"><slot></slot></a></template>{{$t('relatedLinks.support.button')}}</scale-button>
+                            </div>
+                        </div>
+                    </scale-card>
+                    </div>   
+                </div>       
+            </div>
+
         </div>
+
+        
+        
+    </div>
+
+
+        <scale-telekom-footer class="scale-telekom-footer hydrated" type="standard" >
+            <scale-telekom-footer-content class="hydrated"><template shadowrootmode="open"><footer><slot name="extended-navigation"></slot><div part="base"><div part="logo"><scale-logo part="app-logo" exportparts="logo-svg" class="hydrated" style="--focus-outline: var(--telekom-line-weight-highlight) solid var(--telekom-color-functional-focus-on-dark-background);"><template shadowrootmode="open"><style>:host { --logo-size: 38px; }</style><a href="https://colorfix.brand-dialog.telekom.com/de" part="logo variant-white transparent" tabindex="-1" title="Telekom Logo"><scale-logo-svg part="icon" class="hydrated"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 38" part="logo-svg" fill="#ffffff" role="img" aria-labelledby="logo-title-2"><title id="logo-title-2">Telekom Logo</title><path d="M7.6 25.1H0v-7.6h7.6v7.6ZM0 0v12.9h2.3v-.4c0-6.1 3.4-9.9 9.9-9.9h.4V30c0 3.8-1.5 5.3-5.3 5.3H6.1V38h19.8v-2.7h-1.1c-3.8 0-5.3-1.5-5.3-5.3V2.7h.4c6.5 0 9.9 3.8 9.9 9.9v.4h2.3V0H0Zm24.3 25.1h7.6v-7.6h-7.6v7.6Z"></path></svg></scale-logo-svg></a></template></scale-logo></div><div part="body"><div part="notice"><slot name="notice"></slot></div><div part="navigation"><slot name="navigation"></slot></div></div></div></footer></template>
+                <span slot="notice"> © Deutsche Telekom AG </span>
+                <ul slot="navigation">
+                <li>
+                    <a href="https://content.brand-dialog.telekom.com/de/impressum/" target="_blank"> {{$t('footer.impressum.name')}} </a>
+                </li>
+                <li>
+                    <a href=https://content.brand-dialog.telekom.com/de/magenta-colorfix-nutzungsbestimmungen/ target="_blank">  {{$t('footer.terms.name')}} </a>
+                </li>
+                <li>
+                    <a href="https://content.brand-dialog.telekom.com/de/magenta-colorfix-datenschutz/" target="_blank">  {{$t('footer.data.name')}} </a>
+                </li>
+                </ul>
+            </scale-telekom-footer-content>
+            </scale-telekom-footer>
+
+
         <script src="multilingual_content.js"></script>
         <script src="soundlogo.js"></script>
     </div>
+
+
+    
+
 </body>

@@ -21,6 +21,7 @@ window.app = Vue.createApp({
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
             showInvalidFormatToast: false,
             showResolutionHint:false,
+            selectedLanguage: "English",
 
             progressBar: {
                 phase: 0,
@@ -220,6 +221,8 @@ window.app = Vue.createApp({
         },
         updateLanguage(locale) {
             this.$i18n.locale = locale
+            this.selectedLanguage = locale
+            console.log(this.selectedLanguage)
         },
         async handleFileUpload(event) {
 
