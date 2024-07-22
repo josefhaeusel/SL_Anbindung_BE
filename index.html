@@ -15,14 +15,14 @@
     <style>
         .app-container {
             display: flex;
-            justify-content: center
+            justify-content: center;
+            flex-direction: column
         }
         .wrapper {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 130px 0 0;
             width: 95vw;
         }
         .layer{
@@ -41,6 +41,7 @@
         .title-container {
             display: flex;
             flex-direction: column;
+            z-index: 3
         }
 
         .title {
@@ -109,12 +110,8 @@
 
         .fileinput-big{
             position: absolute;
-            left:0;
-            top:0;
-            right: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
+            height: 65%;
             opacity: 0;
         }
 
@@ -442,9 +439,8 @@
         gap: 2.5%;
     }
     .links-card {
-        max-width: 400px;
+        width: 33%;
     }
-
 
    
     </style>
@@ -491,12 +487,9 @@
         </scale-telekom-header>
 
     <div class="app-container">
-        <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
-
-        
 
         <div class="wrapper">
-
+            <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
                 <div class="description" v-html="$t('title.sub')"></div>
@@ -646,9 +639,10 @@
                 </div>
 
             </div>
+        </div class="wrapper">
 
 
-
+        <div class="wrapper">
             <div class="related-links-container">
 
                 <div class="related-links-title">
@@ -676,7 +670,7 @@
                             <img style="margin-bottom: -4px; width:100%;" src="./assets/card_pics/teaser_images_2_branddesign.jpg" alt="Brand Design-Freigaben">
                             <div style="padding: 24px;">
                             <h4 style="margin: 0px 0 16px 0; font: var(--telekom-text-style-heading-4);">{{$t('relatedLinks.dialog.title')}}</h4>
-                            <p>{{$t('relatedLinks.dialog.description')}}</p>
+                            <p v-html="$t('relatedLinks.dialog.description')"></p>
                             <scale-button size="small" href="https://brand-dialog.telekom.com/" target="_blank" icon-position="before" class="hydrated"><template shadowrootmode="open"><a class="button button--size-small button--variant-primary button--icon-before" href="https://brand-dialog.telekom.com/" target="_blank" rel="noopener noreferrer" part="base variant-primary before" role="link"><slot></slot></a></template>{{$t('relatedLinks.dialog.button')}}</scale-button>
                             </div>
                         </div>

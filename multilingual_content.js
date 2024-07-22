@@ -58,7 +58,7 @@ const I18n = VueI18n.createI18n({
                 },
                 dialog: {
                     title: 'Brand design approvals',
-                    description: 'Do you need help with creating communication or need your designs approved? The Brand Dialog online platform is the right place for you.',
+                    description: 'Do you need help with creating communication or need your designs approved? The <span class="text-nowrap">Brand Dialog</span> online platform is the right place for you.',
                     button: 'Visit Brand Dialog',
                 },
                 support: {
@@ -139,7 +139,7 @@ const I18n = VueI18n.createI18n({
                 },
                 dialog: {
                     title: 'Brand Design-Freigaben',
-                    description: 'Du benötigst Hilfe bei der Erstellung von Kommunikation oder möchtest deine Artworks freigeben lassen? Dann nutze dazu unsere Online-Plattform Brand Dialog.',
+                    description: 'Du benötigst Hilfe bei der Erstellung von Kommunikation oder möchtest deine Artworks freigeben lassen? Dann nutze dazu unsere Online-Plattform <span class="text-nowrap">Brand Dialog</span>.',
                     button: 'Brand Dialog-Plattform öffnen',
                 },
                 support: {

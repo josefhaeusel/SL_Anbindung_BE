@@ -83,7 +83,6 @@ window.app = Vue.createApp({
             this.videoPlayer.on('pause', this.stopPlayback);
             this.videoPlayer.on('waiting', this.interruptPlayback);
             this.videoPlayer.on('volumechange', this.updateListeningVolume);
-
         });
 
         // TODO: 2024-07-11, add csrf use @microsoft/fetch-event-source
@@ -319,8 +318,10 @@ window.app = Vue.createApp({
                 const alt_logo_key = logoKeyMap[analysis.audioAnalysis.analysis.also_possible.key]    
                 if (this.soundlogoKeys[1] != alt_logo_key){
                     this.soundlogoKeys[1] = alt_logo_key
-                    // this.soundlogoKeys.pop() 
                 }
+                
+                console.log(`Alt Key ${alt_logo_key} replaced ${this.soundlogoKeys[1]}`)
+
             }
 
             //T-OUTRO ANALYSIS PART
@@ -530,8 +531,11 @@ window.app = Vue.createApp({
 
         startPlayback() {
             // console.log(`Start Playback`)
-            this.playbackPosition = this.videoPlayer.currentTime();
-            this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
+            this.$nextTick( () =>{
+                    this.playbackPosition = this.videoPlayer.currentTime()
+                    this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition)
+                }
+            )
         },
         continuePlayback() {
             // console.log(`Continue Playback`)
@@ -1030,7 +1034,8 @@ async function uploadVideo_API(file) {
 function keyToScale(key, gender="major") {
     console.log("KEY TO SCALE", key)
     const keyArray = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    const keyIndex = keyArray.indexOf(key);
+    const keyIndex = keyArray.indexOf(key)
+
 
     const scale = [
         key, // Key itself
@@ -1070,15 +1075,15 @@ const logoKeyMap = {
     'A minor': 'C',
     'A# minor': 'C#',
     'B minor': 'D',
-    'C minor': 'E',
-    'C# minor': 'F',
-    'D minor': 'F#',
-    'D# minor': 'G',
-    'E minor': 'G#',
-    'F minor': 'A',
-    'F# minor': 'A#',
-    'G minor': 'B',
-    'G# minor': 'C',
+    'C minor': 'D#',
+    'C# minor': 'E',
+    'D minor': 'F',
+    'D# minor': 'F#',
+    'E minor': 'G',
+    'F minor': 'G#',
+    'F# minor': 'A',
+    'G minor': 'A#',
+    'G# minor': 'B',
 
     'A major': 'A',
     'A# major': 'A#',
