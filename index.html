@@ -23,7 +23,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 95vw;
         }
         .layer{
             display: flex;
@@ -71,9 +70,8 @@
             background-color: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
             border-width: 1.5px;
-            max-height: 250px;
             max-width: 530px;
-            width: 100%;
+            width: 95%;
             height: 250px;
             border-color: #ABABAB;
             border-style: dashed;
@@ -116,7 +114,7 @@
         }
 
         .scale-card{
-            width:100%;
+            width:95%;
             max-width: 530px; 
         }
 
@@ -425,7 +423,7 @@
     .related-links-container {
         display: flex;
         flex-direction: column; 
-        width: 100%;
+        width: 95%;
         margin: 2.5rem;
         max-width: 1300px;
         padding-left:  1.25rem;
@@ -435,11 +433,27 @@
     .links-card-container {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
-        gap: 2.5%;
+        flex-wrap: wrap;
+        gap: 20px;
+        row-gap: 20px;
     }
     .links-card {
-        width: 33%;
+        width: 30%
+    }
+    @media (max-width: 860px) {
+        .links-card {
+            width: 100%;
+            max-width: none;
+            min-width: 240px;
+        }
+        .scale-card {
+            width: 100%;
+        }
+    }
+    @media (max-width: 530px) {
+        .title {
+            font-size: 45px;
+        }
     }
 
    
