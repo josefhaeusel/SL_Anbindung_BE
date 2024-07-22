@@ -41,7 +41,7 @@ window.app = Vue.createApp({
             videoPlayer: null,
 
             animationLength: null,
-            animationMinimumLength: 0.8, //01:00:01:04 rest length from "T" logo detection
+            animationMinimumLength: 1.2, //01:00:01:04 rest length from "T" logo detection
 
             isLoadingAnalysis: false,
             isLoadingResult: false,
@@ -246,8 +246,7 @@ window.app = Vue.createApp({
                     await this.setProgress_API('Done (on Client-side).')
                     
                     await this.analysisHandler(analysis);
-                    await this.actionListModal()
-                    console.log(this.actionList)
+                    // console.log(this.actionList)
 
                 } catch (error){
                     console.log("Analysis Error:",error)
@@ -293,6 +292,20 @@ window.app = Vue.createApp({
             console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
             this.inputVideoData = analysis.videoAnalysis.inputVideoData
 
+            //T-OUTRO ANALYSIS PART
+            if (this.videoAnalysis.logo_start == "None"){
+                this.actionList.logoDetected = false;
+            } else {
+                this.actionList.logoDetected = true;
+                this.animationLength = this.audioDuration - this.videoAnalysis.logo_start
+
+                if (this.animationLength < this.animationMinimumLength)
+                    {
+                        this.actionList.fatalAnimationLength = true
+                        console.log(`FATAL ANIMATION LENGTH (${this.animationMinimumLength}):`, this.animationLength)
+                    }
+            }
+
             //KEY ANALYSIS PART
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
@@ -319,23 +332,9 @@ window.app = Vue.createApp({
                 if (this.soundlogoKeys[1] != alt_logo_key){
                     this.soundlogoKeys[1] = alt_logo_key
                 }
-                
+
                 console.log(`Alt Key ${alt_logo_key} replaced ${this.soundlogoKeys[1]}`)
 
-            }
-
-            //T-OUTRO ANALYSIS PART
-            if (this.videoAnalysis.logo_start == "None"){
-                this.actionList.logoDetected = false;
-            } else {
-                this.actionList.logoDetected = true;
-                this.animationLength = this.audioDuration - this.videoAnalysis.logo_start
-
-                if (this.animationLength < this.animationMinimumLength)
-                    {
-                        this.actionList.fatalAnimationLength = true
-                        console.log(`FATAL ANIMATION LENGTH (${this.animationMinimumLength}):`, this.animationLength)
-                    }
             }
 
             //APPENDED ANIMATION PART
@@ -376,8 +375,7 @@ window.app = Vue.createApp({
             });
             this.video_url = await URL.createObjectURL(this.video_file);
         },   
-        actionListModal(){
-
+        checkAnimationLength(){
 
             if (!this.actionList.fatalAnimationLength){
                 this.showResultModal = true
@@ -534,8 +532,10 @@ window.app = Vue.createApp({
             this.$nextTick( () =>{
                     this.playbackPosition = this.videoPlayer.currentTime()
                     this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition)
+                    this.playerHasBeenClicked ? '' : this.playerHasBeenClicked=true
                 }
             )
+
         },
         continuePlayback() {
             // console.log(`Continue Playback`)

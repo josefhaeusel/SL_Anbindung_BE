@@ -100,7 +100,7 @@
 
         .fileinput{
             position:absolute;
-            height: 100%;
+            height: 130%;
             width: 100%;
             opacity: 0;
             z-index:2
@@ -530,6 +530,9 @@
                             <span slot="text" v-if="!actionList.commonFiletype">{{$t('upload.supportedFormats')}}<br /></span>
                             <span slot="text" v-if="showResolutionHint&&!actionList.commonResolution">{{$t('upload.supportedResolutions')}}<br /></span>
                             <span slot="text" v-if="showResolutionHint&&!actionList.commonRatio">{{$t('upload.supportedRatios')}}<br /></span>
+                            <span slot="text" v-if="showResolutionHint&&actionList.fatalAnimationLength">{{$t('upload.supportedLength')}}<br /></span>
+                            <span slot="text" v-if="showResolutionHint" v-html="$t('upload.brandPortal')"></span>
+
                         </scale-notification>
                     </div>
                 </transition>
@@ -554,7 +557,7 @@
                 <div class="video-container"@click="this.playerHasBeenClicked = true">
                     <video ref="myVideo" id="myVideo" class="video-js vjs-theme-forest"
                     style="border-radius: 10px;"
-                    controls muted>
+                    controls muted @click="this.playerHasBeenClicked = true">
                         <p class="vjs-no-js">
                             To view this video please enable JavaScript, and consider upgrading to a
                             web browser that

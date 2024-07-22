@@ -12,7 +12,9 @@ const I18n = VueI18n.createI18n({
                 invalidFormat: 'The provided filetype is invalid.',
                 supportedFormats: 'Supported formats: MP4, WebM, OGG.',
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
-                supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.'
+                supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.',
+                supportedLength: 'The existing T-Outro Animation is too short.',
+                brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />'
             },
             header: {
                 contact: 'Contact Brand Design team'
@@ -93,7 +95,10 @@ const I18n = VueI18n.createI18n({
                 invalidFormat: 'Der bereitgestellte Dateityp ist ungültig.',
                 supportedFormats: 'Unterstützte Formate: MP4, WebM, OGG.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
-                supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.'
+                supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.',
+                supportedLength: 'Die vorhandene T-Outro Animation ist zu kurz.',
+                brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />'
+
             },
             header: {
                 contact: 'Brand Design Team kontaktieren'
