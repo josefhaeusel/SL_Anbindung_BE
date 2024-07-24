@@ -7,7 +7,7 @@ const I18n = VueI18n.createI18n({
                 sub: 'Add the iconic Telekom Sound Logo at the end of all videos.<br>Keep everything on brand with the help of AI.'
             },
             upload: {
-                instructions: 'Upload a Video or Drop the File Here',
+                instructions: 'Upload a video or drop the File here',
                 button: 'Upload a Video',
                 invalidFormat: 'The provided filetype is invalid.',
                 supportedFormats: 'Supported formats: MP4, WebM, OGG.',

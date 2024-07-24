@@ -7,7 +7,7 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    if (process.env.NODE_ENV == 'production') {
+      if (process.env.NODE_ENV == 'production') {
       return "Use address <a href='/soundlogo'>/soundlogo</a>"
     } else {
       return "Use address <a href='/soundlogo'>/soundlogo</a> or <a href='/highlight'>/highlight</a>"
