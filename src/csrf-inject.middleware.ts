@@ -8,20 +8,20 @@ export class CsrfInjectMiddleware implements NestMiddleware {
   private readonly logger = new Logger(CsrfInjectMiddleware.name)
 
   use(req: any, res: any, next: () => void) {
-    // res.setHeader("Content-Security-Policy", 
-    //   "default-src 'self'; " +
-    //   "connect-src 'self' blob: https://team.brand-dialog.telekom.com; " +
-    //   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://vjs.zencdn.net; " +
-    //   "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://vjs.zencdn.net https://team.brand-dialog.telekom.com; " +
-    //   "style-src 'self' 'unsafe-inline' https://vjs.zencdn.net https://unpkg.com https://cdn.jsdelivr.net; " +
-    //   "style-src-elem 'self' 'unsafe-inline' https://vjs.zencdn.net https://unpkg.com https://cdn.jsdelivr.net; " +
-    //   "font-src 'self' data:; " +
-    //   "worker-src 'self' blob:; " +
-    //   "object-src 'none'; " +
-    //   "frame-ancestors 'none'; " +
-    //   "img-src 'self' data:; " +
-    //   "media-src 'self';"
-    // );
+    res.setHeader("Content-Security-Policy", 
+      "default-src 'self'; " +
+      "connect-src 'self' blob: https://team.brand-dialog.telekom.com; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://vjs.zencdn.net; " +
+      "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://vjs.zencdn.net https://team.brand-dialog.telekom.com; " +
+      "style-src 'self' 'unsafe-inline' https://vjs.zencdn.net https://unpkg.com https://cdn.jsdelivr.net; " +
+      "style-src-elem 'self' 'unsafe-inline' https://vjs.zencdn.net https://unpkg.com https://cdn.jsdelivr.net; " +
+      "font-src 'self' data:; " +
+      "worker-src 'self' blob:; " +
+      "object-src 'none'; " +
+      "frame-ancestors 'none'; " +
+      "img-src 'self' data:; " +
+      "media-src 'self';"
+    );
 
     // TODO: 2024-07-11, change url if soundlogo only
     if (req.originalUrl === '/soundlogo/') {
