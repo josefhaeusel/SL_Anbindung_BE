@@ -9,12 +9,13 @@ const I18n = VueI18n.createI18n({
             upload: {
                 instructions: 'Upload a video or drop the File here',
                 button: 'Upload a Video',
-                invalidFormat: 'The provided filetype is invalid.',
-                supportedFormats: 'Supported formats: MP4, WebM, OGG.',
+                invalidFormat: {title: 'Unsupported file', description: 'The provided file is invalid.' },
+                supportedFormats: 'Only videos are supported.',
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
                 supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.',
                 supportedLength: 'The existing T-Outro Animation is too short.',
-                brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />'
+                brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
+                generalError: {title: 'Something went wrong.', description:'Please try uploading the file again. If the error persists, consider contacting the Brand Design team.'},
             },
             header: {
                 contact: 'Contact Brand Design team'
@@ -91,13 +92,14 @@ const I18n = VueI18n.createI18n({
             },
             upload: {
                 instructions: 'Laden Sie ein Video hoch oder ziehen Sie die Datei hierher',
+                invalidFormat: { title: 'Datei nicht unterstützt.', description:'Die bereitgestellte Datei ist ungültig.'},
                 button: 'Ein Video hochladen',
-                invalidFormat: 'Der bereitgestellte Dateityp ist ungültig.',
-                supportedFormats: 'Unterstützte Formate: MP4, WebM, OGG.',
+                supportedFormats: 'Nur Videos werden unterstützt.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
                 supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.',
                 supportedLength: 'Die vorhandene T-Outro Animation ist zu kurz.',
-                brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />'
+                brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
+                generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' }
 
             },
             header: {

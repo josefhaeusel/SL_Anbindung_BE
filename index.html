@@ -13,8 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
 
-    
-
     <style>
         .app-container {
             display: flex;
@@ -109,8 +107,8 @@
 
         .fileinput{
             position:absolute;
-            height: 130%;
-            width: 100%;
+            height: 70%;
+            width: 80%;
             opacity: 0;
             z-index:2
         }
@@ -437,8 +435,6 @@
     .related-links-container {
         display: flex;
         flex-direction: column; 
-        align-self: flex-start;
-        width: 100%;
         margin: 2.5rem;
         max-width: 1300px;
     }
@@ -526,10 +522,10 @@
                 <transition name="fade-in-in">
                     <div class="upload-container" v-if="!isLoadingAnalysis">
                         <div class="dropzone">
-                            <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*" />
-
+                            <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
                             <span class="upload-instructions">{{$t('upload.instructions')}}</span>
                             <scale-icon-action-drag-and-drop style="padding-bottom: 30px;" fill="var(--telekom-color-text-and-icon-additional)"></scale-icon-action-drag-and-drop>
+
                         </div>
 
                         <scale-button class="upload-button">
@@ -537,30 +533,32 @@
                             {{$t('upload.button')}}
                         </scale-button>
 
-                        <scale-notification v-if="showInvalidFormatToast" heading="Unsupported Format" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false">
-                            <span slot="text">{{$t('upload.invalidFormat')}}<br /></span>
+                        <scale-notification v-if="showInvalidFormatToast" :heading="$t('upload.invalidFormat.title')" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFormatToast=false"  style="z-index: 1000">
+                            <span slot="text">{{$t('upload.invalidFormat.description')}}<br /></span>
                             <span slot="text" v-if="!actionList.commonFiletype">{{$t('upload.supportedFormats')}}<br /></span>
-                            <span slot="text" v-if="showResolutionHint&&!actionList.commonResolution">{{$t('upload.supportedResolutions')}}<br /></span>
-                            <span slot="text" v-if="showResolutionHint&&!actionList.commonRatio">{{$t('upload.supportedRatios')}}<br /></span>
-                            <span slot="text" v-if="showResolutionHint&&actionList.fatalAnimationLength">{{$t('upload.supportedLength')}}<br /></span>
-                            <span slot="text" v-if="showResolutionHint" v-html="$t('upload.brandPortal')"></span>
-
+                            <span slot="text" v-if="!actionList.commonResolution">{{$t('upload.supportedResolutions')}}<br /></span>
+                            <span slot="text" v-if="!actionList.commonRatio">{{$t('upload.supportedRatios')}}<br /></span>
+                            <span slot="text" v-if="actionList.fatalAnimationLength">{{$t('upload.supportedLength')}}<br /></span>
+                            <span slot="text" v-if="actionList.commonFiletype" v-html="$t('upload.brandPortal')"></span>
                         </scale-notification>
+
+                        <scale-notification v-if="showGeneralError" :heading="$t('upload.generalError.title')" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false" style="z-index: 1000">
+                            <span slot="text">{{$t('upload.generalError.description')}}</span>
+                        </scale-notification>
+
                     </div>
                 </transition>
 
                 <transition name="fade-in">
                     <scale-card class="scale-card"v-show="isLoadingAnalysis">
                         <img style="width:120%;margin: -25px -25px 0" src="assets/patterns/T_pattern_2023_organic_canyon_rgb.png" alt="placeholder" />
-                        <scale-progress-bar class="scale-progress-bar" v-show="!progressBar.error" :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="progressBar.error" :label="$t('analyzing')" show-status="true"></scale-progress-bar>
+                        <scale-progress-bar class="scale-progress-bar" :percentage="formatNumberPercentage(progressBar.percentage)" :hasError="showGeneralError" :label="$t('analyzing')" show-status="true"></scale-progress-bar>
 
                         <div class="progress-bar-subtitles">
                             <transition name="subtitle-fade" v-for="(phase, index) in $tm('progressTexts')">
                                 <p v-show="progressBar.hasBeenActive.includes(index)" :class="getPhaseStyle(index)"><scale-icon-action-success size="14" v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length)"></scale-icon-action-success><span v-if="index != progressBar.phase || progressBar.phase==(progressBar.phaseValues.length)">&nbsp;&nbsp;</span>{{phase}}</p>
                             </transition>
                         </div>
-
-                        <scale-notification v-if="progressBar.error" style="color:--telekom-color-text-and-icon-standard; margin: 10px" :heading="$t('error')" variant="danger" dismissible="false" opened></scale-notification>
                     </scale-card>
                 </transition>
             </div>

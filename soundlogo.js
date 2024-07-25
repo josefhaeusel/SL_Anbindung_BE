@@ -21,6 +21,7 @@ window.app = Vue.createApp({
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
             showInvalidFormatToast: false,
             showResolutionHint:false,
+            showGeneralError: false,
             selectedLanguage: "English",
 
             progressBar: {
@@ -56,7 +57,7 @@ window.app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false, commonResolution: null, commonRatio: null, commonFiletype:null, appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {commonResolution: null, commonRatio: null, commonFiletype:null,success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false,  appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -259,28 +260,39 @@ window.app = Vue.createApp({
         },
         
         async checkFiletype() {
+            console.log("Checking Filetype")
             let allowedFiletypes = new Set(["video/mp4", "video/ogg", "video/webm", "video/quicktime"]);
-
             return allowedFiletypes.has(this.video_file.type);
         },
 
         handleProgressAnalysisError(error){
 
+            this.showResolutionHint = true
+            this.showInvalidFormatToast = true
+            console.log("ERROR", error)
             if (error == 'Resolution and display ratio not supported.'){
+                console.log("1")
                 this.actionList.commonResolution, this.actionList.commonRatio = false
             } else if (error == 'Resolution not supported.'){
+                console.log("2")
+
                 this.actionList.commonResolution = false
                 this.actionList.commonRatio = true
             } else if (error == 'Display ratio not supported.') {
+                console.log("3")
+
                 this.actionList.commonResolution = true
                 this.actionList.commonRatio = false
             } else {
-                this.progressBar.error = true
+                console.log("4")
+
+               this.showGeneralError = true
+               this.showResolutionHint = false
+               this.showInvalidFormatToast = false
             }
 
+            console.log(this.actionList)
             this.handleReturn()
-            this.showResolutionHint = true
-            this.showInvalidFormatToast = true
 
         },
         async analysisHandler(analysis) {
