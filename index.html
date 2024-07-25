@@ -26,7 +26,11 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 0 10px;
+            padding: 0 10px 20px
+        }
+        .tool-background {
+            background-color: var(--telekom-color-background-surface-subtle);
+            margin: 0 -25px;
         }
         .layer{
             display: flex;
@@ -71,7 +75,7 @@
         }
         .dropzone {
             cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: var(--telekom-color-background-canvas-subtle);
             border-radius: 10px;
             border-width: 1.5px;
             max-width: 530px;
@@ -87,7 +91,7 @@
         }
 
         .dropzone:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: var(--telekom-color-ui-faint);
             cursor: pointer;
         }
 
@@ -99,7 +103,8 @@
         }
 
         .upload-button{
-            padding: 20px;
+            padding: 20px 0;
+            z-index: 10;
         }
 
         .fileinput{
@@ -120,6 +125,11 @@
         .scale-card{
             width:95%;
             max-width: 530px; 
+            padding: 0 0 20px;
+        }
+
+        .scale-card .cart {
+            background: #000000
         }
 
         .scale-progress-bar {
@@ -427,11 +437,10 @@
     .related-links-container {
         display: flex;
         flex-direction: column; 
+        align-self: flex-start;
         width: 100%;
         margin: 2.5rem;
         max-width: 1300px;
-        padding-left:  1.25rem;
-        padding-right:  1.25rem;
     }
 
     .links-card-container {
@@ -504,8 +513,8 @@
         </scale-telekom-header>
 
     <div class="app-container">
-
         <div class="wrapper">
+
             <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
@@ -657,11 +666,11 @@
                     <scale-icon-action-thumbs-up :size="feedback.thumbsup.hover ? '30' : '28'" @mouseover="feedback.thumbsup.hover = true" @mouseleave="feedback.thumbsup.hover = false" :fill="feedback.thumbs === 'up' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'up'; console.log('up')" style="padding:5px"></scale-icon-action-thumbs-up>
                     <scale-icon-action-thumbs-down :size="feedback.thumbsdown.hover ? '30' : '28'" @mouseover="feedback.thumbsdown.hover = true" @mouseleave="feedback.thumbsdown.hover = false" :fill="feedback.thumbs === 'down' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'down'; console.log('down')" style="padding:5px"></scale-icon-action-thumbs-down>
                 </div>
-
             </div>
-        </div class="wrapper">
 
+        </div>
 
+        <div class="tool-background">
         <div class="wrapper">
             <div class="related-links-container">
 
@@ -711,9 +720,8 @@
                     </div>   
                 </div>       
             </div>
-
         </div>
-
+        </div>
         
         
     </div>
