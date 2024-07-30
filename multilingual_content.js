@@ -13,7 +13,9 @@ const I18n = VueI18n.createI18n({
                 supportedFormats: 'Only videos are supported.',
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
                 supportedRatios: 'Supported ratios: 16:9, 9:16, 1:1.',
-                supportedLength: 'The existing T-Outro Animation is too short.',
+                supportedAnimationLength: 'The existing T-Outro Animation is too short.',
+                supportedVideoLength: 'The video must not be longer than {maximumVideoLength} seconds.',
+                supportedFileSize: 'The video must not be larger than {maximumFileSize}MB.',
                 brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
                 generalError: {title: 'Something went wrong.', description:'Please try uploading the file again. If the error persists, consider contacting the Brand Design team.'},
             },
@@ -97,7 +99,9 @@ const I18n = VueI18n.createI18n({
                 supportedFormats: 'Nur Videos werden unterstützt.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
                 supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.',
-                supportedLength: 'Die vorhandene T-Outro Animation ist zu kurz.',
+                supportedAnimationLength: 'Die vorhandene T-Outro Animation ist zu kurz.',
+                supportedVideoLength: 'Das Video darf nicht länger als {maximumVideoLength} Sekunden sein.',
+                supportedFileSize: 'Das Video darf nicht größer als {maximumFileSize}MB sein.',
                 brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
                 generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' }
 

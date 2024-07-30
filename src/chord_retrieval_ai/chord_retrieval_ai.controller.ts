@@ -110,6 +110,8 @@ export class ChordRetrievalAiController {
       this.logger.debug(videoData)
 
       switch (true) {
+        case videoData.supported_length === false:
+          throw new Error('LengthNotSupported')
         case videoData.supported_resolution === false &&
           videoData.supported_ratio === false:
           throw new Error('ResolutionAndRatioNotSupported')
@@ -202,11 +204,12 @@ export class ChordRetrievalAiController {
       fs.unlinkSync(tempAudioFilePath)
       this.logger.warn(`Deleted ${tempAudioFilePath}`)
     } catch (error) {
+
       this.logger.warn('Error during video handling', error.stack)
-      if (error.message === 'ResolutionAndRatioNotSupported') {
-        response
-          .status(400)
-          .json({ error: 'Resolution and display ratio not supported.' })
+      if (error.message === 'LengthNotSupported') {
+        response.status(400).json({ error: 'Length not supported.' })
+      } else if (error.message === 'ResolutionAndRatioNotSupported') {
+        response.status(400).json({ error: 'Resolution and display ratio not supported.' })
       } else if (error.message === 'ResolutionNotSupported') {
         response.status(400).json({ error: 'Resolution not supported.' })
       } else if (error.message === 'RatioNotSupported') {

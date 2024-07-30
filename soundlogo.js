@@ -20,9 +20,14 @@ window.app = Vue.createApp({
             showKeys:false,
             marker: { element: null, time: null, label: 'Soundlogo', left: null, exists: null},
             showInvalidFormatToast: false,
-            showResolutionHint:false,
+            showResolutionHint: false,
+            showVideoLengthHint: false,
+            showFileSizeHint: false,
             showGeneralError: false,
             selectedLanguage: "English",
+
+            maximumFileSize: 100, // MB
+            maximumVideoLength: 60, // Seconds
 
             progressBar: {
                 phase: 0,
@@ -57,7 +62,7 @@ window.app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {commonResolution: null, commonRatio: null, commonFiletype:null,success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false,  appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {commonResolution: null, commonRatio: null, commonFiletype:null, commonFileSize: null, commonVideoLength: null, success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false,  appendedAnimation:null,fatalAnimationLength: null},
 
             video_file: null,
             video_url:"",
@@ -67,7 +72,7 @@ window.app = Vue.createApp({
             metadataLoadedOnce: false,
             playerHasBeenClicked: false,
 
-            feedback: {thumbs: null, text: "", show: false, thumbsup:{hover:null}, thumbsdown:{hover:null}}
+            feedback: {thumbs: null, text: "", show: false, thumbsup:{ hover: null }, thumbsdown:{ hover: null }}
 
         }
     },
@@ -127,10 +132,10 @@ window.app = Vue.createApp({
                 return value.toFixed(decimals)-0.1
             }
         },
-        handleReturn(){
+        handleErrorReturn(){
 
             this.isLoadingAnalysis=false;
-            this.actionList= { success: false, audioEmpty: false, logoDetected: false, convertedVideo: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype,fatalAnimationLength: null}
+            this.actionList= { success: false, audioEmpty: false, logoDetected: false, convertedVideo: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype, fatalAnimationLength: null, commonFileSize: this.actionList.commonFileSize, commonVideoLength:  this.actionList.commonVideoLength, }
             console.log("ACTION LIST:", this.actionList)
 
         },
@@ -229,8 +234,9 @@ window.app = Vue.createApp({
             this.video_file = event.target.files[0];
             console.log(this.video_file)
             this.actionList.commonFiletype = await this.checkFiletype()
+            this.actionList.commonFileSize = await this.checkFileSize()
             
-            if (this.actionList.commonFiletype){
+            if (this.actionList.commonFiletype && this.actionList.commonFileSize){
                 try {
                     this.isLoadingAnalysis = true;
                     await this.setProgress_API('Uploading Video...');
@@ -264,36 +270,34 @@ window.app = Vue.createApp({
             let allowedFiletypes = new Set(["video/mp4", "video/ogg", "video/webm", "video/quicktime"]);
             return allowedFiletypes.has(this.video_file.type);
         },
-
+        async checkFileSize() {
+            const sizeMegabyte = this.video_file.size/1000000
+            console.log("Checking Filesize", `${sizeMegabyte}MB`)
+            return (sizeMegabyte <= this.maximumFileSize)
+        },
         handleProgressAnalysisError(error){
 
             this.showResolutionHint = true
             this.showInvalidFormatToast = true
-            console.log("ERROR", error)
-            if (error == 'Resolution and display ratio not supported.'){
-                console.log("1")
+            console.error(error)
+            if (error == 'Length not supported.'){
+                this.actionList.commonVideoLength = false
+            } else if (error == 'Resolution and display ratio not supported.'){
                 this.actionList.commonResolution, this.actionList.commonRatio = false
             } else if (error == 'Resolution not supported.'){
-                console.log("2")
-
                 this.actionList.commonResolution = false
                 this.actionList.commonRatio = true
             } else if (error == 'Display ratio not supported.') {
-                console.log("3")
-
                 this.actionList.commonResolution = true
                 this.actionList.commonRatio = false
             } else {
-                console.log("4")
-
                this.showGeneralError = true
                this.showResolutionHint = false
                this.showInvalidFormatToast = false
             }
 
             console.log(this.actionList)
-            this.handleReturn()
-
+            this.handleErrorReturn()
         },
         async analysisHandler(analysis) {
 
@@ -470,8 +474,7 @@ window.app = Vue.createApp({
                     throw new Error('Unsupported video format');
                 }
     
-                // Ensure video path is unique to prevent caching issues
-                const videoUrl = `${this.video_path}?${new Date().getTime()}`;
+                const videoUrl = `${this.video_path}?${new Date().getTime()}`; //Unique Videopath
     
                 this.videoPlayer.src({
                     type: type,

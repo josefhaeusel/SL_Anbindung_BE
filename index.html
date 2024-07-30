@@ -535,11 +535,13 @@
 
                         <scale-notification v-if="showInvalidFormatToast" :heading="$t('upload.invalidFormat.title')" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFormatToast=false"  style="z-index: 1000">
                             <span slot="text">{{$t('upload.invalidFormat.description')}}<br /></span>
-                            <span slot="text" v-if="!actionList.commonFiletype">{{$t('upload.supportedFormats')}}<br /></span>
-                            <span slot="text" v-if="!actionList.commonResolution">{{$t('upload.supportedResolutions')}}<br /></span>
-                            <span slot="text" v-if="!actionList.commonRatio">{{$t('upload.supportedRatios')}}<br /></span>
-                            <span slot="text" v-if="actionList.fatalAnimationLength">{{$t('upload.supportedLength')}}<br /></span>
-                            <span slot="text" v-if="actionList.commonFiletype" v-html="$t('upload.brandPortal')"></span>
+                            <span slot="text" v-if="actionList.commonFiletype === false">{{$t('upload.supportedFormats')}}<br /></span>
+                            <span slot="text" v-if="actionList.commonResolution === false">{{$t('upload.supportedResolutions')}}<br /></span>
+                            <span slot="text" v-if="actionList.commonRatio === false">{{$t('upload.supportedRatios')}}<br /></span>
+                            <span slot="text" v-if="actionList.fatalAnimationLength">{{$t('upload.supportedAnimationLength')}}<br /></span>
+                            <span slot="text" v-show="actionList.commonFileSize === false">{{$t('upload.supportedFileSize',{maximumFileSize: this.maximumFileSize}  )}}<br /></span>
+                            <span slot="text" v-show="actionList.commonVideoLength === false">{{$t('upload.supportedVideoLength' , {maximumVideoLength: this.maximumVideoLength} )}}<br /></span>
+                            <span slot="text" v-if="actionList.commonResolution === false || actionList.commonRatio === false || actionList.fatalAnimationLength" v-html="$t('upload.brandPortal')"></span>
                         </scale-notification>
 
                         <scale-notification v-if="showGeneralError" :heading="$t('upload.generalError.title')" variant="warning" type="toast" dismissible opened @scale-before-close="showInvalidFileTypeToast=false" style="z-index: 1000">

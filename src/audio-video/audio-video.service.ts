@@ -20,6 +20,7 @@ export interface VideoData {
   pixel_format: string | null
   supported_ratio: boolean
   supported_resolution: boolean
+  supported_length: boolean
   audio: string | null
 }
 
@@ -123,6 +124,7 @@ export class AudioVideoService {
       pixel_format: null,
       supported_ratio: null,
       supported_resolution: null,
+      supported_length: null,
       audio: null,
       duration_ms: null,
     }
@@ -133,6 +135,7 @@ export class AudioVideoService {
     this.logger.debug(audioStream)
 
     const resolutionRatioCheck = await this._checkResolution(videoStream)
+    videoData.supported_length = await this._checkLength(videoStream)
 
     videoData.supported_ratio = resolutionRatioCheck.supportedRatio
     videoData.supported_resolution = resolutionRatioCheck.supportedResolution
@@ -143,8 +146,10 @@ export class AudioVideoService {
     videoData.codec_name_long = videoStream.codec_long_name
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
-    videoData.duration_ms = audioStream.duration * 1000
-    videoData.audio = audioStream.codec_long_name
+    videoData.duration_ms = videoStream.duration * 1000
+    if (audioStream) {
+      videoData.audio = audioStream.codec_long_name
+    }
 
     if (videoData.width == 1080 || videoData.height == 1080) {
       videoData.fidelity = 'hd'
@@ -308,6 +313,9 @@ export class AudioVideoService {
       supportedRatio: supportedRatio,
       supportedResolution: supportedResolution,
     }
+  }
+  private _checkLength(videoStream) {
+    return (videoStream.duration <= 60.0)
   }
   private _getVideoPath(
     inputPathName: string,
