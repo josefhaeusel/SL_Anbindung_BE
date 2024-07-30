@@ -7,8 +7,9 @@ const I18n = VueI18n.createI18n({
                 sub: 'Add the iconic Telekom Sound Logo at the end of all videos.<br>Keep everything on brand with the help of AI.'
             },
             upload: {
-                instructions: 'Upload a video or drop the File here',
+                instructions: 'Upload a video or drop the file here',
                 button: 'Upload a Video',
+                allowedFiles: '(max. {maximumFileSize}MB and {maximumVideoLength}s)',
                 invalidFormat: {title: 'Unsupported file', description: 'The provided file is invalid.' },
                 supportedFormats: 'Only videos are supported.',
                 supportedResolutions: 'Supported resolutions: FullHD, UHD.',
@@ -95,6 +96,7 @@ const I18n = VueI18n.createI18n({
             upload: {
                 instructions: 'Laden Sie ein Video hoch oder ziehen Sie die Datei hierher',
                 invalidFormat: { title: 'Datei nicht unterstützt.', description:'Die bereitgestellte Datei ist ungültig.'},
+                allowedFiles: '(max. {maximumFileSize}MB und {maximumVideoLength}s)',
                 button: 'Ein Video hochladen',
                 supportedFormats: 'Nur Videos werden unterstützt.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',

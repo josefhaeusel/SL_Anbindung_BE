@@ -95,7 +95,14 @@
 
         .upload-instructions {
             color: var(--telekom-color-text-and-icon-additional);
-            padding: 30px 20px 30px;
+            padding: 55px 20px 5px;
+            text-align: center;
+            font-size: var(--telekom-color-text-and-icon-additional);      
+        }
+
+        .allowed-file-instructions {
+            color: var(--telekom-color-text-and-icon-additional);
+            padding: 0px 20px 30px;
             text-align: center;
             font-size: var(--telekom-color-text-and-icon-additional);      
         }
@@ -449,7 +456,7 @@
     .links-card {
         width: 30%
     }
-    @media (max-width: 860px) {
+    @media (max-width: 1000px) {
         .links-card {
             width: 100%;
             max-width: none;
@@ -524,6 +531,7 @@
                         <div class="dropzone">
                             <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
                             <span class="upload-instructions">{{$t('upload.instructions')}}</span>
+                            <span class="allowed-file-instructions">{{$t('upload.allowedFiles', {maximumFileSize: maximumFileSize, maximumVideoLength: maximumVideoLength})}}</span>
                             <scale-icon-action-drag-and-drop style="padding-bottom: 30px;" fill="var(--telekom-color-text-and-icon-additional)"></scale-icon-action-drag-and-drop>
 
                         </div>
