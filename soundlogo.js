@@ -340,6 +340,7 @@ window.app = Vue.createApp({
             //KEY ANALYSIS PART
             this.actionList.audioSegmentEmpty = analysis.audioAnalysis.analysisSegmentEmpty;
             const likely_key = analysis.audioAnalysis.analysis.likely_key;
+            const alt_key = analysis.audioAnalysis.analysis.also_possible;
             const loudness = analysis.audioAnalysis.loudness;
 
             if (this.actionList.audioSegmentEmpty) {
@@ -359,15 +360,22 @@ window.app = Vue.createApp({
             if (analysis.audioAnalysis.analysis.also_possible){
                 this.actionList.altKeyDetected=true
 
-                //Prioritize Major, if both keys are same
-                
-
                 const alt_logo_key = logoKeyMap[analysis.audioAnalysis.analysis.also_possible.key]    
                 if (this.soundlogoKeys[1] != alt_logo_key){
+                    console.log(`Alt Key ${alt_logo_key} has replaced ${this.soundlogoKeys[1]}`)
                     this.soundlogoKeys[1] = alt_logo_key
+
+                    if (likely_key.key.includes(alt_logo_key) && likely_key.key.includes("minor")){
+                        this.soundlogoKeys = this.soundlogoKeys.reverse()
+
+                        console.log(`Keys have been swapped, because of major prioritization over minor of same root.`)
+
+                    }
+
                 }
 
-                console.log(`Alt Key ${alt_logo_key} replaced ${this.soundlogoKeys[1]}`)
+                
+
 
             }
 
