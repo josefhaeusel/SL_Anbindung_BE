@@ -46,7 +46,6 @@
         .title-container {
             display: flex;
             flex-direction: column;
-            z-index: 3
         }
 
         .title {
@@ -69,7 +68,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%
+            width: 100%;
+            z-index: 3
         }
         .dropzone {
             cursor: pointer;
@@ -114,16 +114,16 @@
 
         .fileinput{
             position:absolute;
-            height: 70%;
-            width: 80%;
+            height: 100%;
+            width: 100%;
             opacity: 0;
-            z-index:2
         }
 
         .fileinput-big{
             position: absolute;
-            width: 100%;
-            height: 65%;
+            width: 100vw;
+            height: 75%;
+            z-index: 2;
             opacity: 0;
         }
 
@@ -518,7 +518,7 @@
     <div class="app-container">
         <div class="wrapper">
 
-            <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*" @click.prevent />
+            <input v-if="!isLoadingAnalysis && currentLayer === 'layer1'" type="file" id="fileInputBig" class="fileinput-big" @change="handleFileUpload" accept="video/*"/>
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
                 <div class="description" v-html="$t('title.sub')"></div>
@@ -529,7 +529,7 @@
                 <transition name="fade-in-in">
                     <div class="upload-container" v-if="!isLoadingAnalysis">
                         <div class="dropzone">
-                            <input type="file" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
+                            <input type="file" ref="fileInput" id="fileInput" class="fileinput" @change="handleFileUpload" accept="video/*"/>
                             <span class="upload-instructions">{{$t('upload.instructions')}}</span>
                             <span class="allowed-file-instructions">{{$t('upload.allowedFiles', {maximumFileSize: maximumFileSize, maximumVideoLength: maximumVideoLength})}}</span>
                             <scale-icon-action-drag-and-drop style="padding-bottom: 30px;" fill="var(--telekom-color-text-and-icon-additional)"></scale-icon-action-drag-and-drop>
@@ -611,7 +611,7 @@
 
                         <div class="right-controls">
                             <div class="key-label">{{$t('soundlogo.key')}}:</div>
-                            <scale-tooltip placement="bottom-end">
+                            <scale-tooltip placement="bottom-start">
                                 <span v-if="!actionList.altKeyDetected" slot="content">
                                     <scale-icon-content-heart size="12" selected></scale-icon-content-heart>
                                     {{$t('soundlogo.recommended')}}
@@ -620,7 +620,7 @@
                                     <scale-icon-content-music size="12" selected></scale-icon-content-music>
                                     {{$t('soundlogo.bothKeysPossible')}}
                                 </span>
-                                <scale-segmented-button id="keyDisplay" size="medium">
+                                <scale-segmented-button id="keyDisplay" size="medium" :disabled="isLoadingResult">
                                     <scale-segment v-for="(key, index) in soundlogoKeys" :selected="index == selectedKey.id" @click="updateLogoKey(index)">{{key}}</option>
                                 </scale-segmented-button>
                             </scale-tooltip>

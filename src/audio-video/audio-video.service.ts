@@ -315,7 +315,7 @@ export class AudioVideoService {
     }
   }
   private _checkLength(videoStream) {
-    return (videoStream.duration <= 60.0)
+    return (videoStream.duration <= 120.0)
   }
   private _getVideoPath(
     inputPathName: string,

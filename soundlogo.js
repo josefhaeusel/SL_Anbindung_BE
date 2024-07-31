@@ -27,7 +27,7 @@ window.app = Vue.createApp({
             selectedLanguage: "English",
 
             maximumFileSize: 100, // MB
-            maximumVideoLength: 60, // Seconds
+            maximumVideoLength: 120, // Seconds
 
             progressBar: {
                 phase: 0,
@@ -62,7 +62,7 @@ window.app = Vue.createApp({
             videoPlayerLUFS:-26.71,
             desiredMasterLUFS: -20,
 
-            actionList: {commonResolution: null, commonRatio: null, commonFiletype:null, commonFileSize: null, commonVideoLength: null, success: false, audioEmpty: false, audioSegmentEmpty: false, convertedVideo: false, keyDetected: false, altKeyDetected:false, logoDetected: false,  appendedAnimation:null,fatalAnimationLength: null},
+            actionList: {},
 
             video_file: null,
             video_url:"",
@@ -79,7 +79,8 @@ window.app = Vue.createApp({
 
     async mounted() {
         await this.setup();
-    
+        this.initializeActionList()
+
         this.videoPlayer = videojs("myVideo");
         console.log("VIDEO PLAYER", this.videoPlayer);
     
@@ -116,10 +117,22 @@ window.app = Vue.createApp({
             });
         });
 
+        // document.addEventListener('drop', function(event) {
+        //     console.log("DROP")
+        //     event.preventDefault(); // Prevent default behavior (e.g., opening the file in the browser)
+        //     // const files = event.dataTransfer.files; // Get the dropped files
+        // });
+
     },
 
     methods: {
-
+        handleFileDropClick(event){
+            event.preventDefault();
+            this.$refs.fileInput.click()
+        },
+        initializeActionList(){
+            this.actionList = {commonResolution: null, commonRatio: null, commonFiletype:null, commonFileSize: null, commonVideoLength: null, success: null, audioEmpty: null, audioSegmentEmpty: null, convertedVideo: false, keyDetected: null, altKeyDetected:null, logoDetected: null,  appendedAnimation:null,fatalAnimationLength: null}
+        },
         formatNumber(value, decimals = 2) {
             return value.toFixed(decimals);
         },
@@ -135,7 +148,7 @@ window.app = Vue.createApp({
         handleErrorReturn(){
 
             this.isLoadingAnalysis=false;
-            this.actionList= { success: false, audioEmpty: false, logoDetected: false, convertedVideo: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype, fatalAnimationLength: null, commonFileSize: this.actionList.commonFileSize, commonVideoLength:  this.actionList.commonVideoLength, }
+            this.actionList= { success: false, audioEmpty: null, logoDetected: null, convertedVideo: false, commonResolution: this.actionList.commonResolution, commonRatio: this.actionList.commonRatio, commonFiletype: this.actionList.commonFiletype, fatalAnimationLength: null, commonFileSize: this.actionList.commonFileSize, commonVideoLength:  this.actionList.commonVideoLength}
             console.log("ACTION LIST:", this.actionList)
 
         },
@@ -230,8 +243,8 @@ window.app = Vue.createApp({
             console.log(this.selectedLanguage)
         },
         async handleFileUpload(event) {
-
-            this.video_file = event.target.files[0];
+            this.initializeActionList()
+            this.video_file = event.target.files[0]
             console.log(this.video_file)
             this.actionList.commonFiletype = await this.checkFiletype()
             this.actionList.commonFileSize = await this.checkFileSize()
@@ -283,7 +296,8 @@ window.app = Vue.createApp({
             if (error == 'Length not supported.'){
                 this.actionList.commonVideoLength = false
             } else if (error == 'Resolution and display ratio not supported.'){
-                this.actionList.commonResolution, this.actionList.commonRatio = false
+                this.actionList.commonResolution = false
+                this.actionList.commonRatio = false
             } else if (error == 'Resolution not supported.'){
                 this.actionList.commonResolution = false
                 this.actionList.commonRatio = true
@@ -296,8 +310,9 @@ window.app = Vue.createApp({
                this.showInvalidFormatToast = false
             }
 
+            this.isLoadingAnalysis = false
             console.log(this.actionList)
-            this.handleErrorReturn()
+            // this.handleErrorReturn()
         },
         async analysisHandler(analysis) {
 
@@ -567,6 +582,7 @@ window.app = Vue.createApp({
         },
         async downloadVideo() {
             try {
+                this.stopTransports()
                 this.isLoadingResult = true;
                 const renderedBuffer = await this.renderAudio();
                 const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);

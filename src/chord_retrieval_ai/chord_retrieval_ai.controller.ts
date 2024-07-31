@@ -167,11 +167,13 @@ export class ChordRetrievalAiController {
         audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(
           tempAudioFilePath,
           videoAnalysisResult.appendAnimation,
+          videoAnalysisResult.analysis.logo_start
         )
       } else {
         audioAnalysisResult = await this.chordRetrievalAiService.analyzeSong(
           tempOriginalVideoFilePath,
           videoAnalysisResult.appendAnimation,
+          videoAnalysisResult.analysis.logo_start
         )
       }
 

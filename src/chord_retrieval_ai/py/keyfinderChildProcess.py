@@ -8,31 +8,32 @@ import matplotlib
 import soundfile
 
 
+def clip(number, min, max):
+    if number < min:
+        return min
+    elif number > max:
+        return max
+    else:
+        return number
+
 if len(sys.argv) > 1:
     try:
-        audio_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
-        animation_appended = sys.argv[2]  # The first argument is the script name, so the song name is the second argument
+        audio_path = sys.argv[1]
+        animation_appended = sys.argv[2] 
+        animation_start = float(sys.argv[3])
 
         y, sr = librosa.load(audio_path)
-        duration = librosa.get_duration(y=y, sr=sr)
+        duration = librosa.get_duration(y=y, sr=sr) # Duration of the split .aac file (from Phase "Splitting Audio from Video") !Not length of appended animation!
 
         if animation_appended == "true":
-            if duration > 1:
-                analysis_start = librosa.time_to_samples(duration - 1, sr=sr) #1.4s from SL start till end 
-                analysis_end = librosa.time_to_samples(duration, sr=sr)
-            else:
-                analysis_start = librosa.time_to_samples(0, sr=sr)
-                analysis_end = librosa.time_to_samples(duration, sr=sr)
+            analysis_start = librosa.time_to_samples(clip(duration - 1, 0, duration), sr=sr) # 1.4s from SL start till end 
+            analysis_end = librosa.time_to_samples(duration, sr=sr)
         else: #Calculate with logo detection time!!!
-            if duration > 4.5:
-                analysis_start = librosa.time_to_samples(duration - (4.5), sr=sr)
-                analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
-            elif duration <= 2.5:
-                analysis_start = librosa.time_to_samples(0, sr=sr)
-                analysis_end = librosa.time_to_samples(duration-0.1, sr=sr)
-            else:
-                analysis_start = librosa.time_to_samples(0, sr=sr)
-                analysis_end = librosa.time_to_samples(duration - 2.5, sr=sr)
+            analysis_start_secs = clip(animation_start - 3.5, 0, duration) # Soundlogo start (animation_start - 3.55)
+            analysis_end_secs = clip(analysis_start_secs+1.5, 0, duration)
+            analysis_start = librosa.time_to_samples(analysis_start_secs, sr=sr)
+            analysis_end = librosa.time_to_samples(analysis_end_secs, sr=sr)
+
 
         
 
@@ -89,3 +90,7 @@ if len(sys.argv) > 1:
 
 else:
     print("Please provide a song name as an argument.")
+
+
+
+    

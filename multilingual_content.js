@@ -100,7 +100,7 @@ const I18n = VueI18n.createI18n({
                 button: 'Ein Video hochladen',
                 supportedFormats: 'Nur Videos werden unterstützt.',
                 supportedResolutions: 'Unterstützte Auflösungen: FullHD, UHD.',
-                supportedRatios: 'Unterstützte Seitenverhältnisse: 16:9, 9:16, 1:1.',
+                supportedRatios: 'Unterstützte Ratios: 16:9, 9:16, 1:1.',
                 supportedAnimationLength: 'Die vorhandene T-Outro Animation ist zu kurz.',
                 supportedVideoLength: 'Das Video darf nicht länger als {maximumVideoLength} Sekunden sein.',
                 supportedFileSize: 'Das Video darf nicht größer als {maximumFileSize}MB sein.',

@@ -8,7 +8,7 @@ import { join } from 'path'
 export class ChordRetrievalAiService {
   private readonly logger = new Logger(ChordRetrievalAiService.name)
 
-  analyzeSong(songPath: string, animationAppended: boolean): Promise<any> {
+  analyzeSong(songPath: string, animationAppended: boolean, animationStart: number): Promise<any> {
     return new Promise((resolve, reject) => {
       const rootPath =
         process.env.NODE_ENV == 'production'
@@ -19,7 +19,7 @@ export class ChordRetrievalAiService {
         (process.env.NODE_ENV == 'production' ? 'pyc' : 'py')
       const pythonPath = path.join(rootPath, 'py', pythonFile)
       this.logger.debug(
-        `python3 ${pythonPath} ${songPath} ${animationAppended}`,
+        `python3 ${pythonPath} ${songPath} ${animationAppended} ${animationStart}`,
       )
       this.logger.debug(`env ${process.env.NODE_ENV}`)
       this.logger.debug(`env ${process.env.NUMBA_CACHE_DIR}`)
@@ -28,7 +28,7 @@ export class ChordRetrievalAiService {
 
       const pythonProcess = spawn(
         'python3',
-        [pythonPath, songPath, animationAppended.toString()],
+        [pythonPath, songPath, animationAppended.toString(), animationStart.toString()],
         { env: process.env },
       )
 
