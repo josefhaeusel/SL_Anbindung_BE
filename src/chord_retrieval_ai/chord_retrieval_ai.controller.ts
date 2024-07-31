@@ -254,8 +254,7 @@ export class ChordRetrievalAiController {
 
       const appendedAnimation = (request.session as ISession).appendedAnimation
       const convertedVideo = (request.session as ISession).convertedVideo
-      const tempOriginalVideoFilePath = (request.session as ISession)
-        .tempOriginalVideoFilePath
+      const tempOriginalVideoFilePath = (request.session as ISession).tempOriginalVideoFilePath
 
       const tempVideoFilePath = path.join(
         __dirname,

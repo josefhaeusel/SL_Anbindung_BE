@@ -61,7 +61,13 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .outputOptions(['-map 0:v', '-c:v copy', '-map 0:a', '-c:a copy'])
+        .outputOptions(['-map 0:v', '-c:v copy', '-map 0:a', '-c:a copy', 
+          '-preset medium', // Faster preset for NVENC
+          '-crf 23', // Adjust CRF value for balance between quality and file size
+          '-maxrate 10M', // Maximum bitrate
+          '-bufsize 15M', // VBV buffer size
+          '-movflags +faststart', // Optimize for web playback
+          ])
         .output(videoOutputPath)
         .output(audioOutputPath)
         .on('error', (error) => {
@@ -72,7 +78,7 @@ export class AudioVideoService {
         .on('end', () => {
           this.logger.debug('Splitting done')
           resolve({ audio: audioOutputPath, video: videoOutputPath })
-          fs.unlinkSync(inputPath)
+          // fs.unlinkSync(inputPath)
           this.logger.warn(`Deleted ${inputPath}`)
         })
         .run()
@@ -174,6 +180,8 @@ export class AudioVideoService {
     videoData: any,
     basenameOnly = false,
   ): Promise<string> {
+
+
     const inputPathParsed = path.parse(inputVideoPath)
 
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name)
@@ -186,6 +194,7 @@ export class AudioVideoService {
       false,
       true,
     )
+    this.logger.debug(`videoInputPath: ${inputVideoPath}`)
 
     const appendAnimationPath = path.resolve(
       `.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
@@ -226,24 +235,36 @@ export class AudioVideoService {
     convertedVideo = false,
     appendedAnimation = false,
   ): Promise<string> {
-    this.logger.debug(`outputVideoPath: ${outputVideoPath}`)
-    this.logger.debug(`inputAudioPath: ${inputAudioPath}`)
 
     const outputVideoPathParsed = path.parse(outputVideoPath)
+
+
+    
+    this.logger.debug(`inputAudioPath: ${inputAudioPath}`)
 
     const inputVideoPathName = path.join(
       outputVideoPathParsed.dir,
       outputVideoPathParsed.name,
     )
-    const inputVideoPathExt = outputVideoPathParsed.ext
-
+  
     const videoInputPath = this._getVideoPath(
       inputVideoPathName,
-      inputVideoPathExt,
+      ".mp4",
       convertedVideo,
       true,
       appendedAnimation,
     )
+
+    const videoOutputPath = this._getVideoPath(
+      inputVideoPathName,
+      ".mp4",
+      false,
+      false,
+      false,
+    )
+
+    this.logger.debug(`videoInputPath: ${videoInputPath}`)
+    this.logger.debug(`videoOutputPath: ${videoOutputPath}`)
 
     const videoInputAudioCodec =
       await this._getAudioCodecSettings(videoInputPath)
@@ -251,7 +272,6 @@ export class AudioVideoService {
     this.logger.debug('videoAudioCodec:')
     this.logger.debug(videoInputAudioCodec)
 
-    this.logger.debug(`videoInputPath: ${videoInputPath}`)
 
     return new Promise((resolve, reject) => {
       this._initFfmpeg()
@@ -261,7 +281,7 @@ export class AudioVideoService {
         .addInput(inputAudioPath)
         .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
         .audioCodec(videoInputAudioCodec.codec_name)
-        .format(inputVideoPathExt.replace('.', ''))
+        .format('mp4')
         .on('error', (error) => {
           this.logger.error('error:', error)
 
@@ -271,10 +291,10 @@ export class AudioVideoService {
           this.logger.debug('Joining done')
 
           resolve(
-            basenameOnly ? path.basename(outputVideoPath) : outputVideoPath,
+            basenameOnly ? path.basename(videoOutputPath) : videoOutputPath,
           )
         })
-        .saveToFile(outputVideoPath)
+        .saveToFile(videoOutputPath)
     })
   }
 
@@ -320,8 +340,36 @@ export class AudioVideoService {
     }
   }
   private _checkLength(videoStream) {
-    return (videoStream.duration <= 120.0)
+
+    let duration
+    if (videoStream.duration =="N/A") {
+      try {
+        duration = this._parseTimecodeToSeconds(videoStream.tags.DURATION) //Handling for webm format
+        this.logger.log(duration)
+      } catch (error) {
+        this.logger.error(error)
+      }
+    } else{
+      duration = videoStream.duration
+    }
+
+    return (duration <= 120.0)
   }
+  private _parseTimecodeToSeconds(timeCode: string){
+    const [hours, minutes, secondsAndMs] = timeCode.split(':');
+
+    const [seconds, milliseconds] = secondsAndMs.split('.');
+
+    const hoursInSeconds = parseInt(hours, 10) * 3600;
+    const minutesInSeconds = parseInt(minutes, 10) * 60;
+    const secondsInt = parseInt(seconds, 10);
+    const millisecondsFloat = parseFloat('0.' + milliseconds);
+
+    const totalSeconds = hoursInSeconds + minutesInSeconds + secondsInt + millisecondsFloat;
+
+    return totalSeconds;
+  }
+
   private _getVideoPath(
     inputPathName: string,
     inputPathExt: string,
