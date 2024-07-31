@@ -359,6 +359,9 @@ window.app = Vue.createApp({
             if (analysis.audioAnalysis.analysis.also_possible){
                 this.actionList.altKeyDetected=true
 
+                //Prioritize Major, if both keys are same
+                
+
                 const alt_logo_key = logoKeyMap[analysis.audioAnalysis.analysis.also_possible.key]    
                 if (this.soundlogoKeys[1] != alt_logo_key){
                     this.soundlogoKeys[1] = alt_logo_key

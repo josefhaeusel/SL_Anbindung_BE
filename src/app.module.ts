@@ -25,13 +25,8 @@ import { CsrfInjectMiddleware } from './csrf-inject.middleware'
         '..',
         process.env.NODE_ENV == 'production' ? 'frontend' : '',
       ),
-      serveRoot: '/soundlogo',
+      serveRoot: '/',
     }),
-    /*ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'frontend/highlight'),
-      serveRoot: '/highlight',
-    }),
-  MusicAiSearchModule,*/
   ],
   controllers: [AppController, DownloadController],
   providers: [

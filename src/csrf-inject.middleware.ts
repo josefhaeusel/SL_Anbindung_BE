@@ -23,8 +23,7 @@ export class CsrfInjectMiddleware implements NestMiddleware {
       "media-src 'self';"
     );
 
-    // TODO: 2024-07-11, change url if soundlogo only
-    if (req.originalUrl === '/soundlogo/') {
+    if (req.originalUrl === '/') {
       this.logger.log(`Url: ${req.originalUrl}`)
 
       const filePath = path.join(
