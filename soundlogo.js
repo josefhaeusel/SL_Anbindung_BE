@@ -2,7 +2,6 @@
 //Audio Nodes
 let logoPlayer
 let logoBuffers
-let filter
 let audioPlayerCrossFade
 let video_url
 let audioPlayer
@@ -126,10 +125,6 @@ window.app = Vue.createApp({
     },
 
     methods: {
-        handleFileDropClick(event){
-            event.preventDefault();
-            this.$refs.fileInput.click()
-        },
         initializeActionList(){
             this.actionList = {commonResolution: null, commonRatio: null, commonFiletype:null, commonFileSize: null, commonVideoLength: null, success: null, audioEmpty: null, audioSegmentEmpty: null, convertedVideo: false, keyDetected: null, altKeyDetected:null, logoDetected: null,  appendedAnimation:null,fatalAnimationLength: null}
         },
@@ -266,6 +261,7 @@ window.app = Vue.createApp({
                     await this.setProgress_API('Done (on Client-side).')
                     
                     await this.analysisHandler(analysis);
+                    this.setVideoPlayerBeforeLogo();
                     // console.log(this.actionList)
 
                 } catch (error){
@@ -277,7 +273,14 @@ window.app = Vue.createApp({
             }
 
         },
-        
+        setVideoPlayerBeforeLogo(){
+            let timeBeforeLogo = this.soundlogoPosition-5
+            console.log("Set Time before Logo:", timeBeforeLogo)
+            if (timeBeforeLogo < 0) {
+                timeBeforeLogo = 0
+            }
+            this.videoPlayer.currentTime(timeBeforeLogo)
+        },
         async checkFiletype() {
             console.log("Checking Filetype")
             let allowedFiletypes = new Set(["video/mp4", "video/ogg", "video/webm", "video/quicktime"]);
@@ -573,11 +576,6 @@ window.app = Vue.createApp({
             )
 
         },
-        continuePlayback() {
-            // console.log(`Continue Playback`)
-            this.playbackPosition = this.videoPlayer.currentTime();
-            this.startTransports(this.playbackPosition, this.audioDuration, this.soundlogoPosition);
-        },
         stopPlayback() {
             // console.log(`Stop Playback`)
             this.stopTransports();
@@ -606,7 +604,6 @@ window.app = Vue.createApp({
                     await this.setLoudness();
 
                     scheduleAudio(this.audioDuration, 0, this.soundlogoPosition,transport);
-                    scheduleFilter(this.audioDuration, 0, this.soundlogoPosition, transport);
                     scheduleLogoSound(this.audioDuration, 0, this.soundlogoPosition, transport);
                     transport.start();
                 }, this.audioDuration)
@@ -631,15 +628,9 @@ window.app = Vue.createApp({
         
             scheduleAudio(audioDuration, currentPosition, logoStart, transport);
             scheduleLogoSound(audioDuration, currentPosition, logoStart, transport);
-            scheduleFilter(audioDuration, currentPosition, logoStart, transport)
         
-            this.videoPlayer.setCurrentTime = currentPosition;
-            this.videoPlayer.play();
             transport.start();
-        
-            audioPlayer.onstop = () => {
-                this.stopTransports();
-            }
+
         },
         stopTransports() {
             Tone.Transport.stop();
@@ -697,9 +688,6 @@ async function setupAudioNodes(context, key='A') {
 
         audioPlayer = await loadAudioplayer(context);
         console.log('Audio player initialized:', audioPlayer);
-
-        filter = await loadFilter(context)
-        console.log('Filter initialized:', filter);
 
         await loadLogoBuffers();
         logoPlayer = await loadLogoPlayer(context, key);
@@ -784,21 +772,6 @@ function writeString(view, offset, string) {
     }
 }
 
-let filterSettings = {start:20000, frequency:2000, rampTime:2, delay:1.25}
-
-function scheduleFilter(audioDuration, currentPosition, logoStart, transport) {
-
-    filter.set({frequency: filterSettings.start})
-
-    const secondsTillLogoStart = calculateEnvScheduleTime(audioDuration, currentPosition, logoStart)-1;
-    if (secondsTillLogoStart >= 0) {
-
-        transport.schedule((time) => {
-            filter.frequency.exponentialRampTo(filterSettings.frequency, filterSettings.rampTime, time)
-            console.log("Go Filter Ramp!");
-        }, `+${secondsTillLogoStart+filterSettings.delay}`);
-    }
-}
 
 function scheduleAudio(audioDuration, currentPosition, logoStart, transport) {
 
@@ -911,18 +884,9 @@ function getVideoDimensions(url) {
 async function loadAudioplayer(Context) {
 
     const newAudioPlayer = new Tone.Player({ url: audioBuffer, context: Context, volume: 0 });
+    newAudioPlayer.chain(envelope, master);
 
     return newAudioPlayer
-
-}
-
-
-async function loadFilter(Context){
-    const filterEffect = new Tone.Filter({frequency:20000, type:"lowpass", context: Context});
-
-    audioPlayer.chain(/*filterEffect,*/ envelope, master);
-
-    return filterEffect
 
 }
 
