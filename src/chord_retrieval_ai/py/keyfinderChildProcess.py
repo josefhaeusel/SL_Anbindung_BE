@@ -29,8 +29,8 @@ if len(sys.argv) > 1:
             analysis_start = librosa.time_to_samples(clip(duration - 1, 0, duration), sr=sr) # 1.4s from SL start till end 
             analysis_end = librosa.time_to_samples(duration, sr=sr)
         else: #Calculate with logo detection time!!!
-            analysis_start_secs = clip(animation_start - 3.5, 0, duration) # Soundlogo start (animation_start - 3.55)
-            analysis_end_secs = clip(analysis_start_secs+1.5, 0, duration)
+            analysis_start_secs = clip(animation_start - 3.25, 0, duration) # Soundlogo start (animation_start - 3.55)
+            analysis_end_secs = clip(analysis_start_secs+1.25, 0, duration)
             analysis_start = librosa.time_to_samples(analysis_start_secs, sr=sr)
             analysis_end = librosa.time_to_samples(analysis_end_secs, sr=sr)
 

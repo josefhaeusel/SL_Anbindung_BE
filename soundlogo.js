@@ -921,7 +921,7 @@ async function loadFilter(Context){
 }
 
 function calculateEnvScheduleTime(audioDuration, currentPosition, logoStart) {
-    const secondsTillStart = (logoStart - 0.4) - currentPosition;
+    const secondsTillStart = (logoStart+0.4) - currentPosition;
     return secondsTillStart;
 }
 
@@ -930,7 +930,7 @@ async function ampEnvelope() {
         attack: 0,
         decay: 0,
         sustain: 1.0,
-        release: 2.8
+        release: 2
 
     });
 
