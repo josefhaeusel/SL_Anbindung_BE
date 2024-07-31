@@ -92,6 +92,15 @@ export class ChordRetrievalAiController {
     try {
       this.logger.log('Starting video upload handling')
 
+      const commonFilesize = () => {
+        const sizeMegabyte = file.size/1000000
+        console.log("Checking Filesize", `${sizeMegabyte}MB`)
+        return (sizeMegabyte <= 100)
+      }
+      if (!commonFilesize()){
+        throw new Error('InvalidFilesize')
+      }
+     
       const tempOriginalVideoFilePath = path.join(
         __dirname,
         '../../temp_uploads/video',
@@ -208,7 +217,9 @@ export class ChordRetrievalAiController {
     } catch (error) {
 
       this.logger.warn('Error during video handling', error.stack)
-      if (error.message === 'LengthNotSupported') {
+      if (error.message === 'InvalidFilesize') {
+        response.status(400).json({ error: 'Invalid Filesize.' })
+      } else if (error.message === 'LengthNotSupported') {
         response.status(400).json({ error: 'Length not supported.' })
       } else if (error.message === 'ResolutionAndRatioNotSupported') {
         response.status(400).json({ error: 'Resolution and display ratio not supported.' })

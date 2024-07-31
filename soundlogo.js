@@ -293,7 +293,9 @@ window.app = Vue.createApp({
             this.showResolutionHint = true
             this.showInvalidFormatToast = true
             console.error(error)
-            if (error == 'Length not supported.'){
+            if (error == 'Invalid Filesize.'){
+                this.actionList.commonFileSize = false
+            } else if (error == 'Length not supported.'){
                 this.actionList.commonVideoLength = false
             } else if (error == 'Resolution and display ratio not supported.'){
                 this.actionList.commonResolution = false
@@ -312,7 +314,7 @@ window.app = Vue.createApp({
 
             this.isLoadingAnalysis = false
             console.log(this.actionList)
-            // this.handleErrorReturn()
+
         },
         async analysisHandler(analysis) {
 
@@ -367,16 +369,9 @@ window.app = Vue.createApp({
 
                     if (likely_key.key.includes(alt_logo_key) && likely_key.key.includes("minor")){
                         this.soundlogoKeys = this.soundlogoKeys.reverse()
-
-                        console.log(`Keys have been swapped, because of major prioritization over minor of same root.`)
-
+                        console.warn(`Keys have been swapped, because of major prioritization over minor of same root.`)
                     }
-
                 }
-
-                
-
-
             }
 
             //APPENDED ANIMATION PART
