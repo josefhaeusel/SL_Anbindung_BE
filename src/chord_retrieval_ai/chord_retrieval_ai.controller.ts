@@ -140,8 +140,8 @@ export class ChordRetrievalAiController {
         sendProgress('Converting Video Format...')
         tempVideoOutputFilePath = await this.audioVideoService.convert(
           tempOriginalVideoFilePath,
-        )
-        ;(request.session as ISession).convertedVideo = true
+        );
+        (request.session as ISession).convertedVideo = true
       } else {
         tempVideoOutputFilePath = tempOriginalVideoFilePath
         ;(request.session as ISession).convertedVideo = false

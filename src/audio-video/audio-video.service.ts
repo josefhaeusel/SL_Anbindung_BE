@@ -139,7 +139,7 @@ export class AudioVideoService {
 
     videoData.supported_ratio = resolutionRatioCheck.supportedRatio
     videoData.supported_resolution = resolutionRatioCheck.supportedResolution
-    videoData.ratio = videoStream.display_aspect_ratio.replace(':', '_')
+    videoData.ratio = videoStream.display_aspect_ratio
     videoData.width = videoStream.width
     videoData.height = videoStream.height
     videoData.codec_name = videoStream.codec_name
@@ -203,9 +203,6 @@ export class AudioVideoService {
           ],
           ['outv', 'outa'],
         )
-        /*.outputOptions([
-        '-map 0:a?', // map the audio from the first input (if it exists)
-      ])*/
         .on('error', (error) => {
           this.logger.error('error:', error)
           reject(error)
@@ -285,22 +282,30 @@ export class AudioVideoService {
     let supportedRatio = true
     let supportedResolution = true
 
+    videoStream.display_aspect_ratio = videoStream.display_aspect_ratio.replace(":", "_")
+
     if (videoStream.display_aspect_ratio == 'N/A') {
       const ratio = videoStream.width / videoStream.height
       switch (ratio) {
-        case 16 / 9:
-          videoStream.display_aspect_ratio = '16:9'
-        case 9 / 16:
-          videoStream.display_aspect_ratio = '9:16'
+        case (16 / 9):
+          videoStream.display_aspect_ratio = '16_9'
+          break
+        case (9 / 16):
+          videoStream.display_aspect_ratio = '9_16'
+          break
         case 1:
-          videoStream.display_aspect_ratio = '1:1'
+          videoStream.display_aspect_ratio = '1_1'
+          break
+        default:
+          videoStream.display_aspect_ratio = ratio
+
       }
     }
 
     if (
-      videoStream.display_aspect_ratio != '1:1' &&
-      videoStream.display_aspect_ratio != '16:9' &&
-      videoStream.display_aspect_ratio != '9:16'
+      videoStream.display_aspect_ratio != '1_1' &&
+      videoStream.display_aspect_ratio != '16_9' &&
+      videoStream.display_aspect_ratio != '9_16'
     ) {
       supportedRatio = false
     }
@@ -404,14 +409,14 @@ export class AudioVideoService {
       const ffprobeLinuxPath = audioVideoPaths.ffprobeLinuxPath
 
       try {
-        this.logger.debug('Trying ffmpeg path: ', ffmpegPath)
+        // this.logger.debug('Trying ffmpeg path: ', ffmpegPath)
         fs.chmodSync(ffmpegPath as unknown as string, '755')
         ffmpeg.setFfmpegPath(ffmpegPath)
       } catch (err) {
         this.logger.warn('Failed setting ffmpeg permissions: ', err)
 
         try {
-          this.logger.debug('Trying ffmpeg linux path: ', ffmpegLinuxPath.path)
+          // this.logger.debug('Trying ffmpeg linux path: ', ffmpegLinuxPath.path)
           fs.chmodSync(ffmpegLinuxPath.path, '755')
           ffmpeg.setFfmpegPath(ffmpegLinuxPath.path)
         } catch (err) {
@@ -420,17 +425,14 @@ export class AudioVideoService {
       }
 
       try {
-        this.logger.debug('Trying ffprobe path: ', ffprobePath.path)
+        // this.logger.debug('Trying ffprobe path: ', ffprobePath.path)
         fs.chmodSync(ffprobePath.path, '755')
         ffmpeg.setFfprobePath(ffprobePath.path)
       } catch (err) {
         this.logger.warn('Failed setting ffprobe permissions: ', err)
 
         try {
-          this.logger.debug(
-            'Trying ffprobe linux path: ',
-            ffprobeLinuxPath.path,
-          )
+          // this.logger.debug('Trying ffprobe linux path: ', ffprobeLinuxPath.path,)
           fs.chmodSync(ffprobeLinuxPath.path, '755')
           ffmpeg.setFfprobePath(ffprobeLinuxPath.path)
         } catch (err) {

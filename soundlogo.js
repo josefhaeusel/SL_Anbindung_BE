@@ -282,7 +282,7 @@ window.app = Vue.createApp({
             this.videoPlayer.currentTime(timeBeforeLogo)
         },
         async checkFiletype() {
-            console.log("Checking Filetype")
+            console.log("Checking Filetype", this.video_file.type)
             let allowedFiletypes = new Set(["video/mp4", "video/ogg", "video/webm", "video/quicktime"]);
             return allowedFiletypes.has(this.video_file.type);
         },

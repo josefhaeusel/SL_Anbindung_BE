@@ -19,20 +19,25 @@ def clip(number, min, max):
 if len(sys.argv) > 1:
     try:
         audio_path = sys.argv[1]
-        animation_appended = sys.argv[2] 
-        animation_start = float(sys.argv[3])
-
+        animation_appended = sys.argv[2]
+    
         y, sr = librosa.load(audio_path)
         duration = librosa.get_duration(y=y, sr=sr) # Duration of the split .aac file (from Phase "Splitting Audio from Video") !Not length of appended animation!
+        animation_start = None
+        if (animation_appended):
+            animation_start = duration + 0.97
+        else:
+            animation_start = float(sys.argv[3])
 
-        if animation_appended == "true":
-            analysis_start = librosa.time_to_samples(clip(duration - 1, 0, duration), sr=sr) # 1.4s from SL start till end 
-            analysis_end = librosa.time_to_samples(duration, sr=sr)
-        else: #Calculate with logo detection time!!!
-            analysis_start_secs = clip(animation_start - 3.25, 0, duration) # Soundlogo start (animation_start - 3.55)
-            analysis_end_secs = clip(analysis_start_secs+1.25, 0, duration)
-            analysis_start = librosa.time_to_samples(analysis_start_secs, sr=sr)
-            analysis_end = librosa.time_to_samples(analysis_end_secs, sr=sr)
+
+        # if animation_appended == "true":
+        #     analysis_start = librosa.time_to_samples(clip(duration - 1, 0, duration), sr=sr) # 1.4s from SL start till end 
+        #     analysis_end = librosa.time_to_samples(duration, sr=sr)
+        # else: #Calculate with logo detection time!!!
+        analysis_start_secs = clip(animation_start - 3.25, 0, duration) # Soundlogo start (animation_start - 3.55)
+        analysis_end_secs = clip(analysis_start_secs+1.25, 0, duration)
+        analysis_start = librosa.time_to_samples(analysis_start_secs, sr=sr)
+        analysis_end = librosa.time_to_samples(analysis_end_secs, sr=sr)
 
 
         
