@@ -1,11 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
 import * as ffmpeg from 'fluent-ffmpeg'
-/*
-import * as ffprobePath from 'ffprobe-static';
-import * as ffmpegPath from 'ffmpeg-static';
-import * as ffprobeLinuxPath from '@ffprobe-installer/ffprobe';
-import * as ffmpegLinuxPath from '@ffmpeg-installer/ffmpeg';
-*/
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -62,11 +56,11 @@ export class AudioVideoService {
 
       ffmpeg(inputPath)
         .outputOptions(['-map 0:v', '-c:v copy', '-map 0:a', '-c:a copy', 
-          '-preset medium', // Faster preset for NVENC
-          '-crf 23', // Adjust CRF value for balance between quality and file size
-          '-maxrate 10M', // Maximum bitrate
-          '-bufsize 15M', // VBV buffer size
-          '-movflags +faststart', // Optimize for web playback
+          '-preset medium', 
+          '-crf 26', 
+          '-maxrate 10M', 
+          '-bufsize 15M', 
+          '-movflags +faststart',
           ])
         .output(videoOutputPath)
         .output(audioOutputPath)
@@ -102,7 +96,11 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .outputOptions(['-pix_fmt yuv420p', '-preset medium'])
+        .outputOptions(['-pix_fmt yuv420p', '-preset medium',
+          '-crf 26', 
+          '-maxrate 10M', 
+          '-bufsize 15M', 
+          '-movflags +faststart'])
         .output(videoOutputPath)
         .on('error', (error) => {
           this.logger.error('error:', error)
@@ -141,8 +139,16 @@ export class AudioVideoService {
     this.logger.debug(audioStream)
 
     const resolutionRatioCheck = await this._checkResolution(videoStream)
-    videoData.supported_length = await this._checkLength(videoStream)
 
+    if (videoStream.duration =="N/A") {
+      try {
+        videoStream.duration = this._parseTimecodeToSeconds(videoStream.tags.DURATION) //Handling for webm format
+      } catch (error) {
+        this.logger.error(error)
+      }
+    }
+
+    videoData.supported_length = await this._checkLength(videoStream.duration)
     videoData.supported_ratio = resolutionRatioCheck.supportedRatio
     videoData.supported_resolution = resolutionRatioCheck.supportedResolution
     videoData.ratio = videoStream.display_aspect_ratio
@@ -207,11 +213,12 @@ export class AudioVideoService {
         .input(inputVideoPath)
         .input(appendAnimationPath)
         .complexFilter(
-          [
-            '[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[outv][outa]', // Concatenate both video and audio streams
-          ],
-          ['outv', 'outa'],
+            [
+                '[0:v][1:v]concat=n=2:v=1[outv]', // Concatenate only video streams
+            ],
+            ['outv'],
         )
+        .outputOptions(['-map 0:a', '-c:v libx264', '-c:a copy']) // Keep the audio from the first input and copy codec
         .on('error', (error) => {
           this.logger.error('error:', error)
           reject(error)
@@ -339,19 +346,7 @@ export class AudioVideoService {
       supportedResolution: supportedResolution,
     }
   }
-  private _checkLength(videoStream) {
-
-    let duration
-    if (videoStream.duration =="N/A") {
-      try {
-        duration = this._parseTimecodeToSeconds(videoStream.tags.DURATION) //Handling for webm format
-        this.logger.log(duration)
-      } catch (error) {
-        this.logger.error(error)
-      }
-    } else{
-      duration = videoStream.duration
-    }
+  private _checkLength(duration) {
 
     return (duration <= 120.0)
   }

@@ -18,7 +18,7 @@ const I18n = VueI18n.createI18n({
                 supportedVideoLength: 'The video must not be longer than {maximumVideoLength} seconds.',
                 supportedFileSize: 'The video must not be larger than {maximumFileSize}MB.',
                 brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
-                generalError: {title: 'Something went wrong.', description:'Please try uploading the file again. If the error persists, consider contacting the Brand Design team.'},
+                generalError: {title: 'Something went wrong.', description:'Please try reloading the page and uploading the file again. If the error persists, consider contacting the Brand Design team.'},
             },
             header: {
                 contact: 'Contact Brand Design team'
@@ -105,7 +105,7 @@ const I18n = VueI18n.createI18n({
                 supportedVideoLength: 'Das Video darf nicht länger als {maximumVideoLength} Sekunden sein.',
                 supportedFileSize: 'Das Video darf nicht größer als {maximumFileSize}MB sein.',
                 brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
-                generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' }
+                generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Seite zu aktualisieren und die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' }
 
             },
             header: {

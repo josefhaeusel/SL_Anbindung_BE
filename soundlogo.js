@@ -219,7 +219,7 @@ window.app = Vue.createApp({
         updateProgressBar() {
             let percentDifference = this.progressBar.phaseValues[this.progressBar.phase] - this.progressBar.percentage;
         
-            this.progressBar.percentage += percentDifference * 0.006; 
+            this.progressBar.percentage += percentDifference * 0.004; 
 
             if (this.progressBar.phase != 0){
                 this.progressBar.percentage = clamp(this.progressBar.percentage, this.progressBar.phaseValues[this.progressBar.phase-1], this.progressBar.phaseValues[this.progressBar.phase])
@@ -328,6 +328,17 @@ window.app = Vue.createApp({
             console.log("Codec:",analysis.videoAnalysis.inputVideoData.codec_name)
             this.inputVideoData = analysis.videoAnalysis.inputVideoData
 
+
+            this.audioDuration = this.inputVideoData.duration_ms/1000
+
+            //APPENDED ANIMATION PART
+            if (analysis.videoAnalysis.appendAnimation == true) {
+                console.log("APPENDED ANIMATION")
+                this.audioDuration += 3
+                this.videoAnalysis.logo_start = this.audioDuration - 1.55 //No Claim Timing -1.02
+                this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
+            }
+
             //T-OUTRO ANALYSIS PART
             if (this.videoAnalysis.logo_start == "None"){
                 this.actionList.logoDetected = false;
@@ -375,13 +386,6 @@ window.app = Vue.createApp({
                         console.warn(`Keys have been swapped, because of major prioritization over minor of same root.`)
                     }
                 }
-            }
-
-            //APPENDED ANIMATION PART
-            if (analysis.videoAnalysis.appendAnimation == true) {
-                console.log("APPENDED ANIMATION")
-                this.videoAnalysis.logo_start = this.audioDuration - 1.55 //No Claim Timing -1.02
-                this.actionList.appendedAnimation = analysis.videoAnalysis.appendAnimation;
             }
 
             //CONVERTED VIDEO PART
@@ -545,10 +549,8 @@ window.app = Vue.createApp({
             try {
                 audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url)
                 audioPlayer.buffer = audioBuffer
-                this.audioDuration = audioPlayer.buffer.duration
 
                 console.log("Audio buffer loaded:", audioBuffer)
-                console.log("AUDIO DURATION:", this.audioDuration)
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
