@@ -10,7 +10,7 @@
 /temp_uploads/tmp/*
 
 # unused files
-/unused
+/unused/*
 
 # Logs
 logs
