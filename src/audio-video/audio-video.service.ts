@@ -55,12 +55,8 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .outputOptions(['-map 0:v', '-c:v copy', '-map 0:a', '-c:a copy', 
-          '-preset medium', 
-          '-crf 26', 
-          '-maxrate 10M', 
-          '-bufsize 15M', 
-          '-movflags +faststart',
+        .outputOptions(['-map 0:v', '-c:v libx264', '-map 0:a', '-c:a copy', 
+          '-pix_fmt yuv420p', '-profile:v high', '-level 4.0', '-refs 1', '-r 25', '-preset medium'
           ])
         .output(videoOutputPath)
         .output(audioOutputPath)
@@ -96,11 +92,7 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .outputOptions(['-pix_fmt yuv420p', '-preset medium',
-          '-crf 26', 
-          '-maxrate 10M', 
-          '-bufsize 15M', 
-          '-movflags +faststart'])
+        .outputOptions(['-map 0:v', '-c:v libx264', '-map 0:a', '-c:a copy'])
         .output(videoOutputPath)
         .on('error', (error) => {
           this.logger.error('error:', error)
@@ -206,6 +198,9 @@ export class AudioVideoService {
       `.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
     )
 
+    this.logger.debug(`appendAnimationPath: ${appendAnimationPath}`)
+
+
     return new Promise((resolve, reject) => {
       this._initFfmpeg()
 
@@ -214,7 +209,7 @@ export class AudioVideoService {
         .input(appendAnimationPath)
         .complexFilter(
             [
-                '[0:v][1:v]concat=n=2:v=1[outv]', // Concatenate only video streams
+                '[0:v][1:v]concat=n=2:v=1[outv]' // Concatenate only video streams
             ],
             ['outv'],
         )
@@ -286,7 +281,7 @@ export class AudioVideoService {
       ffmpeg()
         .addInput(videoInputPath)
         .addInput(inputAudioPath)
-        .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
+        .addOptions(['-map 0:v', '-map 1:a', '-c:v libx264'])
         .audioCodec(videoInputAudioCodec.codec_name)
         .format('mp4')
         .on('error', (error) => {

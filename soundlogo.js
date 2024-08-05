@@ -340,7 +340,7 @@ window.app = Vue.createApp({
             }
 
             //T-OUTRO ANALYSIS PART
-            if (this.videoAnalysis.logo_start == "None"){
+            if (this.videoAnalysis.logo_start == "None" || analysis.videoAnalysis.appendAnimation == true){
                 this.actionList.logoDetected = false;
             } else {
                 this.actionList.logoDetected = true;
