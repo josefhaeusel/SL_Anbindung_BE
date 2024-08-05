@@ -18,7 +18,7 @@ class Tonal_Fragment(object):
         if self.tend is not None:
             self.tend = librosa.time_to_samples(self.tend, sr=self.sr)
         self.y_segment = self.waveform[self.tstart:self.tend]
-        self.chromograph = librosa.feature.chroma_cqt(y=self.y_segment, sr=self.sr, bins_per_octave=24)
+        self.chromograph = librosa.feature.chroma_cqt(y=self.y_segment, sr=self.sr, bins_per_octave=12 )
         
         # chroma_vals is the amount of each pitch class present in this time interval
         self.chroma_vals = []
