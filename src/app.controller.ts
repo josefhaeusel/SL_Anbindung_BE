@@ -1,4 +1,4 @@
-import { Controller, Get, Res } from '@nestjs/common'
+import { Controller, Get, Redirect, Res } from '@nestjs/common'
 import { AppService } from './app.service'
 import { Response } from 'express'
 import { join } from 'path'
@@ -9,15 +9,19 @@ export class AppController {
 
   @Get()
   loadFrontend(@Res() res: Response): void {
-    res.sendFile(join(
+    res.sendFile(
+      join(
         __dirname,
         '..',
         process.env.NODE_ENV == 'production' ? 'frontend' : '',
-        'index.html'
+        'index.html',
       ),
     )
   }
+
+  @Get('soundlogo')
+  @Redirect('/', 301)
+  redirectSoundlogo() {
+    /* empty redirect method */
+  }
 }
-
-  
-

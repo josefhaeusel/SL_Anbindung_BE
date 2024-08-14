@@ -253,6 +253,9 @@ window.app = Vue.createApp({
                     if (analysis.error) {
                         throw new Error(analysis.error)
                     }
+                    if (analysis.csrfToken) {
+                        setCsrfHeader(analysis.csrfToken);
+                    }
 
                     await this.setProgress_API("Loading Video...")
                     await this.createVideoSources(analysis.videoOutputFile);
@@ -408,8 +411,8 @@ window.app = Vue.createApp({
 
             console.log("Creating Video Sources...")
 
-            const parsedPath = video_name.replaceAll('\\', '/').split("/");
-            this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-1]}`
+            const parsedPath = video_name.replaceAll('\\', '/').split('/');
+            this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-2]}/${parsedPath[parsedPath.length-1]}`
 
             const response = await fetch(this.video_path);
             const blob = await response.blob();
@@ -931,6 +934,9 @@ async function uploadRenderedAudio_API(buffer, video_file_name) {
 
         const data = await response.json();
         console.log('Audio uploaded successfully:', data);
+        if (data.csrfToken) {
+            setCsrfHeader(data.csrfToken);
+        }
 
         const downloadSuccess = await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
 
@@ -1019,7 +1025,7 @@ async function uploadVideo_API(file) {
         });
 
         const data = await response.json();
-        console.log("ANALYSIS RESULT", data)
+        console.log("ANALYSIS RESULT", data);
 
         return data
 
@@ -1111,6 +1117,11 @@ function getCsrfHeader() {
     return headers;
 }
 
+function setCsrfHeader(token) {
+    if (document.body && document.body.dataset && document.body.dataset.csrfToken) {
+        document.body.dataset.csrfToken = token;
+    }
+}
 
 window.supportpalAsyncInit = function () {
     SupportPal.mount({
