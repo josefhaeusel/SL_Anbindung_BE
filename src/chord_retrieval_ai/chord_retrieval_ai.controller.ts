@@ -174,9 +174,10 @@ export class ChordRetrievalAiController {
           tempOriginalVideoFilePath,
         )
         */
+        // tempVideoOutputFilePath = tempOriginalVideoFilePath
         ;(request.session as ISession).convertedVideo = true
       } else {
-        tempVideoOutputFilePath = tempOriginalVideoFilePath
+        // tempVideoOutputFilePath = tempOriginalVideoFilePath
         ;(request.session as ISession).convertedVideo = false
       }
 
@@ -188,7 +189,8 @@ export class ChordRetrievalAiController {
       // split audio and video
       try {
         const splitFiles = await this.audioVideoService.split(
-          tempVideoOutputFilePath,
+          tempOriginalVideoFilePath, 
+          (request.session as ISession).convertedVideo
         )
         tempVideoOutputFilePath = splitFiles.video
         tempAudioFilePath = splitFiles.audio

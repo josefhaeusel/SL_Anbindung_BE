@@ -12,3 +12,6 @@ https://stackoverflow.com/questions/12368151/adding-silent-audio-in-ffmpeg
 oder
 
 ffmpeg -i input.mov -c:v libx264 -preset fast -crf 22 -c:a aac -b:a 128k -af "volume=0" output.mp4
+
+Optimization as in split
+ffmpeg -i noanimation.mp4 -vf "fps=25,format=yuv420p" -c:v libx264 -profile:v high -level 4.0 -refs 1 -r 25 -tune zerolatency -f mp4 -y adjusted1.mp4

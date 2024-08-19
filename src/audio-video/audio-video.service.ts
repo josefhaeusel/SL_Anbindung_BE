@@ -27,18 +27,17 @@ export interface splitFiles {
 export class AudioVideoService {
   private readonly logger = new Logger(AudioVideoService.name)
 
-  public async split(inputPath: string): Promise<splitFiles> {
+  public async split(inputPath: string, convertVideo: boolean): Promise<splitFiles> {
     const audioCodec = await this._getAudioCodecSettings(inputPath)
 
     const inputPathParsed = path.parse(inputPath)
-
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name)
     const inputPathExt = inputPathParsed.ext
 
     const videoOutputPath = this._getVideoPath(
       inputPathName,
-      inputPathExt,
-      false,
+      ".mp4", //19.08.24 JH
+      convertVideo, //19.08.24 JH
       true,
       false,
     )
