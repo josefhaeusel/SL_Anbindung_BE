@@ -238,11 +238,14 @@ export class ChordRetrievalAiController {
         sendProgress(progress)
 
         // append animation
-        tempVideoOutputFilePath = await this.audioVideoService.appendAnimation(
-          tempVideoOutputFilePath,
-          videoData,
-          true,
-        )
+        try{
+          tempVideoOutputFilePath = await this.audioVideoService.appendAnimation(
+            tempVideoOutputFilePath,
+            videoData,
+            // //2024-08-19 JH true,  
+        )} catch (error) {
+          this.logger.error("Error during appending", error.stack)
+        }
       }
 
       analysisResult.audioAnalysis = audioAnalysisResult

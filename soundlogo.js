@@ -412,6 +412,7 @@ window.app = Vue.createApp({
             console.log("Creating Video Sources...")
 
             const parsedPath = video_name.replaceAll('\\', '/').split('/');
+            console.log("Parsed Path")
             this.video_path = `./temp_uploads/video/${parsedPath[parsedPath.length-2]}/${parsedPath[parsedPath.length-1]}`
 
             const response = await fetch(this.video_path);

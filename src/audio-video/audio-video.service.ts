@@ -36,8 +36,8 @@ export class AudioVideoService {
 
     const videoOutputPath = this._getVideoPath(
       inputPathName,
-      ".mp4", //19.08.24 JH
-      convertVideo, //19.08.24 JH
+      ".mp4", //2024-08-19 JH
+      convertVideo, //2024-08-19 JH
       true,
       false,
     )
@@ -233,7 +233,8 @@ export class AudioVideoService {
             ['outv'],
         )
         // 2024-08-13, RP .outputOptions(['-map 0:a', '-c:v libx264', '-c:a copy']) // Keep the audio from the first input and copy codec
-        .outputOptions(['-map 0:a', '-c:v copy', '-c:a copy']) // Keep the audio from the first input and copy codec
+        // 2024-08-19 JH .outputOptions(['-map 0:a', '-c:v copy', '-c:a copy']) // Keep the audio from the first input and copy codec
+        .outputOptions(['-map 0:a', '-c:v libx264', '-c:a copy']) // Keep the audio from the first input and copy codec
         .on('error', (error) => {
           this.logger.error('error:', error)
           reject(error)
