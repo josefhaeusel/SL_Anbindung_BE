@@ -371,11 +371,13 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        max-width: 100%;
     }
 
     .right-controls {
         display: flex;
         align-items: center;
+        align-self: flex-start;
         gap: 10px;
     }
 
@@ -604,11 +606,17 @@
                 <transition name="fade">
                     <div class="controls-container" v-if="!isLoadingAnalysis">
                         <div class="left-controls">
-                            <scale-button @click="downloadVideo" style="left:0; display:flex; align-items: center;" :disabled="isLoadingResult">
+                            <scale-button v-if="!showTimeoutError" @click="downloadVideo" style="left:0; display:flex; align-items: center;" :disabled="isLoadingResult">
                                 <scale-loading-spinner v-if="isLoadingResult"></scale-loading-spinner>
                                 <scale-icon-action-download size=20 v-if="!isLoadingResult"></scale-icon-action-download>
                                 {{$t('download.result')}}
                             </scale-button>
+
+                            <scale-notification v-show="showDownloadError" :heading="$t('upload.downloadError.title')" variant="warning" type="toast" dismissible opened style="z-index: 1000; max-width: 30%">
+                                <span v-show="!showTimeoutError" slot="text">{{$t('upload.downloadError.description')}}</span>
+                                <span v-show="showTimeoutError" slot="text">{{$t('upload.downloadError.timeoutVariant')}}</span>
+                            </scale-notification>
+    
                         </div>
 
                         <div class="right-controls">
@@ -675,16 +683,31 @@
                     </scale-tab-nav>
                 </div>
 
-                <div v-if="feedback.show" class="feedback-container">
-                    <scale-icon-action-thumbs-up :size="feedback.thumbsup.hover ? '30' : '28'" @mouseover="feedback.thumbsup.hover = true" @mouseleave="feedback.thumbsup.hover = false" :fill="feedback.thumbs === 'up' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'up'; console.log('up')" style="padding:5px"></scale-icon-action-thumbs-up>
-                    <scale-icon-action-thumbs-down :size="feedback.thumbsdown.hover ? '30' : '28'" @mouseover="feedback.thumbsdown.hover = true" @mouseleave="feedback.thumbsdown.hover = false" :fill="feedback.thumbs === 'down' ? '#E20076' : '#000000'" @click="feedback.thumbs = 'down'; console.log('down')" style="padding:5px"></scale-icon-action-thumbs-down>
-                </div>
             </div>
 
         </div>
 
         <div class="tool-background">
         <div class="wrapper">
+
+            <scale-modal :heading="$t('feedback.title')" id="feedback-modal" :opened="feedback.show">
+
+                <scale-rating-stars
+                    :label="$t('feedback.ratelabel')"
+                     style="padding-bottom: 2rem"
+                     id="star-feedback"
+                ></scale-rating-stars>
+                <p></p>
+                <p></p>
+                <scale-text-field
+                    id="text-feedback"
+                    :label="$t('feedback.message')"
+                    style="padding-top: 2rem"
+                ></scale-text-field>
+                <scale-button slot="action" @click="submitFeedback"> {{$t('feedback.button')}} </scale-button>
+            </scale-modal>
+
+
             <div class="related-links-container">
 
                 <div class="related-links-title">

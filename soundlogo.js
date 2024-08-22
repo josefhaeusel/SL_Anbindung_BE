@@ -23,6 +23,10 @@ window.app = Vue.createApp({
             showVideoLengthHint: false,
             showFileSizeHint: false,
             showGeneralError: false,
+            showDownloadError: false,
+            showTimeoutError: false,
+            feedback: { show: false, stars: null, text: ""},
+            
             selectedLanguage: "English",
 
             maximumFileSize: 100, // MB
@@ -71,8 +75,6 @@ window.app = Vue.createApp({
             metadataLoadedOnce: false,
             playerHasBeenClicked: false,
 
-            feedback: {thumbs: null, text: "", show: false, thumbsup:{ hover: null }, thumbsdown:{ hover: null }}
-
         }
     },
 
@@ -116,12 +118,15 @@ window.app = Vue.createApp({
             });
         });
 
-        // document.addEventListener('drop', function(event) {
-        //     console.log("DROP")
-        //     event.preventDefault(); // Prevent default behavior (e.g., opening the file in the browser)
-        //     // const files = event.dataTransfer.files; // Get the dropped files
-        // });
+        const textFeedback = document.getElementById('text-feedback');
+        textFeedback.addEventListener('scale-change', (event) => {
+            this.feedback.text = event.detail.value
+        });
 
+        const starFeedback = document.getElementById('star-feedback');
+        starFeedback.addEventListener('scale-change', (event) => {
+            this.feedback.stars = event.detail.value
+        });
     },
 
     methods: {
@@ -156,27 +161,24 @@ window.app = Vue.createApp({
                 case 'Retrieving Video Data...':
                     this.progressBar.phase = 1
                   break;
-                case 'Converting Video Format...':
+                case 'Splitting Audio from Video...':
                     this.progressBar.phase = 2
                   break;
-                case 'Splitting Audio from Video...':
+                case 'Detecting T-Outro Animation...':
                     this.progressBar.phase = 3
                   break;
-                case 'Detecting T-Outro Animation...':
+                case 'Retrieving Key and Loudness...':
                     this.progressBar.phase = 4
                   break;
-                case 'Retrieving Key and Loudness...':
+                case 'Appending T-Outro Animation...':
                     this.progressBar.phase = 5
                   break;
-                case 'Appending T-Outro Animation...':
-                    this.progressBar.phase = 6
-                  break;
                 case 'Loading Video...':
-                    this.progressBar.phase = 7
+                    this.progressBar.phase = 6
                     break
                 case 'Done (on Client-side).':
                     clearInterval(this.progressBar.timer);
-                    this.progressBar.phase = 8;
+                    this.progressBar.phase = 7;
                     this.progressBar.percentage = 101
                     setTimeout(()=>{this.currentLayer = "layer2"; this.isLoadingAnalysis=false}, 1200)
                     break;
@@ -192,8 +194,8 @@ window.app = Vue.createApp({
         initProgressBar(){
             this.progressBar={
                 phase: 0,
-                phaseValues: [10, 20, 30, 40, 60, 80, 95, 100],
-                texts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...","Detecting T-Outro Animation...",  "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
+                phaseValues: [15, 20, 40, 60, 80, 95, 100],
+                texts: ['Uploading Video...', 'Retrieving Video Data...', "Splitting Audio from Video...","Detecting T-Outro Animation...",  "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
                 hasBeenActive: [0],
                 percentage: 0,
                 timer: null,
@@ -214,6 +216,12 @@ window.app = Vue.createApp({
                 return 'previous-phase'
 
             }
+        },
+        submitFeedback() {
+            this.feedback.show=false
+            console.log("Submitted Feedback:", this.feedback)
+
+            //TODO Feedback Processing Logic
         },
 
         updateProgressBar() {
@@ -290,7 +298,7 @@ window.app = Vue.createApp({
             return allowedFiletypes.has(this.video_file.type);
         },
         async checkFileSize() {
-            const sizeMegabyte = this.video_file.size/1000000
+            const sizeMegabyte = this.video_file.size / 1000000
             console.log("Checking Filesize", `${sizeMegabyte}MB`)
             return (sizeMegabyte <= this.maximumFileSize)
         },
@@ -551,10 +559,10 @@ window.app = Vue.createApp({
         async extractAudioBuffer() {
 
             try {
-                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url)
-                audioPlayer.buffer = audioBuffer
-
-                console.log("Audio buffer loaded:", audioBuffer)
+                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url).then( () =>{
+                    audioPlayer.buffer = audioBuffer
+                    console.log("Audio buffer loaded:", audioBuffer)
+                })
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
@@ -595,7 +603,7 @@ window.app = Vue.createApp({
                 this.stopTransports()
                 this.isLoadingResult = true;
                 const renderedBuffer = await this.renderAudio();
-                const videoFilepath = await uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
+                const videoFilepath = await this.uploadRenderedAudio_API(renderedBuffer, this.video_file.name);
                 this.isLoadingResult = false;
             } catch (error) {
                 console.log("Error during downloadVideo()", error)
@@ -668,6 +676,104 @@ window.app = Vue.createApp({
                 document.getElementById("fileInput").addEventListener('change', setupHandler);
             }
         },
+
+        async uploadRenderedAudio_API(buffer, video_file_name) {
+            const name = video_file_name.split('.').slice(0, -1).join('.');
+            console.log(name);
+            const formData = await audioToWavFile(buffer, name);
+
+            try {
+                const response = await fetch('/chord-retrieval-ai/uploadRenderedAudio', {
+                    method: 'POST',
+                    body: formData,
+                    headers: getCsrfHeader(),
+                });
+
+                const data = await response.json();
+                console.log('Audio uploaded successfully:', data);
+                if (data.csrfToken) {
+                    setCsrfHeader(data.csrfToken);
+                }
+
+                const downloadSuccess = await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
+
+                if (downloadSuccess) {
+                    console.log('Downloaded successfully:', data);
+                    this.feedback.show = true;
+                } else {
+                    console.log('Download failed:', data);
+                    this.showDownloadError=true
+                    console.log(data.statusCode)
+                    if (data.statusCode == 403 || data.statusCode == 504){
+                        console.log("showTimeoutError")
+                        this.showTimeoutError=true
+                    }        
+                }
+
+            } catch (error) {
+                console.error('Error during upload or download:', error);
+            }
+
+
+            function audioToWavFile(buffer, name) {
+
+                const wavBlob = convertToWav(buffer);
+
+                const audioFile = new File([wavBlob], `${name}.wav`, { type: 'audio/wav' });
+                const formData = new FormData();
+                formData.append('file', audioFile);
+                return formData
+            }
+
+            async function downloadFile(url, filename) {
+                try {
+                    const response = await fetch(url, {
+                        headers: getCsrfHeader(),
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+            
+                    const reader = response.body.getReader();
+                    const contentLength = +response.headers.get('Content-Length');
+                    let receivedLength = 0; // bytes received
+                    const chunks = []; // array of received binary chunks
+            
+                    while(true) {
+                        const {done, value} = await reader.read();
+            
+                        if (done) {
+                            break;
+                        }
+            
+                        chunks.push(value);
+                        receivedLength += value.length;
+            
+                        //console.log(`Received ${receivedLength} of ${contentLength}`);
+                    }
+            
+                    const blob = new Blob(chunks);
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl; 
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    
+                    // Clean up URL object
+                    URL.revokeObjectURL(downloadUrl);
+            
+                    console.log('File download completed');
+                    return true;
+                } catch (error) {
+                    console.error('Error downloading file:', error);
+                    return false;
+                }
+            }
+        }
+
 
     }
     
@@ -919,96 +1025,6 @@ async function updateMainAudioBuffer(filepath) {
     console.log("Updated Main Audio Buffer:", filepath);
     const audioBuffer = new Tone.ToneAudioBuffer(filepath);
     audioPlayer.buffer = audioBuffer;
-}
-
-async function uploadRenderedAudio_API(buffer, video_file_name) {
-    const name = video_file_name.split('.').slice(0, -1).join('.');
-    console.log(name);
-    const formData = await audioToWavFile(buffer, name);
-
-    try {
-        const response = await fetch('/chord-retrieval-ai/uploadRenderedAudio', {
-            method: 'POST',
-            body: formData,
-            headers: getCsrfHeader(),
-        });
-
-        const data = await response.json();
-        console.log('Audio uploaded successfully:', data);
-        if (data.csrfToken) {
-            setCsrfHeader(data.csrfToken);
-        }
-
-        const downloadSuccess = await downloadFile('/download/streamable/?file=' + data.renderedResult, data.renderedResult);
-
-        if (downloadSuccess) {
-            console.log('Downloaded successfully:', data);
-        } else {
-            console.log('Download failed:', data);
-        }
-
-    } catch (error) {
-        console.error('Error during upload or download:', error);
-    }
-
-
-    function audioToWavFile(buffer, name) {
-
-        const wavBlob = convertToWav(buffer);
-
-        const audioFile = new File([wavBlob], `${name}.wav`, { type: 'audio/wav' });
-        const formData = new FormData();
-        formData.append('file', audioFile);
-        return formData
-    }
-
-    async function downloadFile(url, filename) {
-        try {
-            const response = await fetch(url, {
-                headers: getCsrfHeader(),
-            });
-            
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-    
-            const reader = response.body.getReader();
-            const contentLength = +response.headers.get('Content-Length');
-            let receivedLength = 0; // bytes received
-            const chunks = []; // array of received binary chunks
-    
-            while(true) {
-                const {done, value} = await reader.read();
-    
-                if (done) {
-                    break;
-                }
-    
-                chunks.push(value);
-                receivedLength += value.length;
-    
-                //console.log(`Received ${receivedLength} of ${contentLength}`);
-            }
-    
-            const blob = new Blob(chunks);
-            const downloadUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl; 
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            
-            // Clean up URL object
-            URL.revokeObjectURL(downloadUrl);
-    
-            console.log('File download completed');
-            return true;
-        } catch (error) {
-            console.error('Error downloading file:', error);
-            return false;
-        }
-    }
 }
 
 

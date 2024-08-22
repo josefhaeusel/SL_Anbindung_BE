@@ -19,11 +19,12 @@ const I18n = VueI18n.createI18n({
                 supportedFileSize: 'The video must not be larger than {maximumFileSize}MB.',
                 brandPortal: 'Please use the official <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
                 generalError: {title: 'Something went wrong.', description:'Please try reloading the page and uploading the file again. If the error persists, consider contacting the Brand Design team.'},
+                downloadError: {title: "Download failed", description: "Please try downloading again or reload the page and resubmit your video.", timeoutVariant: "Unfortunately, you took too long to respond. Please reload the page and submit your video again."}
             },
             header: {
                 contact: 'Contact Brand Design team'
             },
-            progressTexts: ['Uploading Video...', 'Retrieving Video Data...', 'Converting Video Format...',"Splitting Audio from Video...", "Detecting T-Outro Animation...", "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
+            progressTexts: ['Uploading Video...', 'Retrieving Video Data...', "Splitting Audio from Video...", "Detecting T-Outro Animation...", "Retrieving Key and Loudness...", "Appending T-Outro Animation...", "Loading Video...", "Done."],
             analyzing: 'Analyzing...',
             error: 'Something went wrong. Please try uploading again.',
             video: {
@@ -53,6 +54,12 @@ const I18n = VueI18n.createI18n({
                 convertedDescription: 'Converted video codec from {codec} to H264 (.mp4).',
                 masteredLoudness: 'Mastered Loudness',
                 loudness: 'The overall loudness of the audio track has been set to standardized {loudness}LUFS.'
+            },
+            feedback: {
+                title: 'Rate your Experience!',
+                ratelabel: 'Rate',
+                message: 'Your message...',
+                button: 'Submit'
             },
             relatedLinks: {
                 title: 'Related links',
@@ -105,13 +112,14 @@ const I18n = VueI18n.createI18n({
                 supportedVideoLength: 'Das Video darf nicht länger als {maximumVideoLength} Sekunden sein.',
                 supportedFileSize: 'Das Video darf nicht größer als {maximumFileSize}MB sein.',
                 brandPortal: 'Bitte nutzen Sie die offizielle <a h-ref="www.brand-design.telekom.com">T-Outro Animation</a>.<br />',
-                generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Seite zu aktualisieren und die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' }
+                generalError: {title: 'Etwas ist schiefgeloffen', description:'Bitte versuchen Sie, die Seite zu aktualisieren und die Datei erneut hochzuladen. Sollte der Fehler weiterhin bestehen, wenden Sie sich bitte an das Brand Design Team.' },
+                downloadError: {title: "Download fehlgeschlagen", description: "Bitte versuchen Sie den download erneut oder aktualisieren Sie dei Seite und laden Sie das Video erneut hocch.", timeoutVariant: "Leider haben Sie zu lange gebraucht, um zu interagieren. Laden Sie die Seite neu und laden Sie erneut ihr Video hoch."}
 
             },
             header: {
                 contact: 'Brand Design Team kontaktieren'
             },
-            progressTexts: ['Video hochladen...', 'Videodaten abrufen...', 'Videoformat konvertieren...', "Audio vom Video trennen...", "T-Outro-Animation ermitteln...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
+            progressTexts: ['Video hochladen...', 'Videodaten abrufen...', "Audio vom Video trennen...", "T-Outro-Animation ermitteln...", "Tonart und Lautstärke erkennen...", "T-Outro-Animation anhängen...", "Video laden...", "Fertig."],
             analyzing: 'Analysieren...',
             error: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut hochzuladen.',
             video: {
@@ -141,6 +149,12 @@ const I18n = VueI18n.createI18n({
                 convertedDescription: 'Videocodec konvertiert von {codec} zu H264 (.mp4).',
                 masteredLoudness: 'Lautstärke gemastered',
                 loudness: 'Die Gesamtlautstärke der Audiospur wurde auf standardisierte {loudness}LUFS gesetzt.'
+            },
+            feedback: {
+                title: 'Bewerte deine Erfahrung!',
+                ratelabel: 'Rating',
+                message: 'Deine Nachricht',
+                button: 'Senden'
             },
             relatedLinks: {
                 title: 'Weiterführende Links',
