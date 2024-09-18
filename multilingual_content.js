@@ -3,7 +3,7 @@ const I18n = VueI18n.createI18n({
     messages: {
         English: {
             title: {
-                main: 'Sound Logo Wizard',
+                main: 'Sound Logo Wizard (BETA)',
                 sub: 'Add the iconic Telekom Sound Logo at the end of all videos.<br>Keep everything on brand with the help of AI.'
             },
             upload: {
@@ -97,7 +97,7 @@ const I18n = VueI18n.createI18n({
         },
         Deutsch: {
             title: {
-                main: 'Sound Logo Wizard',
+                main: 'Sound Logo Wizard (BETA)',
                 sub: 'Binden Sie das ikonische Telekom Sound Logo an das Ende aller Videos an.<br>Bleibe mithilfe von KI on-Brand.'
             },
             upload: {
