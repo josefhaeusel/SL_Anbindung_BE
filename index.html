@@ -460,6 +460,11 @@
     .links-card {
         width: 30%
     }
+    .beta-label {
+        position: absolute;
+        right: 30px;
+        margin-top: 25px
+    }
     @media (max-width: 1000px) {
         .links-card {
             width: 100%;
@@ -526,7 +531,12 @@
             <div class="title-container">
                 <div class="title">{{$t('title.main')}}</div>
                 <div class="description" v-html="$t('title.sub')"></div>
+                <scale-callout variant="blue" class="beta-label">
+                    <span class="scl-callout-text-large">Beta</span>
+                </scale-callout>
             </div>
+
+            
 
             <div v-show="currentLayer === 'layer1'" id="layer1" class="layer">
                 
