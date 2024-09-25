@@ -559,10 +559,10 @@ window.app = Vue.createApp({
         async extractAudioBuffer() {
 
             try {
-                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url).then( () =>{
-                    audioPlayer.buffer = audioBuffer
-                    console.log("Audio buffer loaded:", audioBuffer)
-                })
+                audioBuffer = await Tone.ToneAudioBuffer.fromUrl(this.video_url)
+                audioPlayer.buffer = audioBuffer
+                console.log("Audio buffer loaded:", audioBuffer)
+
 
             } catch (error) {
                 console.error("Failed to load audio buffer:", error);
