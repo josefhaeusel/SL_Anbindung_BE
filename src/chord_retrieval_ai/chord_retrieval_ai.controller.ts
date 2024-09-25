@@ -18,6 +18,8 @@ import { AudioVideoService } from '../audio-video/audio-video.service'
 import { ComputerVisionService } from '../computer_vision/computer_vision.service'
 import { Csrf } from 'ncsrf'
 import { nanoid } from 'nanoid'
+import { DataSource } from 'typeorm'
+import { Log } from '../database/entity/log.entity'
 
 export interface ISession extends Session {
   tempOriginalVideoFilePath?: string
@@ -34,6 +36,7 @@ export class ChordRetrievalAiController {
     private readonly chordRetrievalAiService: ChordRetrievalAiService,
     private readonly audioVideoService: AudioVideoService,
     private readonly computerVisionService: ComputerVisionService,
+    private readonly dataSource: DataSource,
   ) {
     const baseDir = path.join(__dirname, '../../temp_uploads')
     const videoDir = path.join(baseDir, 'video')
@@ -84,7 +87,13 @@ export class ChordRetrievalAiController {
     let progress = ''
     const sendProgress = request.app.get('sendProgress')
 
+    const logRepository = this.dataSource.getRepository(Log)
+    const log = new Log()
+    log.createdAt = new Date()
+    log.userAgent = request.headers['user-agent']
+
     const uploadPrefix = nanoid(6)
+    log.uploadPrefix = uploadPrefix
 
     ;(request.session as ISession).uploadPrefix = uploadPrefix
 
@@ -106,9 +115,11 @@ export class ChordRetrievalAiController {
         this.logger.log('Checking Filesize', `${sizeMegabyte}MB`)
         return sizeMegabyte <= 100
       }
-      if (!commonFilesize()){
+      if (!commonFilesize()) {
         throw new Error('InvalidFilesize')
       }
+
+      log.videoFileSize = sizeMegabyte
 
       const tempBaseVideoPath = path.join(
         __dirname,
@@ -132,7 +143,7 @@ export class ChordRetrievalAiController {
         tempBaseVideoPath,
         file.originalname,
       )
-
+      log.videoFileName = file.originalname
       let tempVideoOutputFilePath
 
       this.logger.log(tempOriginalVideoFilePath)
@@ -148,6 +159,7 @@ export class ChordRetrievalAiController {
         tempOriginalVideoFilePath,
       )
       this.logger.debug(videoData)
+      log.videoFileMetaData = JSON.stringify(videoData)
 
       switch (true) {
         case videoData.supported_length === false:
@@ -174,10 +186,9 @@ export class ChordRetrievalAiController {
           tempOriginalVideoFilePath,
         )
         */
-        // tempVideoOutputFilePath = tempOriginalVideoFilePath
         ;(request.session as ISession).convertedVideo = true
       } else {
-        // tempVideoOutputFilePath = tempOriginalVideoFilePath
+        tempVideoOutputFilePath = tempOriginalVideoFilePath
         ;(request.session as ISession).convertedVideo = false
       }
 
@@ -189,14 +200,18 @@ export class ChordRetrievalAiController {
       // split audio and video
       try {
         const splitFiles = await this.audioVideoService.split(
-          tempOriginalVideoFilePath, 
-          (request.session as ISession).convertedVideo
+          tempOriginalVideoFilePath,
+          (request.session as ISession).convertedVideo,
         )
         tempVideoOutputFilePath = splitFiles.video
         tempAudioFilePath = splitFiles.audio
       } catch (error) {
         this.logger.error('Error during audio/video splitting', error.stack)
       }
+
+      // log
+      log.splitVideoFile = tempVideoOutputFilePath
+      log.splitAudioFile = tempAudioFilePath
 
       // send progress
       progress = 'Detecting T-Outro Animation...'
@@ -210,6 +225,7 @@ export class ChordRetrievalAiController {
       videoAnalysisResult.inputVideoData = videoData
 
       this.logger.debug(videoAnalysisResult)
+      log.videoFileAnalyze = JSON.stringify(videoAnalysisResult)
 
       // send progress
       progress = 'Retrieving Key and Loudness...'
@@ -231,19 +247,25 @@ export class ChordRetrievalAiController {
         )
       }
 
+      // log
+      log.audioFileAnalyze = JSON.stringify(audioAnalysisResult)
+
       if (videoAnalysisResult.appendAnimation == true) {
         // send progress
         progress = 'Appending T-Outro Animation...'
         this.logger.log(`send progress: ${progress}`)
         sendProgress(progress)
 
+        // log
+        log.appendAnimation = true
+
         // append animation
         try{
           tempVideoOutputFilePath = await this.audioVideoService.appendAnimation(
             tempVideoOutputFilePath,
             videoData,
-            // //2024-08-19 JH true,  
-        )} catch (error) {
+            // //2024-08-19 JH true,
+          )} catch (error) {
           this.logger.error("Error during appending", error.stack)
         }
       }
@@ -264,21 +286,34 @@ export class ChordRetrievalAiController {
 
       sendProgress('Done (on server-side).')
       this.logger.log('Processing done')
+
       this.logger.log(analysisResult)
       response.json(analysisResult)
 
       // delete split audio
       fs.unlinkSync(tempAudioFilePath)
       this.logger.warn(`Deleted ${tempAudioFilePath}`)
-    } catch (error) {
 
+      // log
+      log.finishedAt = new Date()
+      await logRepository.save(log)
+
+    } catch (error) {
       this.logger.warn('Error during video handling', error.stack)
+
+      // log
+      log.error = JSON.stringify(error)
+      log.finishedAt = new Date()
+      await logRepository.save(log)
+
       if (error.message === 'InvalidFilesize') {
         response.status(400).json({ error: 'Invalid Filesize.' })
       } else if (error.message === 'LengthNotSupported') {
         response.status(400).json({ error: 'Length not supported.' })
       } else if (error.message === 'ResolutionAndRatioNotSupported') {
-        response.status(400).json({ error: 'Resolution and display ratio not supported.' })
+        response
+          .status(400)
+          .json({ error: 'Resolution and display ratio not supported.' })
       } else if (error.message === 'ResolutionNotSupported') {
         response.status(400).json({ error: 'Resolution not supported.' })
       } else if (error.message === 'RatioNotSupported') {
@@ -298,8 +333,9 @@ export class ChordRetrievalAiController {
     @Res() response: Response,
   ) {
     try {
-            
       this.logger.log(`Starting audio upload handling: ${file.originalname}`)
+
+      const logRepository = this.dataSource.getRepository(Log)
 
       const uploadPrefix = (request.session as ISession).uploadPrefix
       const tempAudioFilePath = path.join(
@@ -313,7 +349,8 @@ export class ChordRetrievalAiController {
 
       const appendedAnimation = (request.session as ISession).appendedAnimation
       const convertedVideo = (request.session as ISession).convertedVideo
-      const tempOriginalVideoFilePath = (request.session as ISession).tempOriginalVideoFilePath
+      const tempOriginalVideoFilePath = (request.session as ISession)
+        .tempOriginalVideoFilePath
 
       /*
       const tempVideoFilePath = path.join(
@@ -344,11 +381,17 @@ export class ChordRetrievalAiController {
         csrfToken: (request as any).csrfToken(),
       })
 
+      const log = await logRepository.findOneBy({ uploadPrefix: uploadPrefix })
+      if (log) {
+        log.downloadedAt = new Date()
+        await logRepository.save(log)
+      }
+
       /*fs.unlinkSync(tempOriginalVideoFilePath);
       this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`);*/
     } catch (error) {
       this.logger.error('Error during audio handling', error.stack)
-      response.status(500).json({ error: error.message })
+      response.status(500).json({ success: false, message: error.message })
     }
   }
 }
