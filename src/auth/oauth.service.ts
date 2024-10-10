@@ -10,17 +10,20 @@ export class OAuthService {
 
   async getAuthorizationUrl(@Req() request): Promise<string> {
     // const clientId = this.configService.get<string>(`oauth:${provider}:client_id`);
-    const clientId = 'NestJsTestClient'
+    // const clientId = 'NestJsTestClient'
+    const clientId = process.env.OAUTH_CLIENT_ID
     // const redirectUri = encodeURIComponent(this.configService.get<string>('oauth:redirect_uri'));
-    const redirectUri = encodeURI('http://localhost:3000/auth/callback')
-    const scope = 'openid'
+    // const redirectUri = encodeURI('http://localhost:3000/auth/callback')
+    const redirectUri = encodeURI(process.env.OAUTH_URL_CALLBACK)
+    // const scope = 'openid'
+    const scope = process.env.OAUTH_SCOPE
     const state = Date.now().toString()
 
     request.session.state = state
 
     // const url = `https://login.microsoftonline.com/${clientId}/oauth2/v2.0/authorize?`;
-    const url =
-      'http://localhost:8888/realms/telekom/protocol/openid-connect/auth?'
+    // const url = `http://localhost:8888/realms/telekom/protocol/openid-connect/auth?`;
+    const url = process.env.OAUTH_URL_CODE
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
@@ -40,9 +43,12 @@ export class OAuthService {
     ) {
       this.logger.debug(`code: ${req.query.code}`)
 
-      const clientId = 'NestJsTestClient'
-      const clientSecret = 'your_client_secret'
-      const redirectUri = encodeURI('http://localhost:3000/auth/callback')
+      // const clientId = 'NestJsTestClient'
+      const clientId = process.env.OAUTH_CLIENT_ID
+      // const clientSecret = 'your_client_secret'
+      const clientSecret = process.env.OAUTH_SECRET
+      // const redirectUri = encodeURI('http://localhost:3000/auth/callback')
+      const redirectUri = encodeURI(process.env.OAUTH_URL_CALLBACK)
 
       try {
         const params = new URLSearchParams({
@@ -54,7 +60,8 @@ export class OAuthService {
         })
 
         const response = await axios.post(
-          'http://localhost:8888/realms/telekom/protocol/openid-connect/token',
+          // 'http://localhost:8888/realms/telekom/protocol/openid-connect/token',
+          process.env.OAUTH_URL_TOKEN,
           params.toString(), // Convert URLSearchParams to string
           {
             headers: {

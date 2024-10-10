@@ -18,15 +18,27 @@ import { OAuthExternalProviderGuard } from './auth/oauth.guard'
 import { OAuthService } from './auth/oauth.service'
 import { AuthController } from './auth/oauth.controller'
 import { JwtService } from '@nestjs/jwt'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
   imports: [
     ChordRetrievalAiModule,
+    MusicAiSearchModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
         '..',
-        process.env.NODE_ENV == 'production' ? 'frontend' : '',
+        // process.env.NODE_ENV == 'production' ? 'frontend' : '',
+        'frontend',
+        'favicon.ico',
+      ),
+      serveRoot: '/favicon.ico',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(
+        __dirname,
+        '..',
+        // process.env.NODE_ENV == 'production' ? 'frontend' : '',
         'frontend',
         'assets',
       ),
@@ -36,7 +48,7 @@ import { JwtService } from '@nestjs/jwt'
       rootPath: join(
         __dirname,
         '..',
-        process.env.NODE_ENV == 'production' ? 'frontend' : '',
+        // process.env.NODE_ENV == 'production' ? 'frontend' : '',
         'frontend',
         'libs',
       ),
@@ -55,7 +67,7 @@ import { JwtService } from '@nestjs/jwt'
       rootPath: join(
         __dirname,
         '..',
-        process.env.NODE_ENV == 'production' ? 'frontend' : '',
+        // process.env.NODE_ENV == 'production' ? 'frontend' : '',
         'temp_uploads',
       ),
       serveRoot: '/temp_uploads',
@@ -77,6 +89,7 @@ import { JwtService } from '@nestjs/jwt'
         return dataSource
       },
     }),
+    ConfigModule.forRoot(),
   ],
   controllers: [AppController, AuthController, DownloadController],
   providers: [

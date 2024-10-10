@@ -10,8 +10,10 @@ import {
 import { OAuthExternalProviderGuard } from './oauth.guard'
 import { OAuthExternalProviderGuardFailureFilter } from './oauth.filter'
 import { OAuthService } from './oauth.service'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name)
 
@@ -20,6 +22,7 @@ export class AuthController {
   @Get()
   @UseGuards(OAuthExternalProviderGuard)
   @UseFilters(OAuthExternalProviderGuardFailureFilter)
+  @ApiOperation({ summary: 'Returns the authenticated user' })
   async authenticate(@Req() req, @Res() res) {
     const user = req.user
     // Implement logic to handle authenticated user
@@ -27,6 +30,7 @@ export class AuthController {
   }
 
   @Get('callback')
+  @ApiOperation({ summary: 'Handles oauth callback' })
   async callback(@Req() req, @Res() res) {
     return await this.oauthService.handleCallback(req, res)
   }

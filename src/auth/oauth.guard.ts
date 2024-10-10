@@ -42,6 +42,14 @@ export class OAuthExternalProviderGuard implements CanActivate {
     // const request = context // .switchToHttp().getRequest()
     // this.logger.debug(`session: ${Object.keys(request.session)}`)
 
+    // check if oauth is enabled
+    this.logger.debug(`env OAUTH_ENABLE: ${process.env.OAUTH_ENABLE}`)
+    if (typeof process.env.OAUTH_ENABLE === 'undefined') {
+      return true
+    } else if (process.env.OAUTH_ENABLE === 'false') {
+      return true
+    }
+
     const authHeader = request.session.authorization
     // this.logger.debug(`authHeader: ${authHeader}`)
 

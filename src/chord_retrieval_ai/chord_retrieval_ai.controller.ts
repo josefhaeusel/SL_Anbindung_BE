@@ -20,6 +20,7 @@ import { Csrf } from 'ncsrf'
 import { nanoid } from 'nanoid'
 import { DataSource } from 'typeorm'
 import { Log } from '../database/entity/log.entity'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 export interface ISession extends Session {
   tempOriginalVideoFilePath?: string
@@ -29,6 +30,7 @@ export interface ISession extends Session {
 }
 
 @Controller('chord-retrieval-ai')
+@ApiTags('chord-retrieval-ai')
 export class ChordRetrievalAiController {
   private readonly logger = new Logger(ChordRetrievalAiController.name)
 
@@ -57,6 +59,7 @@ export class ChordRetrievalAiController {
 
   @Get('progress')
   // @Csrf() TODO: 2024-07-11, eventsource can't use custom headers - soundlogo.js
+  @ApiOperation({ summary: 'Returns the event source progress' })
   progress(@Req() request: Request, @Res() response: Response) {
     response.setHeader('Content-Type', 'text/event-stream')
     response.setHeader('Cache-Control', 'no-cache')
@@ -78,6 +81,7 @@ export class ChordRetrievalAiController {
   @Post('uploadVideo')
   @Csrf()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Uploads a video file and returns it\'s analysis' })
   async videoHandler(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
@@ -327,6 +331,8 @@ export class ChordRetrievalAiController {
   @Post('uploadRenderedAudio')
   @Csrf()
   @UseInterceptors(FileInterceptor('file'))
+
+  @ApiOperation({ summary: 'Uploads the rendered audio file and returns the merged video file' })
   async audioHandler(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
