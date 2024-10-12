@@ -17,10 +17,12 @@ export class AppController {
   private readonly proxy
 
   constructor(private readonly appService: AppService) {
-    this.proxy = createProxyMiddleware({
-      target: process.env.LOCAL_PROXY, // Target URL to proxy to
-      changeOrigin: true,
-    })
+    if (typeof process.env.LOCAL_PROXY !== 'undefined') {
+      this.proxy = createProxyMiddleware({
+        target: process.env.LOCAL_PROXY, // Target URL to proxy to
+        changeOrigin: true,
+      })
+    }
   }
 
   /* now in CsrfInjectMiddleware
