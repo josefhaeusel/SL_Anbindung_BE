@@ -236,8 +236,20 @@ export class AudioVideoService {
     )
     this.logger.debug(`videoInputPath: ${inputVideoPath}`)
 
+    /* 2024-10-12, fixed path
     const appendAnimationPath = path.resolve(
       `.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
+    )
+    */
+    const rootPath =
+      process.env.NODE_ENV == 'production'
+        ? __dirname
+        : path.join(process.cwd(), 'src', 'audio-video')
+    const appendAnimationPath = path.join(
+      rootPath,
+      'animations',
+      'noaudio',
+      `T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
     )
 
     this.logger.debug(`appendAnimationPath: ${appendAnimationPath}`)
