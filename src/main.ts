@@ -15,8 +15,13 @@ import { createProxyMiddleware } from 'http-proxy-middleware'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  const logger = new Logger('bootstrap')
+  logger.debug(`NODE_ENV: ${process?.env?.NODE_ENV}`)
+
   // websocket proxy
   if (typeof process.env.LOCAL_PROXY !== 'undefined') {
+    logger.debug(`LOCAL_PROXY: ${process?.env?.LOCAL_PROXY}`)
+
     const wsAdapter = new WsAdapter(app)
     app.use(
       createProxyMiddleware({
@@ -29,12 +34,7 @@ async function bootstrap() {
     app.useWebSocketAdapter(wsAdapter)
   }
 
-  const logger = new Logger('bootstrap')
-  logger.debug(`NODE_ENV: ${process?.env?.NODE_ENV}`)
-
-  const sessionRepo = app.get(DataSource).getRepository(Session)
-
-  // security -csp
+  // security - csp
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -67,6 +67,7 @@ async function bootstrap() {
   )
 
   // session
+  const sessionRepo = app.get(DataSource).getRepository(Session)
   let sessionStore
   try {
     for (const [key, value] of Object.entries(
