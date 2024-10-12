@@ -27,7 +27,10 @@ export interface splitFiles {
 export class AudioVideoService {
   private readonly logger = new Logger(AudioVideoService.name)
 
-  public async split(inputPath: string, convertVideo: boolean): Promise<splitFiles> {
+  public async split(
+    inputPath: string,
+    convertVideo: boolean,
+  ): Promise<splitFiles> {
     const audioCodec = await this._getAudioCodecSettings(inputPath)
 
     const inputPathParsed = path.parse(inputPath)
@@ -36,15 +39,15 @@ export class AudioVideoService {
 
     const videoOutputPath = this._getVideoPath(
       inputPathName,
-      ".mp4", //2024-08-19 JH
-      convertVideo, //2024-08-19 JH
+      '.mp4', // 2024-08-19 JH
+      convertVideo, // 2024-08-19 JH
       true,
       false,
     )
     const audioOutputPath = this._getAudioPath(
       inputPathName,
-      inputPathExt,
-      audioCodec,
+      '.aac', // 2024-10-12 RP
+      // audioCodec,
     )
 
     this.logger.debug(`videoOutputPath: ${videoOutputPath}`)
@@ -54,14 +57,14 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .inputOptions([
-          '-hwaccel auto',
-        ])
+        .inputOptions(['-hwaccel auto'])
         .outputOptions([
           '-map 0:v',
           '-c:v libx264',
           '-map 0:a',
-          '-c:a copy',
+          // '-c:a copy',
+          '-c:a aac',
+          '-b:a 256k',
           '-pix_fmt yuv420p',
           // 2024-08-13, RP '-profile:v high',
           '-profile:v main',
@@ -73,8 +76,11 @@ export class AudioVideoService {
         ])
         .output(videoOutputPath)
         .output(audioOutputPath)
-        .on('error', (error) => {
-          this.logger.error('error:', error)
+        .on('start', (commandLine) => {
+          this.logger.debug('Splitting start:', commandLine)
+        })
+        .on('error', (error, stdout, stderr) => {
+          this.logger.error('Splitting error:', error, stderr)
 
           reject(error)
         })
@@ -105,13 +111,14 @@ export class AudioVideoService {
       this._initFfmpeg()
 
       ffmpeg(inputPath)
-        .inputOptions([
-          '-hwaccel auto',
-        ])
+        .inputOptions(['-hwaccel auto'])
         .outputOptions(['-map 0:v', '-c:v libx264', '-map 0:a', '-c:a copy'])
         .output(videoOutputPath)
-        .on('error', (error) => {
-          this.logger.error('error:', error)
+        .on('start', (commandLine) => {
+          this.logger.debug('Converting start:', commandLine)
+        })
+        .on('error', (error, stdout, stderr) => {
+          this.logger.error('Converting error:', error, stderr)
 
           reject(error)
         })
@@ -139,6 +146,7 @@ export class AudioVideoService {
       supported_length: null,
       audio: null,
       duration_ms: null,
+      rotation: null,
     }
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath)
@@ -148,9 +156,11 @@ export class AudioVideoService {
 
     const resolutionRatioCheck = await this._checkResolution(videoStream)
 
-    if (videoStream.duration =="N/A") {
+    if (videoStream.duration == 'N/A') {
       try {
-        videoStream.duration = this._parseTimecodeToSeconds(videoStream.tags.DURATION) //Handling for webm format
+        videoStream.duration = this._parseTimecodeToSeconds(
+          videoStream.tags.DURATION,
+        ) //Handling for webm format
       } catch (error) {
         this.logger.error(error)
       }
@@ -167,10 +177,28 @@ export class AudioVideoService {
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
     videoData.duration_ms = videoStream.duration * 1000
+    videoData.rotation = videoStream.rotation
     if (audioStream) {
       videoData.audio = audioStream.codec_long_name
     }
 
+    // 2024-10-12, honor the rotation
+    if (Math.abs(videoStream.rotation) === 90) {
+      this.logger.warn('rotated video detected')
+
+      // swap width and height
+      videoData.width = videoStream.height
+      videoData.height = videoStream.width
+
+      // replace ratio
+      if (videoStream.display_aspect_ratio === '16_9') {
+        videoData.ratio = '9_16'
+      } else if (videoStream.display_aspect_ratio === '9_16') {
+        videoData.ratio = '16_9'
+      }
+    }
+
+    // fidelity
     if (videoData.width == 1080 || videoData.height == 1080) {
       videoData.fidelity = 'hd'
     } else if (videoData.width == 2160 || videoData.height == 2160) {
@@ -194,8 +222,6 @@ export class AudioVideoService {
     videoData: any,
     basenameOnly = false,
   ): Promise<string> {
-
-
     const inputPathParsed = path.parse(inputVideoPath)
 
     const inputPathName = path.join(inputPathParsed.dir, inputPathParsed.name)
@@ -216,27 +242,27 @@ export class AudioVideoService {
 
     this.logger.debug(`appendAnimationPath: ${appendAnimationPath}`)
 
-
     return new Promise((resolve, reject) => {
       this._initFfmpeg()
 
       ffmpeg()
         .input(inputVideoPath)
         .input(appendAnimationPath)
-        .inputOptions([
-          '-hwaccel auto',
-        ])
+        .inputOptions(['-hwaccel auto'])
         .complexFilter(
-            [
-                '[0:v][1:v]concat=n=2:v=1[outv]' // Concatenate only video streams
-            ],
-            ['outv'],
+          [
+            '[0:v][1:v]concat=n=2:v=1[outv]', // Concatenate only video streams
+          ],
+          ['outv'],
         )
         // 2024-08-13, RP .outputOptions(['-map 0:a', '-c:v libx264', '-c:a copy']) // Keep the audio from the first input and copy codec
         // 2024-08-19 JH .outputOptions(['-map 0:a', '-c:v copy', '-c:a copy']) // Keep the audio from the first input and copy codec
         .outputOptions(['-map 0:a', '-c:v libx264', '-c:a copy']) // Keep the audio from the first input and copy codec
-        .on('error', (error) => {
-          this.logger.error('error:', error)
+        .on('start', (commandLine) => {
+          this.logger.debug('Appending animation start:', commandLine)
+        })
+        .on('error', (error, stdout, stderr) => {
+          this.logger.error('Appending animation error:', error, stderr)
           reject(error)
         })
         .on('end', () => {
@@ -258,21 +284,18 @@ export class AudioVideoService {
     convertedVideo = false,
     appendedAnimation = false,
   ): Promise<string> {
-
     const outputVideoPathParsed = path.parse(outputVideoPath)
 
-
-    
     this.logger.debug(`inputAudioPath: ${inputAudioPath}`)
 
     const inputVideoPathName = path.join(
       outputVideoPathParsed.dir,
       outputVideoPathParsed.name,
     )
-  
+
     const videoInputPath = this._getVideoPath(
       inputVideoPathName,
-      ".mp4",
+      '.mp4',
       convertedVideo,
       true,
       appendedAnimation,
@@ -280,7 +303,7 @@ export class AudioVideoService {
 
     const videoOutputPath = this._getVideoPath(
       inputVideoPathName,
-      ".mp4",
+      '.mp4',
       false,
       false,
       false,
@@ -295,22 +318,22 @@ export class AudioVideoService {
     this.logger.debug('videoAudioCodec:')
     this.logger.debug(videoInputAudioCodec)
 
-
     return new Promise((resolve, reject) => {
       this._initFfmpeg()
 
       ffmpeg()
         .addInput(videoInputPath)
         .addInput(inputAudioPath)
-        .inputOptions([
-          '-hwaccel auto',
-        ])
+        .inputOptions(['-hwaccel auto'])
         // 2024-08-13, RP .addOptions(['-map 0:v', '-map 1:a', '-c:v libx264'])
         .addOptions(['-map 0:v', '-map 1:a', '-c:v copy'])
         .audioCodec(videoInputAudioCodec.codec_name)
         .format('mp4')
-        .on('error', (error) => {
-          this.logger.error('error:', error)
+        .on('start', (commandLine) => {
+          this.logger.debug('Joining start:', commandLine)
+        })
+        .on('error', (error, stdout, stderr) => {
+          this.logger.error('Joining error:', error, stderr)
 
           reject(error)
         })
@@ -329,15 +352,18 @@ export class AudioVideoService {
     let supportedRatio = true
     let supportedResolution = true
 
-    videoStream.display_aspect_ratio = videoStream.display_aspect_ratio.replace(":", "_")
+    videoStream.display_aspect_ratio = videoStream.display_aspect_ratio.replace(
+      ':',
+      '_',
+    )
 
     if (videoStream.display_aspect_ratio == 'N/A') {
       const ratio = videoStream.width / videoStream.height
       switch (ratio) {
-        case (16 / 9):
+        case 16 / 9:
           videoStream.display_aspect_ratio = '16_9'
           break
-        case (9 / 16):
+        case 9 / 16:
           videoStream.display_aspect_ratio = '9_16'
           break
         case 1:
@@ -345,7 +371,6 @@ export class AudioVideoService {
           break
         default:
           videoStream.display_aspect_ratio = ratio
-
       }
     }
 
@@ -366,23 +391,25 @@ export class AudioVideoService {
       supportedResolution: supportedResolution,
     }
   }
+
   private _checkLength(duration) {
-
-    return (duration <= 120.0)
+    return duration <= 120.0
   }
-  private _parseTimecodeToSeconds(timeCode: string){
-    const [hours, minutes, secondsAndMs] = timeCode.split(':');
 
-    const [seconds, milliseconds] = secondsAndMs.split('.');
+  private _parseTimecodeToSeconds(timeCode: string) {
+    const [hours, minutes, secondsAndMs] = timeCode.split(':')
 
-    const hoursInSeconds = parseInt(hours, 10) * 3600;
-    const minutesInSeconds = parseInt(minutes, 10) * 60;
-    const secondsInt = parseInt(seconds, 10);
-    const millisecondsFloat = parseFloat('0.' + milliseconds);
+    const [seconds, milliseconds] = secondsAndMs.split('.')
 
-    const totalSeconds = hoursInSeconds + minutesInSeconds + secondsInt + millisecondsFloat;
+    const hoursInSeconds = parseInt(hours, 10) * 3600
+    const minutesInSeconds = parseInt(minutes, 10) * 60
+    const secondsInt = parseInt(seconds, 10)
+    const millisecondsFloat = parseFloat('0.' + milliseconds)
 
-    return totalSeconds;
+    const totalSeconds =
+      hoursInSeconds + minutesInSeconds + secondsInt + millisecondsFloat
+
+    return totalSeconds
   }
 
   private _getVideoPath(
@@ -416,9 +443,20 @@ export class AudioVideoService {
       `${path.sep}audio${path.sep}`,
     )
 
+    // set audio file extension
     if (audioCodec) {
-      file = file.replace(inputPathExt, `.${audioCodec.codec_name}`)
+      let codecName = audioCodec.codec_name
+      // let codecName = audioCodec.codec_tag_string
+
+      if (codecName.toLowerCase().includes('pcm')) {
+        codecName = 'wav'
+      }
+
+      file = file.replace(inputPathExt, `.${codecName}`)
     }
+
+    // replace blanks
+    // file = file.replaceAll(' ', '_')
 
     return file
   }
