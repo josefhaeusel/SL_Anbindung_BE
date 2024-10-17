@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import * as session from 'express-session'
+import session from 'express-session'
 import { Logger } from '@nestjs/common'
 import helmet from 'helmet'
 import { nestCsrf } from 'ncsrf'
-import * as cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 import { TypeormStore } from 'connect-typeorm'
 import { DataSource } from 'typeorm'
 import { Session } from './database/entity/session.entity'
@@ -106,12 +106,17 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Backend')
-      .setDescription('The API description')
-      .setVersion('1.0')
+      .setDescription('The local api documentation')
+      .setVersion('0.9')
       .addTag('auth')
       .addTag('chord-retrieval-ai')
       .addTag('download')
       .addTag('music-ai-search')
+      .addSecurity('csrf', {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-csrf-token',
+      })
       .build()
     const document = SwaggerModule.createDocument(app, config)
     SwaggerModule.setup('docs', app, document)

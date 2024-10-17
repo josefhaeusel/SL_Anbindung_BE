@@ -17,9 +17,10 @@ import * as path from 'node:path'
 import { FeedbackDto } from './download.dto'
 import { Log } from '../database/entity/log.entity'
 import { DataSource } from 'typeorm'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger'
 
 @Controller('download')
+@ApiTags('download')
 export class DownloadController {
   private readonly logger = new Logger(DownloadController.name)
 
@@ -30,8 +31,8 @@ export class DownloadController {
 
   @Get('streamable')
   @Csrf()
-  @ApiTags('download')
   @ApiOperation({ summary: 'Returns the a file' })
+  @ApiSecurity('csrf')
   async streamable(
     @Query('file') file: string,
     @Res({ passthrough: true }) response: Response,
@@ -57,8 +58,8 @@ export class DownloadController {
 
   @Post('feedback')
   @Csrf()
-  @ApiTags('download')
   @ApiOperation({ summary: 'Post feedback for render process' })
+  @ApiSecurity('csrf')
   async feedback(
     @Body() feedbackDto: FeedbackDto,
     @Res() response: Response,

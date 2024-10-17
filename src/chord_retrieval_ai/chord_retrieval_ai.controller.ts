@@ -20,7 +20,7 @@ import { Csrf } from 'ncsrf'
 import { nanoid } from 'nanoid'
 import { DataSource } from 'typeorm'
 import { Log } from '../database/entity/log.entity'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger'
 
 export interface ISession extends Session {
   tempOriginalVideoFilePath?: string
@@ -82,6 +82,7 @@ export class ChordRetrievalAiController {
   @Csrf()
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Uploads a video file and returns it\'s analysis' })
+  @ApiSecurity('csrf')
   async videoHandler(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
@@ -331,8 +332,8 @@ export class ChordRetrievalAiController {
   @Post('uploadRenderedAudio')
   @Csrf()
   @UseInterceptors(FileInterceptor('file'))
-
   @ApiOperation({ summary: 'Uploads the rendered audio file and returns the merged video file' })
+  @ApiSecurity('csrf')
   async audioHandler(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,

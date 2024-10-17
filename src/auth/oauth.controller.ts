@@ -30,7 +30,7 @@ export class AuthController {
   }
 
   @Get('callback')
-  @ApiOperation({ summary: 'Handles oauth callback' })
+  @ApiOperation({ summary: 'Handles the oauth callback' })
   async callback(@Req() req, @Res() res) {
     return await this.oauthService.handleCallback(req, res)
   }

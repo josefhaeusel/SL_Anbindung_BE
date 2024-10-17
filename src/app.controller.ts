@@ -8,7 +8,7 @@ import {
   Res,
 } from '@nestjs/common'
 import { AppService } from './app.service'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiExcludeEndpoint, ApiOperation, ApiResponse } from '@nestjs/swagger'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 
 @Controller()
@@ -53,12 +53,8 @@ export class AppController {
     /* empty redirect method */
   }
 
-  @Get([
-    '@vite/*',
-    '@id/*',
-    'src/*',
-    'node_modules/*',
-  ])
+  @Get(['@vite/*', '@id/*', 'src/*', 'node_modules/*'])
+  @ApiExcludeEndpoint()
   proxyRoute(@Req() req, @Res() res, @Next() next) {
     if (typeof process.env.LOCAL_PROXY !== 'undefined') {
       this.proxy(req, res, next)
