@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import * as ffmpeg from 'fluent-ffmpeg'
+import ffmpeg from 'fluent-ffmpeg' //JH 241019
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -516,13 +516,14 @@ export class AudioVideoService {
     } else {
       const audioVideoPaths = await import('./audio-video.import')
 
-      const ffmpegPath = audioVideoPaths.ffmpegPath
+
+      const ffmpegPath = audioVideoPaths.ffmpegPath.default //JH 241019
       const ffmpegLinuxPath = audioVideoPaths.ffmpegLinuxPath
       const ffprobePath = audioVideoPaths.ffprobePath
       const ffprobeLinuxPath = audioVideoPaths.ffprobeLinuxPath
 
       try {
-        // this.logger.debug('Trying ffmpeg path: ', ffmpegPath)
+        this.logger.debug('Trying ffmpeg path: ', ffmpegPath)
         fs.chmodSync(ffmpegPath as unknown as string, '755')
         ffmpeg.setFfmpegPath(ffmpegPath)
       } catch (err) {
