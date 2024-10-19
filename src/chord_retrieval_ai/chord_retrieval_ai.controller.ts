@@ -7,6 +7,7 @@ import {
   Req,
   Get,
   Logger,
+  Body
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ChordRetrievalAiService } from './chord_retrieval_ai.service'
@@ -16,6 +17,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { AudioVideoService } from '../audio-video/audio-video.service'
 import { ComputerVisionService } from '../computer_vision/computer_vision.service'
+import { VoiceOptimizationService } from '../voice-optimization/voice-optimization.service'
 import { Csrf } from 'ncsrf'
 import { nanoid } from 'nanoid'
 import { DataSource } from 'typeorm'
@@ -24,9 +26,11 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger'
 
 export interface ISession extends Session {
   tempOriginalVideoFilePath?: string
+  tempAudioFilePath?: string
   appendedAnimation?: boolean
   convertedVideo?: boolean
   uploadPrefix?: string
+  optimizedVoice?: boolean
 }
 
 @Controller('chord-retrieval-ai')
@@ -37,6 +41,7 @@ export class ChordRetrievalAiController {
   constructor(
     private readonly chordRetrievalAiService: ChordRetrievalAiService,
     private readonly audioVideoService: AudioVideoService,
+    private readonly voiceOptimizationService: VoiceOptimizationService,
     private readonly computerVisionService: ComputerVisionService,
     private readonly dataSource: DataSource,
   ) {
@@ -105,6 +110,7 @@ export class ChordRetrievalAiController {
       audioAnalysis: {},
       videoAnalysis: { convertedVideo: null },
       videoOutputFile: null,
+      audioOutputFile: null,
       csrfToken: null,
     }
     let audioAnalysisResult
@@ -277,6 +283,7 @@ export class ChordRetrievalAiController {
       analysisResult.audioAnalysis = audioAnalysisResult
       analysisResult.videoAnalysis = videoAnalysisResult
       analysisResult.videoOutputFile = tempVideoOutputFilePath
+      analysisResult.audioOutputFile = tempAudioFilePath
       analysisResult.videoAnalysis.convertedVideo = (
         request.session as ISession
       ).convertedVideo
@@ -295,8 +302,12 @@ export class ChordRetrievalAiController {
       response.json(analysisResult)
 
       // delete split audio
-      fs.unlinkSync(tempAudioFilePath)
-      this.logger.warn(`Deleted ${tempAudioFilePath}`)
+      // deactivated for later reuse in voiceOptimization
+      // fs.unlinkSync(tempAudioFilePath)
+      // this.logger.warn(`Deleted ${tempAudioFilePath}`)
+
+      //Added for later reuse in voiceOptimization
+      ;(request.session as ISession).tempAudioFilePath = tempAudioFilePath
 
       // log
       log.finishedAt = new Date()
@@ -327,6 +338,63 @@ export class ChordRetrievalAiController {
       }
     }
   }
+
+  @Post('optimizeVoice')
+  @Csrf()
+  // @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Uploads (later just path) and splits audio-file into voice + background stems.' })
+  async voiceOptimization(
+    @Body('inputAudioPath') inputAudioPath: string,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    try {
+
+      this.logger.log(`Starting voice optimization handling: ${inputAudioPath}`)
+
+      const logRepository = this.dataSource.getRepository(Log)
+      const uploadPrefix = (request.session as ISession).uploadPrefix
+
+      /*
+      const tempVideoFilePath = path.join(
+        __dirname,
+        '../../temp_uploads/video',
+        tempOriginalVideoFilePath,
+      )
+      */
+
+      const splitStems = await this.voiceOptimizationService.split(
+        inputAudioPath,
+      )
+
+      // fs.unlinkSync(tempAudioFilePath)
+      // this.logger.warn(`Deleted ${tempAudioFilePath}`)
+
+      this.logger.log(
+        `Audio ${inputAudioPath} split into ${splitStems}. `,
+      )
+      response.json({
+        renderedResult: splitStems,
+        // 2024-08-13, csrf
+        csrfToken: (request as any).csrfToken(),
+      })
+
+      const log = await logRepository.findOneBy({ uploadPrefix: uploadPrefix })
+      if (log) {
+        log.downloadedAt = new Date()
+        await logRepository.save(log)
+      }
+
+      /*fs.unlinkSync(tempOriginalVideoFilePath);
+      this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`);*/
+    } catch (error) {
+      this.logger.error('Error during audio handling', error.stack)
+      response.status(500).json({ success: false, message: error.message })
+    }
+  }
+
+
+  
 
   @Post('uploadRenderedAudio')
   @Csrf()
@@ -400,4 +468,7 @@ export class ChordRetrievalAiController {
       response.status(500).json({ success: false, message: error.message })
     }
   }
+
+
+
 }

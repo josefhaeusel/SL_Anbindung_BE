@@ -2,7 +2,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { spawn } from 'child_process'
 import * as path from 'path'
-import { join } from 'path'
 
 @Injectable()
 export class ChordRetrievalAiService {
