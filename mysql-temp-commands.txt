@@ -1,0 +1,26 @@
+mysql -u root -p
+USE soundlogo
+CREATE TABLE log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uploadPrefix VARCHAR(255),
+    videoFileName VARCHAR(255),
+    videoFileSize FLOAT,
+    videoFileMetaData TEXT,
+    splitVideoFile VARCHAR(255),
+    splitAudioFile VARCHAR(255),
+    videoFileAnalyze TEXT,
+    audioFileAnalyze TEXT,
+    appendAnimation BOOLEAN DEFAULT FALSE,
+    error TEXT,
+    userAgent VARCHAR(255),
+    createdAt DATETIME,
+    finishedAt DATETIME,
+    downloadedAt DATETIME NULL
+);
+
+CREATE TABLE session (
+  id VARCHAR(255) PRIMARY KEY,
+  expiredAt BIGINT NOT NULL,
+  json TEXT NOT NULL,
+  destroyedAt DATETIME DEFAULT NULL
+);

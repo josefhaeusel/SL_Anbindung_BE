@@ -1,24 +1,30 @@
-// src/chord-retrieval-ai/chord-retrieval-ai.service.ts
-import { Injectable, Logger } from '@nestjs/common'
-import { spawn } from 'child_process'
+import { Injectable, Logger } from '@nestjs/common';
 import * as path from 'path'
+import { spawn } from 'child_process'
 
+
+export interface splitFiles {
+    voice: string
+    background: string
+  }
+  
 @Injectable()
-export class ChordRetrievalAiService {
-  private readonly logger = new Logger(ChordRetrievalAiService.name)
+export class VoiceOptimizationService {
 
-  analyzeSong(songPath: string, animationAppended: boolean, animationStart: number): Promise<any> {
+  private readonly logger = new Logger(VoiceOptimizationService.name)
+
+  split(inputAudio: string): Promise<splitFiles> {
     return new Promise((resolve, reject) => {
       const rootPath =
         process.env.NODE_ENV == 'production'
           ? __dirname
-          : path.join(process.cwd(), 'src', 'chord_retrieval_ai')
+          : path.join(process.cwd(), 'src', 'voice-optimization')
       const pythonFile =
-        'keyfinderChildProcess.' +
+        'vocalSeparationChildProcess.' +
         (process.env.NODE_ENV == 'production' ? 'pyc' : 'py')
       const pythonPath = path.join(rootPath, 'py', pythonFile)
       this.logger.debug(
-        `python3 ${pythonPath} ${songPath} ${animationAppended} ${animationStart}`,
+        `python3 ${pythonPath} ${inputAudio}`,
       )
       this.logger.debug(`env ${process.env.NODE_ENV}`)
       this.logger.debug(`env ${process.env.NUMBA_CACHE_DIR}`)
@@ -27,14 +33,15 @@ export class ChordRetrievalAiService {
 
       const pythonProcess = spawn(
         'python3',
-        [pythonPath, songPath, animationAppended.toString(), animationStart.toString()],
+        [pythonPath, inputAudio],
         { env: process.env },
       )
 
       pythonProcess.stdout.on('data', (data) => {
         try {
-          const result = JSON.parse(data.toString())
-          resolve(result)
+          const splitFiles = JSON.parse(data.toString())
+
+          resolve({voice: splitFiles.voice, background: splitFiles.background})
         } catch (error) {
           this.logger.error('error:', error)
           console.error(`error: ${error.message}`)
@@ -43,8 +50,7 @@ export class ChordRetrievalAiService {
       })
 
       pythonProcess.stderr.on('data', (data) => {
-        this.logger.warn('stderr:', data)
-        console.error(`stderr: ${data}`)
+        this.logger.log(data)
       })
 
       pythonProcess.on('error', (error) => {

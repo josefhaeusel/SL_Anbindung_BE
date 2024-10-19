@@ -9,6 +9,7 @@ import { DownloadController } from './download/download.controller'
 import { DownloadService } from './download/download.service'
 import { ComputerVisionService } from './computer_vision/computer_vision.service'
 import { MusicAiSearchModule } from './music-ai-search/music-ai-search.module'
+import { VoiceOptimizationService } from './voice-optimization/voice-optimization.service';
 import { CsrfInjectMiddleware } from './csrf-inject.middleware'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { TypeOrmConfigService } from './typeorm-inject.config'
@@ -100,6 +101,7 @@ import { ConfigModule } from '@nestjs/config'
     DownloadService,
     JwtService,
     OAuthExternalProviderGuard,
+    VoiceOptimizationService,
   ],
 })
 export class AppModule implements NestModule {
