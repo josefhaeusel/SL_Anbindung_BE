@@ -13,7 +13,7 @@ if len(sys.argv) > 1:
         vocals_out = os.path.join(output_dir, input_audio_basename+'-vocals'+input_audio_extension)
         background_out = os.path.join(output_dir, input_audio_basename+'-background'+input_audio_extension)
         # # Initialize the Separator class (with optional configuration properties, below)
-        separator = Separator(output_dir=output_dir, amplification_threshold=0.1, normalization_threshold=0.9)
+        separator = Separator(output_dir=output_dir, amplification_threshold=0.1, normalization_threshold=0.9, model_file_dir=os.path.join(os.path.dirname(__file__), "separation_model"))
         # # Später nochmal durch Volume Detection schicken
         
         # Splitting a track into Vocal and Instrumental

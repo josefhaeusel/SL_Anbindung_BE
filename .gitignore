@@ -12,6 +12,9 @@
 # unused files
 /unused/*
 
+# AI Models
+*.ckpt
+
 # Logs
 logs
 *.log
