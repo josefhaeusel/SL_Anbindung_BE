@@ -343,7 +343,7 @@ export class ChordRetrievalAiController {
   @Post('optimizeVoice')
   @Csrf()
   // @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Uploads (later just path) and splits audio-file into voice + background stems.' })
+  @ApiOperation({ summary: 'Splits existing audio-file into voice + background stems.' })
   async voiceOptimization(
     @Body('inputAudioPath') inputAudioPath: string,
     @Req() request: Request,
