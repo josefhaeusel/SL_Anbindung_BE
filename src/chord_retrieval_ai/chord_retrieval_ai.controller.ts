@@ -404,11 +404,13 @@ export class ChordRetrievalAiController {
   @ApiSecurity('csrf')
   async audioHandler(
     @UploadedFile() file: Express.Multer.File,
+    @Body('soundlogoKey') soundlogoKey: string,
     @Req() request: Request,
     @Res() response: Response,
   ) {
     try {
-      this.logger.log(`Starting audio upload handling: ${file.originalname}`)
+
+      this.logger.log(`Starting audio upload handling: ${file.originalname}, Soundlogo Key ${soundlogoKey}`)
 
       const logRepository = this.dataSource.getRepository(Log)
 

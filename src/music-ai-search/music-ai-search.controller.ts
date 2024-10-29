@@ -19,7 +19,7 @@ export class MusicAiSearchController {
   constructor(private readonly musicAiSearchService: MusicAiSearchService) {}
 
   @Get('allTags')
-  @Csrf()
+  // @Csrf()
   @ApiOperation({ summary: 'Return all tags' })
   @ApiSecurity('csrf')
   @ApiOkResponse({
@@ -31,7 +31,7 @@ export class MusicAiSearchController {
   }
 
   @Post('allTags')
-  @Csrf()
+  // @Csrf()
   @ApiOperation({ summary: 'Return tags by track ids' })
   @ApiSecurity('csrf')
   @ApiCreatedResponse({
@@ -55,7 +55,7 @@ export class MusicAiSearchController {
   }
 
   @Post('freeTextSearch')
-  @Csrf()
+  // @Csrf()
   @ApiOperation({
     summary: 'Return tracks by free text search. Can be filtered by tag ids',
   })
@@ -92,11 +92,11 @@ export class MusicAiSearchController {
   }
 
   @Post('tagSearch')
-  @Csrf()
+  // @Csrf()
   @ApiOperation({
     summary: 'Return tracks by tag search. Can be filtered by tag ids',
   })
-  @ApiSecurity('csrf')
+  // @ApiSecurity('csrf')
   @ApiCreatedResponse({
     description: 'Return all matching tracks',
     type: ResponseS12Ok,
