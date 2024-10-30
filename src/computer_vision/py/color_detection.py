@@ -3,9 +3,10 @@ import numpy as np
 import cv2
 
 class ColorDetection:
-    def __init__(self, videoPath):
+    def __init__(self, videoPath, showVideoPlayer=False):
         script_dir = os.path.dirname(os.path.realpath(__file__))
         self.videoPath = videoPath
+        self.showVideoPlayer = showVideoPlayer
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
         self.total_pixels = self.frame_height * self.frame_width
@@ -58,9 +59,10 @@ class ColorDetection:
     def makeMomentDict(self, startTime, endTime):
 
         momentDict = {
-            "start": startTime,
-            "end": endTime,
-            "length": (endTime-startTime)
+            "startTime": startTime,
+            "endTime": endTime,
+            "length": (endTime-startTime),
+            "active": False
         }
 
         return momentDict
@@ -68,12 +70,14 @@ class ColorDetection:
     def addMoment(self):
         moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
         self.detectedMoments.append(moment)
-        print("Added:", moment)
+        if self.showVideoPlayer:
+            print("Added:", moment)
         
     def dropMoment(self):
         moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
         self.droppedOutMoments.append(moment)
-        print("Dropped out:", moment)
+        if self.showVideoPlayer:
+            print("Dropped out:", moment)
 
     def sortMoments(self):
         sortedMoments = self.detectedMoments
@@ -108,7 +112,7 @@ class ColorDetection:
 
 
 
-    def detectMoments(self, showVideoPlayer=False):
+    def detectMoments(self):
         isDetecting = True
 
         while isDetecting:
@@ -131,7 +135,7 @@ class ColorDetection:
                 if self.getCurrentTime() >= self.duration_secs:
                     isDetecting = False
 
-                if showVideoPlayer:
+                if self.showVideoPlayer:
                     # bitMask = cv2.bitwise_and(frame, frame, mask=mask)
 
                     message = f"Magenta Ratio: {magenta_ratio*100:.2f}%     Moment: {self.lastFrameDetected}    Number Moments: {len(self.detectedMoments)}"

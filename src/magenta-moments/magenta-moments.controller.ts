@@ -16,7 +16,6 @@ import {
   import * as path from 'path'
   import { AudioVideoService } from '../audio-video/audio-video.service'
   import { ComputerVisionService } from '../computer_vision/computer_vision.service'
-  import { VoiceOptimizationService } from '../voice-optimization/voice-optimization.service'
   import { ChordRetrievalAiService } from '../chord_retrieval_ai/chord_retrieval_ai.service'
   import { Csrf } from 'ncsrf'
   import { nanoid } from 'nanoid'
@@ -27,20 +26,17 @@ import {
   export interface ISession extends Session {
     tempOriginalVideoFilePath?: string
     tempAudioFilePath?: string
-    appendedAnimation?: boolean
     convertedVideo?: boolean
     uploadPrefix?: string
-    optimizedVoice?: boolean
   }
   
   @Controller('magenta-moments')
   @ApiTags('magenta-moments')
-  export class ChordRetrievalAiController {
-    private readonly logger = new Logger(ChordRetrievalAiController.name)
+  export class MagentaMomentsController {
+    private readonly logger = new Logger(MagentaMomentsController.name)
   
     constructor(
       private readonly audioVideoService: AudioVideoService,
-      private readonly voiceOptimizationService: VoiceOptimizationService,
       private readonly computerVisionService: ComputerVisionService,
       private readonly chordRetrievalAiService: ChordRetrievalAiService,
       private readonly dataSource: DataSource,
@@ -267,8 +263,6 @@ import {
         ).convertedVideo
         ;(request.session as ISession).tempOriginalVideoFilePath =
           tempOriginalVideoFilePath
-        ;(request.session as ISession).appendedAnimation =
-          videoAnalysisResult.appendAnimation
   
         // 2024-08-13, csrf
         analysisResult.csrfToken = (request as any).csrfToken()
@@ -316,139 +310,6 @@ import {
         }
       }
     }
-  
-    @Post('optimizeVoice')
-    @Csrf()
-    // @UseInterceptors(FileInterceptor('file'))
-    @ApiOperation({ summary: 'Splits existing audio-file into voice + background stems.' })
-    async voiceOptimization(
-      @Body('inputAudioPath') inputAudioPath: string,
-      @Req() request: Request,
-      @Res() response: Response,
-    ) {
-      try {
-  
-        this.logger.log(`Starting voice optimization handling: ${inputAudioPath}`)
-  
-        const logRepository = this.dataSource.getRepository(Log)
-        const uploadPrefix = (request.session as ISession).uploadPrefix
-  
-        /*
-        const tempVideoFilePath = path.join(
-          __dirname,
-          '../../temp_uploads/video',
-          tempOriginalVideoFilePath,
-        )
-        */
-  
-        const splitStems = await this.voiceOptimizationService.split(
-          inputAudioPath,
-        )
-  
-        // fs.unlinkSync(tempAudioFilePath)
-        // this.logger.warn(`Deleted ${tempAudioFilePath}`)
-  
-        this.logger.log(
-          `Audio ${inputAudioPath} split into ${splitStems}. `,
-        )
-        response.json({
-          renderedResult: splitStems,
-          // 2024-08-13, csrf
-          csrfToken: (request as any).csrfToken(),
-        })
-  
-        const log = await logRepository.findOneBy({ uploadPrefix: uploadPrefix })
-        if (log) {
-          log.downloadedAt = new Date()
-          await logRepository.save(log)
-        }
-  
-        /*fs.unlinkSync(tempOriginalVideoFilePath);
-        this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`);*/
-      } catch (error) {
-        this.logger.error('Error during audio handling', error.stack)
-        response.status(500).json({ success: false, message: error.message })
-      }
-    }
-  
-  
-    
-  
-    @Post('uploadRenderedAudio')
-    @Csrf()
-    @UseInterceptors(FileInterceptor('file'))
-    @ApiOperation({ summary: 'Uploads the rendered audio file and returns the merged video file' })
-    @ApiSecurity('csrf')
-    async audioHandler(
-      @UploadedFile() file: Express.Multer.File,
-      @Body('soundlogoKey') soundlogoKey: string,
-      @Req() request: Request,
-      @Res() response: Response,
-    ) {
-      try {
-  
-        this.logger.log(`Starting audio upload handling: ${file.originalname}, Soundlogo Key ${soundlogoKey}`)
-  
-        const logRepository = this.dataSource.getRepository(Log)
-  
-        const uploadPrefix = (request.session as ISession).uploadPrefix
-        const tempAudioFilePath = path.join(
-          __dirname,
-          '../../temp_uploads/audio',
-          uploadPrefix,
-          file.originalname,
-        )
-  
-        fs.writeFileSync(tempAudioFilePath, file.buffer)
-  
-        const appendedAnimation = (request.session as ISession).appendedAnimation
-        const convertedVideo = (request.session as ISession).convertedVideo
-        const tempOriginalVideoFilePath = (request.session as ISession)
-          .tempOriginalVideoFilePath
-  
-        /*
-        const tempVideoFilePath = path.join(
-          __dirname,
-          '../../temp_uploads/video',
-          tempOriginalVideoFilePath,
-        )
-        */
-        const tempVideoFilePath = tempOriginalVideoFilePath
-  
-        const renderedResult = await this.audioVideoService.join(
-          tempOriginalVideoFilePath,
-          tempAudioFilePath,
-          true,
-          convertedVideo,
-          appendedAnimation,
-        )
-  
-        fs.unlinkSync(tempAudioFilePath)
-        this.logger.warn(`Deleted ${tempAudioFilePath}`)
-  
-        this.logger.log(
-          `Audio ${tempAudioFilePath} and Video ${tempVideoFilePath} joined as ${renderedResult}`,
-        )
-        response.json({
-          renderedResult: renderedResult,
-          // 2024-08-13, csrf
-          csrfToken: (request as any).csrfToken(),
-        })
-  
-        const log = await logRepository.findOneBy({ uploadPrefix: uploadPrefix })
-        if (log) {
-          log.downloadedAt = new Date()
-          await logRepository.save(log)
-        }
-  
-        /*fs.unlinkSync(tempOriginalVideoFilePath);
-        this.logger.warn(`Deleted ${tempOriginalVideoFilePath}`);*/
-      } catch (error) {
-        this.logger.error('Error during audio handling', error.stack)
-        response.status(500).json({ success: false, message: error.message })
-      }
-    }
-  
   
   
   }
