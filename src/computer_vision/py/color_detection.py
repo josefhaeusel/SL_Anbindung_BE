@@ -9,14 +9,15 @@ class ColorDetection:
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
         self.total_pixels = self.frame_height * self.frame_width
-        self.color_pixel_treshold = 0.6
+        self.color_pixel_treshold = 0.5
+        self.minimumMomentDuration = 0.5
         self.lastFrameDetected = False
 
         # self.frameSearchSkip = 10
         self.frameSearchSkip = 1
 
-        self.analysisStartBeforeEnd = 6
-        self.analysisAbortBeforeEnd = 0.5
+        # self.analysisStartBeforeEnd = 6
+        # self.analysisAbortBeforeEnd = 0.5
 
 
         #E20074 in HSV 233,255,226
@@ -31,7 +32,9 @@ class ColorDetection:
         self.upper_magenta = np.array([magenta_hue + magenta_tolerance, 255, 255])
 
         # self.detected_time = None
+        self.droppedOutMoments = []
         self.detectedMoments = []
+        self.sortedMoments = []
         
     def getCurrentTime(self):
         currentFrame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
@@ -50,8 +53,31 @@ class ColorDetection:
     def toMask(self, frame):
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_frame, self.lower_magenta, self.upper_magenta)
-
         return mask
+    
+    def makeMomentDict(self, startTime, endTime):
+
+        momentDict = {
+            "start": startTime,
+            "end": endTime,
+            "length": (endTime-startTime)
+        }
+
+        return momentDict
+
+    def addMoment(self):
+        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
+        self.detectedMoments.append(moment)
+        print("Added:", moment)
+        
+    def dropMoment(self):
+        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
+        self.droppedOutMoments.append(moment)
+        print("Dropped out:", moment)
+
+    def sortMoments(self):
+        sortedMoments = self.detectedMoments
+        return sortedMoments
     
     def detectMoment(self, magenta_ratio):
 
@@ -62,8 +88,16 @@ class ColorDetection:
                 self.currentMomentEnd = self.getCurrentTime()
                 return True
             else:
-                self.getCurrentTime()
-                self.detectedMoments.append([self.currentMomentStart, self.currentMomentEnd])
+                self.currentMomentEnd = self.getCurrentTime()
+
+                if (self.currentMomentEnd - self.currentMomentStart) >= self.minimumMomentDuration:
+                    self.addMoment()
+                else:
+                    self.dropMoment()
+
+                self.currentMomentStart = 0
+                self.currentMomentEnd = 0
+
                 return False
         else:
             if magenta_ratio >= self.color_pixel_treshold:
@@ -94,7 +128,9 @@ class ColorDetection:
 
                 self.lastFrameDetected = self.detectMoment(magenta_ratio)
 
-                
+                if self.getCurrentTime() >= self.duration_secs:
+                    isDetecting = False
+
                 if showVideoPlayer:
                     # bitMask = cv2.bitwise_and(frame, frame, mask=mask)
 
@@ -124,7 +160,8 @@ class ColorDetection:
         self.video.release()
         cv2.destroyAllWindows()
 
-        response = {"detected_moments": self.detectedMoments}
-        
+        self.sortedMoments = self.sortMoments()
+        response = {"detected_moments": self.detectedMoments, "dropped_out_moments": self.droppedOutMoments}
+
         return response
     
