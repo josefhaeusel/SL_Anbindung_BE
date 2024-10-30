@@ -20,6 +20,7 @@ import { OAuthService } from './auth/oauth.service'
 import { AuthController } from './auth/oauth.controller'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigModule } from '@nestjs/config'
+import { MagentaMomentsModule } from './magenta-moments/magenta-moments.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { ConfigModule } from '@nestjs/config'
       },
     }),
     ConfigModule.forRoot(),
+    MagentaMomentsModule,
   ],
   controllers: [AppController, AuthController, DownloadController],
   providers: [
