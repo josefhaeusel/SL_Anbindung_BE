@@ -50,16 +50,28 @@ class ColorDetection:
     def makeMomentDict(self, startTime, endTime):
 
         momentDict = {
+            "name": None,
             "startTime": startTime,
             "endTime": endTime,
             "length": (endTime-startTime),
-            "active": False
+            "active": False,
+            "id": len(self.detectedMoments)
         }
 
         return momentDict
 
+    def chooseMomentType(self, moment):
+
+        if (moment['length']) > 1:
+            return 'arpeggio_riser'
+        else:
+            return 'direct_impact'
+
+         
+
     def addMoment(self):
         moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
+        moment['name'] = self.chooseMomentType(moment)
         self.detectedMoments.append(moment)
         if self.showVideoPlayer:
             print("Added:", moment)
