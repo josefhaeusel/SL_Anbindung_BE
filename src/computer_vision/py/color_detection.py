@@ -1,18 +1,21 @@
 import os
 import numpy as np
 import cv2
+import json
 
 class ColorDetection:
     def __init__(self, videoPath, showVideoPlayer=False):
-        # script_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.moments_config = self.loadMomentsConfig()
+
         self.videoPath = videoPath
         self.showVideoPlayer = showVideoPlayer
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
 
         self.total_pixels = self.frame_height * self.frame_width
-        self.color_pixel_treshold = 0.5
-        self.minimumMomentDuration = 0.5
+        self.color_pixel_treshold = 0.3
+        self.minimumMomentDuration = 0.3
         self.lastFrameDetected = False
 
         self.frameSearchSkip = self.fps*self.minimumMomentDuration 
@@ -28,6 +31,18 @@ class ColorDetection:
         self.detectedMoments = []
         self.sortedMoments = []
         
+    def loadMomentsConfig(self):
+        #PROD different path
+        
+        file_dir = os.path.dirname(os.path.realpath(__file__))
+        config_path = os.path.join(file_dir, '..', '..', '..', 'frontend', '..', 'src', 'libs', 'magenta_moments.json')
+        config_path = os.path.realpath(config_path)
+
+        with open(config_path, 'r') as config_file:
+            moments_config = json.load(config_file)
+
+        return moments_config
+    
     def getCurrentTime(self):
         currentFrame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
         currentTime = currentFrame / self.fps
@@ -60,18 +75,20 @@ class ColorDetection:
 
         return momentDict
 
-    def chooseMomentType(self, moment):
 
-        if (moment['length']) > 1:
-            return 'arpeggio_riser'
-        else:
-            return 'direct_impact'
+    def chooseRandomMoment(self, moment):
 
-         
+        available_moments = list(self.moments_config.keys())  # Convert dict_keys to a list
+        return available_moments[moment['id'] % len(available_moments)]  # Ensures it stays within bounds
+        # if (moment['length']) > 1:
+        #     return 'arpeggio_riser'
+        # else:
+        #     return 'direct_impact'
+
 
     def addMoment(self):
         moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
-        moment['name'] = self.chooseMomentType(moment)
+        moment['name'] = self.chooseRandomMoment(moment)
         self.detectedMoments.append(moment)
         if self.showVideoPlayer:
             print("Added:", moment)

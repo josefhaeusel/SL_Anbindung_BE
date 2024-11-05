@@ -55,7 +55,7 @@ export class ChordRetrievalAiService {
     })
   }
 
-  analyzeSongMagenta(songPath: string): Promise<any> {
+  analyzeSongMagenta(songPath: string, magentaMoments: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const rootPath =
         process.env.NODE_ENV == 'production'
@@ -66,7 +66,7 @@ export class ChordRetrievalAiService {
         (process.env.NODE_ENV == 'production' ? 'pyc' : 'py')
       const pythonPath = path.join(rootPath, 'py', pythonFile)
       this.logger.debug(
-        `python3 ${pythonPath} ${songPath}`,
+        `python3 ${pythonPath} ${songPath} '${magentaMoments}'`,
       )
       this.logger.debug(`env ${process.env.NODE_ENV}`)
       this.logger.debug(`env ${process.env.NUMBA_CACHE_DIR}`)
@@ -75,7 +75,7 @@ export class ChordRetrievalAiService {
 
       const pythonProcess = spawn(
         'python3',
-        [pythonPath, songPath],
+        [pythonPath, songPath, magentaMoments],
         { env: process.env },
       )
 

@@ -85,7 +85,7 @@ class Tonal_Fragment(object):
     def get_key_info(self):
         key_info = {
             "likely_key": {"key":self.key, "correlation": self.bestcorr},
-            "correlation_table": self.sorted_keys,
+            # "correlation_table": self.sorted_keys,
         }
         if self.altkey is not None:
             key_info["also_possible"] = {

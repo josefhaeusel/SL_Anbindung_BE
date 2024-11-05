@@ -243,12 +243,16 @@ import {
         if (tempAudioFilePath != null) {
           audioAnalysisResult = await this.chordRetrievalAiService.analyzeSongMagenta(
             tempAudioFilePath,
+            JSON.stringify(videoAnalysisResult.analysis.detected_moments)
           )
         } else {
           audioAnalysisResult = await this.chordRetrievalAiService.analyzeSongMagenta(
             tempOriginalVideoFilePath,
+            JSON.stringify(videoAnalysisResult.analysis.detected_moments)
           )
         }
+
+        videoAnalysisResult.analysis.detected_moments = audioAnalysisResult.moments_with_keys
   
         // log
         log.audioFileAnalyze = JSON.stringify(audioAnalysisResult)
