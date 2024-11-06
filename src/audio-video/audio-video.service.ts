@@ -405,7 +405,7 @@ export class AudioVideoService {
   }
 
   private _checkLength(duration) {
-    return duration <= 120.0
+    return duration <= 200.0
   }
 
   private _parseTimecodeToSeconds(timeCode: string) {
