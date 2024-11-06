@@ -18,7 +18,7 @@ if len(sys.argv) > 1:
         duration = librosa.get_duration(y=y, sr=sr) # Duration of the split .aac file (from Phase "Splitting Audio from Video") !Not length of appended animation!
 
         # Overall Loudness Analysis
-        meter = pyln.Meter(sr)  # create BS.1770 meter
+        meter = pyln.Meter(sr, filter_class="DeMan") 
         overall_loudness = meter.integrated_loudness(y)  # measure loudness
 
         analysisSegmentEmpty = False
@@ -31,6 +31,7 @@ if len(sys.argv) > 1:
 
             moments_with_keys = []
             tolerance = 0
+            # Platzierung vorne oder hinten? 
 
             for moment in magenta_moments:
 

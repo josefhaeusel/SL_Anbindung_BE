@@ -90,8 +90,10 @@ class Tonal_Fragment(object):
         if self.altkey is not None:
             key_info["also_possible"] = {
                 "key": self.altkey,
-                "correlation": self.altbestcorr
+                "correlation": self.altbestcorr,
             }
+
+        key_info["selected"] = None
         return key_info
 
         

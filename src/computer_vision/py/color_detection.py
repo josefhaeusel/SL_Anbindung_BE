@@ -14,8 +14,8 @@ class ColorDetection:
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
 
         self.total_pixels = self.frame_height * self.frame_width
-        self.color_pixel_treshold = 0.3
-        self.minimumMomentDuration = 0.3
+        self.color_pixel_treshold = 0.5
+        self.minimumMomentDuration = 0.5
         self.lastFrameDetected = False
 
         self.frameSearchSkip = self.fps*self.minimumMomentDuration 
