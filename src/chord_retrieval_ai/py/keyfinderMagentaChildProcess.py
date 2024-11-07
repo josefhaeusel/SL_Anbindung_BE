@@ -35,6 +35,9 @@ if len(sys.argv) > 1:
 
             for moment in magenta_moments:
 
+                if moment["length"] < 0.75:
+                    tolerance=0.25
+
                 moment_start=librosa.time_to_samples(int(moment["startTime"])-tolerance, sr=sr)
                 moment_end=librosa.time_to_samples(int(moment["endTime"])+tolerance, sr=sr)
                 moment_segment = y[moment_start:moment_end]

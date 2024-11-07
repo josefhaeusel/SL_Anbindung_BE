@@ -13,17 +13,23 @@ class ColorDetection:
         self.video = cv2.VideoCapture(self.videoPath)
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
 
-        self.total_pixels = self.frame_height * self.frame_width
+        self.rescale_factor = 0.25
+        self.rescaled_frame_width = int(self.frame_width*self.rescale_factor)
+        self.rescaled_frame_height = int(self.frame_height*self.rescale_factor)
+
+        self.total_rescaled_pixels = int(self.rescaled_frame_height * self.rescaled_frame_width)
         self.color_pixel_treshold = 0.5
         self.minimumMomentDuration = 0.5
-        self.lastFrameDetected = False
+        self.lastFineFrameDetected = False
 
         self.frameSearchSkip = self.fps*self.minimumMomentDuration 
         self.searchMode = 'rough'
+        self.currentMomentStart = 0
+        self.currentMomentEnd = 0
+
 
         magenta_hue = 328 / 2  # Convert degrees to OpenCV scale (0-180)
         magenta_tolerance = 10  # Adjust as needed
-
         self.lower_magenta = np.array([magenta_hue - magenta_tolerance, 50, 50])
         self.upper_magenta = np.array([magenta_hue + magenta_tolerance, 255, 255])
 
@@ -105,9 +111,7 @@ class ColorDetection:
     
     def detectMomentFine(self, magenta_ratio):
 
-        # Stability Value und Länge, um am Ende die erkannten Momente zu priorisieren
-
-        if self.lastFrameDetected:
+        if self.lastFineFrameDetected:
             if magenta_ratio >= self.color_pixel_treshold:
                 self.currentMomentEnd = self.getCurrentTime()
                 return True
@@ -127,18 +131,27 @@ class ColorDetection:
         else:
             if magenta_ratio >= self.color_pixel_treshold:
                 self.currentMomentStart =  self.getCurrentTime()
+                self.searchMode = 'rough'
                 return True
             else:
                 return False
 
     def detectedMomentsRough(self, magenta_ratio, next_frame):
 
-        if magenta_ratio >= self.color_pixel_treshold:
-            self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
-
-            return 'fine'
+        if (self.currentMomentStart):
+            if magenta_ratio <= self.color_pixel_treshold:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
+                return 'fine'
+            else:
+                return 'rough'
+            
         else:
-            return 'rough'
+            if magenta_ratio >= self.color_pixel_treshold:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
+
+                return 'fine'
+            else:
+                return 'rough'
 
     def detectMoments(self):
         isDetecting = True
@@ -154,40 +167,49 @@ class ColorDetection:
 
                 self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame)
                 ret, frame = self.video.retrieve()
+                resized_frame = cv2.resize(frame, (self.rescaled_frame_width, self.rescaled_frame_height))
 
                 if not ret:
                     break
 
-                mask = self.toMask(frame)
+                mask = self.toMask(resized_frame)
+
 
                 white_pixels = cv2.countNonZero(mask)
-                magenta_ratio = white_pixels / self.total_pixels
+                magenta_ratio = white_pixels / self.total_rescaled_pixels
 
                 if self.searchMode == 'rough':
                     self.searchMode = self.detectedMomentsRough(magenta_ratio, next_frame)
                 elif self.searchMode == 'fine':
-                    self.lastFrameDetected = self.detectMomentFine(magenta_ratio)
+                    self.lastFineFrameDetected = self.detectMomentFine(magenta_ratio)
 
+                ## End Condition
                 if self.getCurrentTime() >= self.duration_secs:
+                    
+                    if self.currentMomentStart:
+                        magenta_ratio = 0
+                        self.detectMomentFine(magenta_ratio)
+                        
                     isDetecting = False
+
 
                 if self.showVideoPlayer:
                     # bitMask = cv2.bitwise_and(frame, frame, mask=mask)
 
-                    message = f"Magenta Ratio: {magenta_ratio*100:.2f}%     Moment: {self.lastFrameDetected}    Number Moments: {len(self.detectedMoments)}"
+                    message = f"Magenta Ratio: {magenta_ratio*100:.2f}% | Moment: {self.lastFineFrameDetected} | Number Moments: {len(self.detectedMoments)}"
 
-                    cv2.putText(frame, message, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                            1, (255, 255, 0), 2, cv2.LINE_AA)
+                    cv2.putText(resized_frame, message, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
+                            (1.5*self.rescale_factor), (255, 255, 0), 1, cv2.LINE_AA)
                     
                     cv2.putText(mask, message, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                            1, (255, 255, 0), 2, cv2.LINE_AA)
+                            (1.5*self.rescale_factor), (255, 255, 0), 1, cv2.LINE_AA)
 
                     cv2.imshow('Bitmask', mask)
                     cv2.moveWindow('Bitmask', 0, 100)  # Position Bitmask window at (100, 100)
 
                     # cv2.imshow('Bitmask', bitMask)
-                    cv2.imshow('Video', frame)
-                    cv2.moveWindow('Video', 1000, 100)  # Position Video window to the right of Bitmask window
+                    cv2.imshow('Video', resized_frame)
+                    cv2.moveWindow('Video', 500, 100)  # Position Video window to the right of Bitmask window
 
 
                     if cv2.waitKey(1) == ord('q'):

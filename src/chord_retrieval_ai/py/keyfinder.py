@@ -83,6 +83,7 @@ class Tonal_Fragment(object):
     
     #Added by Josef
     def get_key_info(self):
+            
         key_info = {
             "likely_key": {"key":self.key, "correlation": self.bestcorr},
             # "correlation_table": self.sorted_keys,
