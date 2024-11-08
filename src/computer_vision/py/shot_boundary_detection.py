@@ -19,11 +19,12 @@ class ShotBoundaryDetection:
         self.rescaled_frame_height = int(self.frame_height*self.rescale_factor)
 
         self.total_rescaled_pixels = int(self.rescaled_frame_height * self.rescaled_frame_width)
-        self.delta_threshold = -0.4
+        self.delta_threshold = -0.3
         self.minimumMomentDuration = 0.5
         self.lastFineFrameDetected = False
 
-        self.frameSearchSkip = self.fps*self.minimumMomentDuration 
+        self.current_frame_pos = 0
+        self.frameSearchSkip = self.fps*self.minimumMomentDuration
         self.searchMode = 'rough'
         self.currentMomentStart = 0
         self.currentMomentEnd = 0
@@ -58,16 +59,17 @@ class ShotBoundaryDetection:
         return fps, total_frames, duration_secs, frame_width, frame_height
 
 
-    def makeMomentDict(self, startTime, endTime, delta_score):
+    def makeMomentDict(self, delta_score):
 
         momentDict = {
             "name": None,
-            "startTime": startTime,
-            "endTime": endTime,
-            "length": (endTime-startTime),
+            "startTime": self.currentMomentStart,
+            "endTime": self.currentMomentEnd,
+            "length": (self.currentMomentEnd-self.currentMomentStart),
             "delta_score": delta_score,
             "active": False,
-            "id": len(self.detectedMoments)
+            "id": len(self.detectedMoments),
+            "frame": self.current_frame_pos,
         }
 
         return momentDict
@@ -84,7 +86,7 @@ class ShotBoundaryDetection:
 
 
     def addMoment(self, delta_score):
-        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd, delta_score)
+        moment = self.makeMomentDict(delta_score)
         moment['name'] = self.chooseRandomMoment(moment)
         self.detectedMoments.append(moment)
         if self.showVideoPlayer:
@@ -109,44 +111,44 @@ class ShotBoundaryDetection:
 
                 self.currentMomentStart = 0
                 self.currentMomentEnd = 0
+                if self.showVideoPlayer:
+                    print("Returning to ROUGH", self.current_frame_pos)
                 return 'rough'
             else:
+                if self.showVideoPlayer:
+                    print("fine", self.current_frame_pos)
                 return 'fine'
 
-    def detectedMomentsRough(self, delta_score, current_frame_pos):
+    def detectedMomentsRough(self, delta_score):
 
-        if (self.currentMomentStart):
+    
             if delta_score <= self.delta_threshold:
-                self.video.set(cv2.CAP_PROP_POS_FRAMES, current_frame_pos - self.frameSearchSkip)
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_pos - self.frameSearchSkip)
+                if self.showVideoPlayer:
+                    print("Changing to FINE from", self.current_frame_pos, self.current_frame_pos - self.frameSearchSkip)
                 return 'fine'
             else:
-                return 'rough'
-            
-        else:
-            if delta_score >= self.delta_threshold:
-                self.video.set(cv2.CAP_PROP_POS_FRAMES, current_frame_pos - self.frameSearchSkip)
-
-                return 'fine'
-            else:
+                if self.showVideoPlayer:
+                    print("rough", self.current_frame_pos)
                 return 'rough'
 
 
     def detectMoments(self):
         isDetecting = True
         previous_score = 1
-        self.video.set(cv2.CAP_PROP_POS_FRAMES, 1)
+        self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_pos)
         prev_ret, prev_frame = self.video.read()
 
         while isDetecting:
             try:
-                current_frame_pos = self.video.get(cv2.CAP_PROP_POS_FRAMES)
+                self.current_frame_pos = self.video.get(cv2.CAP_PROP_POS_FRAMES)
 
                 if self.searchMode == 'rough':
-                    current_frame_pos = current_frame_pos + self.frameSearchSkip
-                elif self.searchMode == 'fine':
-                    current_frame_pos = current_frame_pos + 1
+                    self.current_frame_pos = self.current_frame_pos + self.frameSearchSkip
+                else:
+                    self.current_frame_pos = self.current_frame_pos + 1
 
-                self.video.set(cv2.CAP_PROP_POS_FRAMES, current_frame_pos)
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_pos)
                 ret, current_frame = self.video.retrieve()
                 resized_prev_frame = cv2.resize(prev_frame, (self.rescaled_frame_width, self.rescaled_frame_height))
                 resized_current_frame = cv2.resize(current_frame, (self.rescaled_frame_width, self.rescaled_frame_height))
@@ -168,11 +170,12 @@ class ShotBoundaryDetection:
                 delta_score = current_score - previous_score # Previous Scores Mean Value?
 
                 if self.searchMode == 'rough':
-                    self.searchMode = self.detectedMomentsRough(delta_score, current_frame_pos)
-                elif self.searchMode == 'fine':
+                    self.searchMode = self.detectedMomentsRough(delta_score)
+                else:
                     self.searchMode = self.detectMomentFine(delta_score)
 
                 prev_frame = current_frame
+                previous_score = current_score
 
                 if self.getCurrentTime() >= self.duration_secs:     
                     isDetecting = False
