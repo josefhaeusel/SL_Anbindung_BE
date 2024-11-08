@@ -2,7 +2,7 @@
 
 # First start mysql from dockertest-run-mysql.cmd
 # Maybe pull new registry via pullRegistry.sh
-
+# IP Adress used in DB_HOST is: docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' soundlogotool-mysql
 docker stop sound-logo-tool
 docker rm sound-logo-tool
 
