@@ -72,9 +72,11 @@ class ColorDetection:
 
         momentDict = {
             "name": None,
+            "type": "magenta",
             "startTime": startTime,
             "endTime": endTime,
             "length": (endTime-startTime),
+            "faces": {"detected": False},
             "active": False,
             "id": len(self.detectedMoments)
         }
