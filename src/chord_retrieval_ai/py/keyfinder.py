@@ -52,6 +52,9 @@ class Tonal_Fragment(object):
         # this attribute represents the key determined by the algorithm
         self.key = max(self.key_dict, key=self.key_dict.get)
         self.bestcorr = max(self.key_dict.values())
+        if np.isnan(self.bestcorr):
+            self.bestcorr = None
+
         self.sorted_keys = sorted(self.key_dict.items(), key=lambda item: item[1], reverse=True)
         
         # this attribute represents the second-best key determined by the algorithm,
@@ -63,6 +66,8 @@ class Tonal_Fragment(object):
             if corr > self.bestcorr*0.8 and corr != self.bestcorr:
                 self.altkey = key
                 self.altbestcorr = corr
+                if np.isnan(self.altbestcorr):
+                    self.altbestcorr = None
    
     # prints the relative prominence of each pitch class            
     def print_chroma(self):

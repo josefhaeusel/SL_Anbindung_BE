@@ -21,7 +21,7 @@ class ShotBoundaryDetection:
         self.rescaled_frame_height = int(self.frame_height*self.rescale_factor)
 
         self.total_rescaled_pixels = int(self.rescaled_frame_height * self.rescaled_frame_width)
-        self.delta_threshold = -0.3
+        self.delta_threshold = -0.25
         self.minimumMomentDuration = 0.5
         self.lastFineFrameDetected = False
         self.face_detected = False
