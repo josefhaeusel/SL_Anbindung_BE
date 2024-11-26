@@ -73,8 +73,12 @@ class MomentMatcher(object):
             spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)
             mfcc_similarity = self.getMFCCScore(moment_y, moment_sr)
 
-            score = ((1/spectral_flatness_similarity)+(mfcc_similarity))/2
-            similarity_score = {"name": key, "score": spectral_flatness_similarity}
+            score = ((mfcc_similarity)+(spectral_flatness_similarity))/2
+            similarity_score = {"name": key, "score": score,
+                                "flatness": spectral_flatness_similarity,
+                                "mfcc": mfcc_similarity
+                                  }
+            # print(similarity_score)
             similarity_scores.append(similarity_score)
 
         similarity_scores = sorted(similarity_scores, key=lambda x: x["score"], reverse=True)

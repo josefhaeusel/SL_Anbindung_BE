@@ -6,12 +6,15 @@ import json
 import time
 
 class ShotBoundaryDetection:
-    def __init__(self, videoPath, showVideoPlayer=False):
+    def __init__(self, videoPath, colorDetectionMoments, showVideoPlayer=False):
 
         self.moments_config = self.loadMomentsConfig()
 
         self.videoPath = videoPath
         self.showVideoPlayer = showVideoPlayer
+        self.colorDetectionMoments = colorDetectionMoments
+        self.checkExistingMomentId = 0
+
         self.video = cv2.VideoCapture(self.videoPath)
         self.face_cascade= self.loadCascades()
         self.fps, self.total_frames, self.duration_secs, self.frame_width, self.frame_height = self.getVideoProperties()
@@ -72,7 +75,6 @@ class ShotBoundaryDetection:
         frame_height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         return fps, total_frames, duration_secs, frame_width, frame_height
 
-
     def makeMomentDict(self, delta_score, face_detected, faces):
 
         momentDict = {
@@ -80,12 +82,14 @@ class ShotBoundaryDetection:
             "type": "cut",
             "startTime": self.currentMomentStart,
             "endTime": self.currentMomentEnd,
-            "length": (self.currentMomentEnd - self.currentMomentStart),
-            "delta_score": delta_score,
-            "faces": { "detected": face_detected, "faces": faces},
+            "length": round(self.currentMomentEnd - self.currentMomentStart, 3),
+            "delta_score": round(delta_score,3),
+            "faces": { "detected": face_detected,
+                      #"faces": faces
+                      },
             # "faces": {"detected": False},
             "active": False,
-            "id": len(self.detectedMoments),
+            "id": len(self.detectedMoments)+len(self.colorDetectionMoments["detected_moments"]),
             "frame": self.current_frame_pos,
         }
 
@@ -167,6 +171,23 @@ class ShotBoundaryDetection:
                 if self.showVideoPlayer:
                     print("rough", self.current_frame_pos)
                 return 'rough'
+            
+    def skipDetectedMoments(self):
+
+        moment = self.colorDetectionMoments["detected_moments"][self.checkExistingMomentId]
+        currentTime = self.getCurrentTime()
+        
+        if currentTime>=moment["endTime"] and not (self.checkExistingMomentId > (len(self.colorDetectionMoments["detected_moments"])-1)):
+            self.checkExistingMomentId += 1
+            moment = self.colorDetectionMoments["detected_moments"][self.checkExistingMomentId]
+
+        if currentTime >= moment["startTime"] and currentTime <= moment["endTime"]:
+
+            skip_to_frame = int((moment["endTime"]+1)*self.fps)
+
+            return skip_to_frame
+        else:
+            return self.current_frame_pos
 
 
     def detectMoments(self):
@@ -181,6 +202,8 @@ class ShotBoundaryDetection:
 
                 if self.searchMode == 'rough':
                     self.current_frame_pos = self.current_frame_pos + self.frameSearchSkip
+                    if self.colorDetectionMoments["detected_moments"]:
+                        self.current_frame_pos = self.skipDetectedMoments()
                 else:
                     self.current_frame_pos = self.current_frame_pos + 1
 

@@ -75,7 +75,7 @@ class ColorDetection:
             "type": "magenta",
             "startTime": startTime,
             "endTime": endTime,
-            "length": (endTime-startTime),
+            "length": round(endTime-startTime, 3),
             "faces": {"detected": False},
             "active": False,
             "id": len(self.detectedMoments)
