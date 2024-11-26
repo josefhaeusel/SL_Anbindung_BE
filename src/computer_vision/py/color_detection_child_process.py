@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, os
 from color_detection import ColorDetection
 from shot_boundary_detection import ShotBoundaryDetection
 
@@ -9,10 +9,19 @@ if len(sys.argv) > 1:
     # cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
     # color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
 
+
+
+    temp_dir = os.path.dirname(video_path)
+    analysis_json_path = os.path.join(temp_dir, "analysis.json")
+
     response = {
         "analyzed_video": video_path,
         "analysis": color_detection_analysis,
+        "analysis_path": analysis_json_path
     }
+
+    with open(analysis_json_path, 'w') as json_file:
+        json.dump(response, json_file)
     
     print(json.dumps(response))
 
