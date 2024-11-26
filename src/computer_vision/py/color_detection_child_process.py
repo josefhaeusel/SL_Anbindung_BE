@@ -6,8 +6,8 @@ if len(sys.argv) > 1:
     video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
 
     color_detection_analysis = ColorDetection(video_path, False).detectMoments()
-    cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
-    color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
+    # cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
+    # color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
 
     response = {
         "analyzed_video": video_path,

@@ -12,7 +12,8 @@ import soundfile
 if len(sys.argv) > 1:
     try:
         audio_path = sys.argv[1]
-        magenta_moments = sys.argv[2]
+        magenta_moments_json = sys.argv[2]
+        magenta_moments = json.loads(magenta_moments_json)
 
         y, sr = librosa.load(audio_path)
         duration = librosa.get_duration(y=y, sr=sr) # Duration of the split .aac file (from Phase "Splitting Audio from Video") !Not length of appended animation!
