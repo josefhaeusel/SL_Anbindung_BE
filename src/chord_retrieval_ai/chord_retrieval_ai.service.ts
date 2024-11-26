@@ -78,10 +78,16 @@ export class ChordRetrievalAiService {
         [pythonPath, songPath, magentaMoments],
         { env: process.env },
       )
+      let stdoutData = ''
 
       pythonProcess.stdout.on('data', (data) => {
+        stdoutData += data.toString() // Append data chunks
+        this.logger.log("Data Chunk:",stdoutData)
+      })
+
+      pythonProcess.stdout.on('close', () => {
         try {
-          const result = JSON.parse(data.toString())
+          const result = JSON.parse(stdoutData)
           resolve(result)
         } catch (error) {
           this.logger.error('error:', error)

@@ -13,9 +13,14 @@ if len(sys.argv) > 1:
     try:
         audio_path = sys.argv[1]
         magenta_moments_json = sys.argv[2]
-        # magenta_moments = json.loads(magenta_moments_json)
-        with open(magenta_moments_json, 'r') as openfile:
-            magenta_moments = json.load(openfile)
+
+        with open(magenta_moments_json, 'r', encoding='utf-8') as openfile:
+            content = ""
+            for line in openfile:
+                content += line
+            analysis = json.loads(content)
+            magenta_moments = analysis["analysis"]["detected_moments"]
+
 
 
         y, sr = librosa.load(audio_path)
