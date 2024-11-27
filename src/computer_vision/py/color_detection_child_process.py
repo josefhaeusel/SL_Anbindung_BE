@@ -2,6 +2,24 @@ import sys, json, os
 from color_detection import ColorDetection
 from shot_boundary_detection import ShotBoundaryDetection
 
+# def filterMoments(color_detection_analysis):
+    
+#     keep_moments = []
+#     dropped_out_moments = []
+
+#     for moment in enumerate(color_detection_analysis["detected_moments"]):
+#        if moment["id"] != 0:
+           
+#            if (moment["startTime"] - prev_moment["startTime"]) <= 5:
+              
+               
+#        # print("yo")
+
+#        else:
+#             prev_moment = moment
+
+#     return keep_moments, dropped_out_moments
+
 if len(sys.argv) > 1:
     video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
 
@@ -9,7 +27,9 @@ if len(sys.argv) > 1:
     cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
     color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
 
-
+    # keep_moments, drop_out_moments = filterMoments(color_detection_analysis)
+    # color_detection_analysis["detected_moments"] = keep_moments
+    # color_detection_analysis["dropped_out_moments"].extend(drop_out_moments)
 
     temp_dir = os.path.dirname(video_path)
     analysis_json_path = os.path.join(temp_dir, "analysis.json")
