@@ -24,7 +24,7 @@ class ShotBoundaryDetection:
         self.rescaled_frame_height = int(self.frame_height*self.rescale_factor)
 
         self.total_rescaled_pixels = int(self.rescaled_frame_height * self.rescaled_frame_width)
-        self.delta_threshold = -0.25
+        self.delta_threshold = -0.2
         self.minimumMomentDuration = 0.5
         self.lastFineFrameDetected = False
         self.face_detected = False
@@ -161,7 +161,6 @@ class ShotBoundaryDetection:
 
     def detectedMomentsRough(self, delta_score):
 
-    
             if delta_score <= self.delta_threshold:
                 self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_pos - self.frameSearchSkip)
                 if self.showVideoPlayer:
@@ -195,6 +194,9 @@ class ShotBoundaryDetection:
         previous_score = 1
         self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_pos)
         prev_ret, prev_frame = self.video.read()
+        resized_prev_frame = cv2.resize(prev_frame, (self.rescaled_frame_width, self.rescaled_frame_height))
+        prev_v = cv2.cvtColor(resized_prev_frame, cv2.COLOR_BGR2GRAY)
+
 
         while isDetecting:
             try:
@@ -202,7 +204,7 @@ class ShotBoundaryDetection:
 
                 if self.searchMode == 'rough':
                     self.current_frame_pos = self.current_frame_pos + self.frameSearchSkip
-                    if self.colorDetectionMoments["detected_moments"]:
+                    if self.checkExistingMomentId<len(self.colorDetectionMoments["detected_moments"])-1:
                         self.current_frame_pos = self.skipDetectedMoments()
                 else:
                     self.current_frame_pos = self.current_frame_pos + 1
@@ -215,17 +217,20 @@ class ShotBoundaryDetection:
                 if not ret:
                     break
 
-                prev_hsv = cv2.cvtColor(resized_prev_frame, cv2.COLOR_BGR2HSV)
-                current_hsv = cv2.cvtColor(resized_current_frame, cv2.COLOR_BGR2HSV)
+                # prev_hsv = cv2.cvtColor(resized_prev_frame, cv2.COLOR_BGR2HSV)
+                # current_hsv = cv2.cvtColor(resized_current_frame, cv2.COLOR_BGR2HSV)
 
-                prev_h, prev_s, prev_v = cv2.split(prev_hsv)
-                current_h, current_s, current_v = cv2.split(current_hsv)
+                # prev_h, prev_s, prev_v = cv2.split(prev_hsv)
+                # current_h, current_s, current_v = cv2.split(current_hsv)
+                current_v = cv2.cvtColor(resized_current_frame, cv2.COLOR_BGR2GRAY)
 
-                score_h, _ = ssim(prev_h, current_h, full=True)
-                score_s, _ = ssim(prev_s, current_s, full=True)
-                score_v, _ = ssim(prev_v, current_v, full=True)
 
-                current_score = (score_h + score_s + score_v) / 3
+                # score_h, _ = ssim(prev_h, current_h, full=True)
+                # score_s, _ = ssim(prev_s, current_s, full=True)
+                # score_v, _ = ssim(prev_v, current_v, full=True)
+                current_score, _ = ssim(prev_v, current_v, full=True)
+
+                # current_score = (score_h + score_s + score_v) / 3
                 delta_score = current_score - previous_score # Previous Scores Mean Value?
 
                 if self.searchMode == 'rough':
@@ -234,6 +239,7 @@ class ShotBoundaryDetection:
                     self.searchMode = self.detectMomentFine(delta_score, current_frame)
 
                 prev_frame = current_frame
+                prev_v = current_v
                 previous_score = current_score
 
                 if self.getCurrentTime() >= self.duration_secs:     

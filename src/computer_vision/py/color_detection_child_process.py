@@ -2,14 +2,22 @@ import sys, json, os
 from color_detection import ColorDetection
 from shot_boundary_detection import ShotBoundaryDetection
 
+LOGGING = False
+
 def filterMoments(color_detection_analysis, video_path):
     
     _, _, videoDuration, _, _ = ColorDetection(video_path, False).getVideoProperties()
     momentIntervalSecs = 5
-    analysisWindowStart = 0 
+    # Noch nach niedrigster Startzeit synchronisieren
+    firstMoment = min(color_detection_analysis["detected_moments"], key=lambda moment: moment["startTime"])
+    analysisWindowStart = firstMoment["startTime"]
     analysisWindowEnd = analysisWindowStart + momentIntervalSecs
     keepMoments = []
     droppedOutMoments = []
+
+    if LOGGING:
+        print("FIRST MOMENT", firstMoment)
+        print("ANALYSIS START", analysisWindowStart)
 
     while analysisWindowStart <= videoDuration:
 
@@ -20,39 +28,54 @@ def filterMoments(color_detection_analysis, video_path):
             if moment["startTime"] >= analysisWindowStart and moment["startTime"] <= analysisWindowEnd:
                 momentsInWindow.append(moment)
 
-        if len(momentsInWindow) <= 1:
+        if len(momentsInWindow) == 0:
+            analysisWindowStart += momentIntervalSecs
+            analysisWindowEnd += momentIntervalSecs
+        elif len(momentsInWindow) == 1:
             keepMoments.extend(momentsInWindow)
+            analysisWindowStart = keepMoments[-1]["startTime"]+momentIntervalSecs 
+            analysisWindowEnd = analysisWindowStart+momentIntervalSecs
+
         else:
 
             while len(momentsInWindow) > 1:
-                # print("Second Loop", momentsInWindow)
-                magentaAndCuts = any(moment["type"] in {"magenta", "cut"} for moment in momentsInWindow)
+                if LOGGING: 
+                    print("\nSecond Loop", momentsInWindow) 
                 allMagenta = all(moment["type"] == "magenta" for moment in momentsInWindow)
                 allCuts = all(moment["type"] == "cut" for moment in momentsInWindow)
+                anyMagenta = any(moment["type"] == "magenta" for moment in momentsInWindow)
+                anyCuts= any(moment["type"] == "cut" for moment in momentsInWindow)
 
-                if magentaAndCuts:
+                if anyMagenta and anyCuts:
                     dropMoments = [moment for moment in momentsInWindow if moment["type"] == "cut"]
                     droppedOutMoments.extend(dropMoments)
                     momentsInWindow = [moment for moment in momentsInWindow if moment["type"] == "magenta"]
 
+                    if LOGGING: 
+                        print("\nmagentaAndCuts", momentsInWindow) 
+
                 if allMagenta:
-                    highestScoreMoment = max(momentsInWindow, key=lambda moment: moment["magenta_ratio"])
+                    highestScoreMoment = max(momentsInWindow, key=lambda moment: (moment["relevance"]))
                     dropMoments = [moment for moment in momentsInWindow if moment != highestScoreMoment]
                     droppedOutMoments.extend(dropMoments)
                     momentsInWindow = [highestScoreMoment]
 
+                    if LOGGING: 
+                        print("\nallMagenta", momentsInWindow) 
+
                 if allCuts:
-                    highestDeltaCut = max(momentsInWindow, key=lambda moment: abs(moment["delta_score"]))
+                    highestDeltaCut = min(momentsInWindow, key=lambda moment: moment["delta_score"])
                     dropMoments = [moment for moment in momentsInWindow if moment != highestDeltaCut]
                     droppedOutMoments.extend(dropMoments)
                     momentsInWindow = [highestDeltaCut]
+
+                    if LOGGING: 
+                        print("\nallCuts", momentsInWindow) 
             
             keepMoments.extend(momentsInWindow)
+            analysisWindowStart = keepMoments[-1]["startTime"]+momentIntervalSecs 
+            analysisWindowEnd = analysisWindowStart+momentIntervalSecs
 
-        analysisWindowStart += momentIntervalSecs
-        analysisWindowEnd += momentIntervalSecs
-
-        # print("End first Loop", keepMoments, droppedOutMoments)
 
     for i, moment in enumerate(keepMoments):
         keepMoments[i]["id"] = i
@@ -60,39 +83,53 @@ def filterMoments(color_detection_analysis, video_path):
     return keepMoments, droppedOutMoments
 
 
+try:
+    if len(sys.argv) > 1:
 
-if len(sys.argv) > 1:
-    video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
+        video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
 
-    color_detection_analysis = ColorDetection(video_path, False).detectMoments()
-    # print(color_detection_analysis)
-    cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
-    # print(cut_analysis)
-    color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
+        color_detection_analysis = ColorDetection(video_path, False).detectMoments()
+        if LOGGING:  
+            print("\nCOLOR DETECTION",color_detection_analysis)
+        cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
+        if LOGGING:
+            print("\nCUT ANALYSIS",cut_analysis)
+        color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
+        if LOGGING:
+            print("\nCOLOR + CUT ANALYSIS",color_detection_analysis)
 
-    keep_moments, drop_out_moments = filterMoments(color_detection_analysis, video_path)
-    color_detection_analysis["detected_moments"] = keep_moments
-    color_detection_analysis["dropped_out_moments"].extend(drop_out_moments)
+        keep_moments, drop_out_moments = filterMoments(color_detection_analysis, video_path)
+        color_detection_analysis["detected_moments"] = keep_moments
+        color_detection_analysis["dropped_out_moments"].extend(drop_out_moments)
 
-    temp_dir = os.path.dirname(video_path)
-    analysis_json_path = os.path.join(temp_dir, "analysis.json")
+        if LOGGING:
+            print("\nKEEP MOMENTS",keep_moments)
 
-    response = {
-        "analyzed_video": video_path,
-        "analysis": color_detection_analysis,
-        "analysis_path": analysis_json_path
-    }
 
-    with open(analysis_json_path, 'w') as json_file:
-        json.dump(response, json_file)
-    
-    print(json.dumps(response))
+        temp_dir = os.path.dirname(video_path)
+        analysis_json_path = os.path.join(temp_dir, "analysis.json")
 
-    sys.stdout.flush()
+        response = {
+            "analyzed_video": video_path,
+            "analysis": color_detection_analysis,
+            "analysis_path": analysis_json_path
+        }
 
-else:
-    
-    print("Please provide the video path as an argument.")
+        with open(analysis_json_path, 'w') as json_file:
+            json.dump(response, json_file)
+        
+        print(json.dumps(response))
+
+        sys.stdout.flush()
+
+    else:
+        
+        print("Please provide the video path as an argument.")
+
+except:
+
+    print("ERROR")
+
 
 
 

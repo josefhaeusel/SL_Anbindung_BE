@@ -24,6 +24,7 @@ class ColorDetection:
 
         self.frameSearchSkip = self.fps*self.minimumMomentDuration 
         self.searchMode = 'rough'
+        self.magenta_ratios = []
         self.currentMomentStart = 0
         self.currentMomentEnd = 0
 
@@ -70,13 +71,17 @@ class ColorDetection:
     
     def makeMomentDict(self, startTime, endTime, magenta_ratio):
 
+        length = round(endTime-startTime, 3)
+        relevance = round((magenta_ratio+0.5*length)/2, 3)
+
         momentDict = {
             "name": None,
             "type": "magenta",
             "startTime": startTime,
             "endTime": endTime,
-            "length": round(endTime-startTime, 3),
+            "length": length,
             "magenta_ratio": magenta_ratio,
+            "relevance":  relevance,
             "faces": {"detected": False},
             "active": False,
             "id": len(self.detectedMoments)
@@ -117,18 +122,21 @@ class ColorDetection:
         if self.lastFineFrameDetected:
             if magenta_ratio >= self.color_pixel_treshold:
                 self.currentMomentEnd = self.getCurrentTime()
+                self.magenta_ratios.append(magenta_ratio)
                 return True
             else:
                 self.currentMomentEnd = self.getCurrentTime()
+                mean_magenta_ratio = sum(self.magenta_ratios) / len(self.magenta_ratios)
 
                 if (self.currentMomentEnd - self.currentMomentStart) >= self.minimumMomentDuration:
-                    self.addMoment(magenta_ratio)
+                    self.addMoment(mean_magenta_ratio)
                 else:
-                    self.dropMoment(magenta_ratio)
+                    self.dropMoment(mean_magenta_ratio)
 
                 self.currentMomentStart = 0
                 self.currentMomentEnd = 0
                 self.searchMode = 'rough'
+                self.magenta_ratios = []
 
                 return False
         else:
@@ -151,7 +159,7 @@ class ColorDetection:
         else:
             if magenta_ratio >= self.color_pixel_treshold:
                 self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
-
+                self.magenta_ratios.append(magenta_ratio)
                 return 'fine'
             else:
                 return 'rough'
@@ -190,8 +198,7 @@ class ColorDetection:
                 if self.getCurrentTime() >= self.duration_secs:
                     
                     if self.currentMomentStart:
-                        magenta_ratio = 0
-                        self.detectMomentFine(magenta_ratio)
+                        self.dropMoment(magenta_ratio)
                         
                     isDetecting = False
 

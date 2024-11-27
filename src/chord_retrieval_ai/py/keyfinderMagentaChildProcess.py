@@ -43,12 +43,12 @@ if len(sys.argv) > 1:
             for moment in magenta_moments:
 
                 if moment["type"] == "cut":
-                    moment_start=librosa.time_to_samples(float(moment["startTime"])-0.5, sr=sr)
-                    moment_end=librosa.time_to_samples(float(moment["startTime"])+0.5, sr=sr)
+                    moment_start=librosa.time_to_samples(max(float(moment["startTime"])-1, 0), sr=sr)
+                    moment_end=librosa.time_to_samples(min(float(moment["startTime"])+0.5, duration), sr=sr)
                     y_segment = y[moment_start:moment_end]
                 elif moment["type"] == "magenta":
-                    moment_start=librosa.time_to_samples(float(moment["startTime"]), sr=sr)
-                    moment_end=librosa.time_to_samples(float(moment["endTime"]), sr=sr)
+                    moment_start=librosa.time_to_samples(max(float(moment["startTime"]-1),0), sr=sr)
+                    moment_end=librosa.time_to_samples(min(float(moment["startTime"]+0.5), duration), sr=sr)
                     y_segment = y[moment_start:moment_end]
        
                 y_harmonic, y_percussive = librosa.effects.hpss(y_segment)

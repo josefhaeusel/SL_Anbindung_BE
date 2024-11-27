@@ -5,7 +5,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 videos = ["T_outro_hard_cut_16_9_hd_preview.mp4", "dream_job.mp4", "em.mp4"]
 videoPath= f"{script_dir}/test/{videos[1]}"
 
-magenta_moments = ShotBoundaryDetection(videoPath, True).detectMoments()
+magenta_moments = ShotBoundaryDetection(videoPath, {"detected_moments": []}, True).detectMoments()
 print("Magenta Moments", magenta_moments)
 
 # results = []
