@@ -2,34 +2,77 @@ import sys, json, os
 from color_detection import ColorDetection
 from shot_boundary_detection import ShotBoundaryDetection
 
-# def filterMoments(color_detection_analysis):
+def filterMoments(color_detection_analysis, video_path):
     
-#     keep_moments = []
-#     dropped_out_moments = []
+    _, _, videoDuration, _, _ = ColorDetection(video_path, False).getVideoProperties()
+    momentIntervalSecs = 5
+    analysisWindowStart = 0 
+    analysisWindowEnd = analysisWindowStart + momentIntervalSecs
+    keepMoments = []
+    droppedOutMoments = []
 
-#     for moment in enumerate(color_detection_analysis["detected_moments"]):
-#        if moment["id"] != 0:
-           
-#            if (moment["startTime"] - prev_moment["startTime"]) <= 5:
-              
-               
-#        # print("yo")
+    while analysisWindowStart <= videoDuration:
 
-#        else:
-#             prev_moment = moment
+        momentsInWindow = []
 
-#     return keep_moments, dropped_out_moments
+        for moment in color_detection_analysis["detected_moments"]:
+            
+            if moment["startTime"] >= analysisWindowStart and moment["startTime"] <= analysisWindowEnd:
+                momentsInWindow.append(moment)
+
+        if len(momentsInWindow) <= 1:
+            keepMoments.extend(momentsInWindow)
+        else:
+
+            while len(momentsInWindow) > 1:
+                # print("Second Loop", momentsInWindow)
+                magentaAndCuts = any(moment["type"] in {"magenta", "cut"} for moment in momentsInWindow)
+                allMagenta = all(moment["type"] == "magenta" for moment in momentsInWindow)
+                allCuts = all(moment["type"] == "cut" for moment in momentsInWindow)
+
+                if magentaAndCuts:
+                    dropMoments = [moment for moment in momentsInWindow if moment["type"] == "cut"]
+                    droppedOutMoments.extend(dropMoments)
+                    momentsInWindow = [moment for moment in momentsInWindow if moment["type"] == "magenta"]
+
+                if allMagenta:
+                    highestScoreMoment = max(momentsInWindow, key=lambda moment: moment["magenta_ratio"])
+                    dropMoments = [moment for moment in momentsInWindow if moment != highestScoreMoment]
+                    droppedOutMoments.extend(dropMoments)
+                    momentsInWindow = [highestScoreMoment]
+
+                if allCuts:
+                    highestDeltaCut = max(momentsInWindow, key=lambda moment: abs(moment["delta_score"]))
+                    dropMoments = [moment for moment in momentsInWindow if moment != highestDeltaCut]
+                    droppedOutMoments.extend(dropMoments)
+                    momentsInWindow = [highestDeltaCut]
+            
+            keepMoments.extend(momentsInWindow)
+
+        analysisWindowStart += momentIntervalSecs
+        analysisWindowEnd += momentIntervalSecs
+
+        # print("End first Loop", keepMoments, droppedOutMoments)
+
+    for i, moment in enumerate(keepMoments):
+        keepMoments[i]["id"] = i
+
+    return keepMoments, droppedOutMoments
+
+
 
 if len(sys.argv) > 1:
     video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
 
     color_detection_analysis = ColorDetection(video_path, False).detectMoments()
+    # print(color_detection_analysis)
     cut_analysis = ShotBoundaryDetection(video_path, color_detection_analysis, False).detectMoments()
+    # print(cut_analysis)
     color_detection_analysis["detected_moments"].extend(cut_analysis["detected_moments"])
 
-    # keep_moments, drop_out_moments = filterMoments(color_detection_analysis)
-    # color_detection_analysis["detected_moments"] = keep_moments
-    # color_detection_analysis["dropped_out_moments"].extend(drop_out_moments)
+    keep_moments, drop_out_moments = filterMoments(color_detection_analysis, video_path)
+    color_detection_analysis["detected_moments"] = keep_moments
+    color_detection_analysis["dropped_out_moments"].extend(drop_out_moments)
 
     temp_dir = os.path.dirname(video_path)
     analysis_json_path = os.path.join(temp_dir, "analysis.json")

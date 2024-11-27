@@ -68,7 +68,7 @@ class ColorDetection:
         mask = cv2.inRange(hsv_frame, self.lower_magenta, self.upper_magenta)
         return mask
     
-    def makeMomentDict(self, startTime, endTime):
+    def makeMomentDict(self, startTime, endTime, magenta_ratio):
 
         momentDict = {
             "name": None,
@@ -76,6 +76,7 @@ class ColorDetection:
             "startTime": startTime,
             "endTime": endTime,
             "length": round(endTime-startTime, 3),
+            "magenta_ratio": magenta_ratio,
             "faces": {"detected": False},
             "active": False,
             "id": len(self.detectedMoments)
@@ -94,15 +95,15 @@ class ColorDetection:
         #     return 'direct_impact'
 
 
-    def addMoment(self):
-        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
+    def addMoment(self, magenta_ratio):
+        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd, magenta_ratio)
         moment['name'] = self.chooseRandomMoment(moment)
         self.detectedMoments.append(moment)
         if self.showVideoPlayer:
             print("Added:", moment)
         
-    def dropMoment(self):
-        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd)
+    def dropMoment(self, magenta_ratio):
+        moment = self.makeMomentDict(self.currentMomentStart, self.currentMomentEnd, magenta_ratio)
         self.droppedOutMoments.append(moment)
         if self.showVideoPlayer:
             print("Dropped out:", moment)
@@ -121,9 +122,9 @@ class ColorDetection:
                 self.currentMomentEnd = self.getCurrentTime()
 
                 if (self.currentMomentEnd - self.currentMomentStart) >= self.minimumMomentDuration:
-                    self.addMoment()
+                    self.addMoment(magenta_ratio)
                 else:
-                    self.dropMoment()
+                    self.dropMoment(magenta_ratio)
 
                 self.currentMomentStart = 0
                 self.currentMomentEnd = 0
