@@ -3,11 +3,10 @@ import librosa
 import librosa.display
 import os, json
 from sklearn.metrics.pairwise import cosine_similarity
-from librosa.segment import cross_similarity
+
 # mfcc vektoren von oneshots vorkalkulieren und abspeichern
 # die hierarchie der matches sortiert in interface abbilden
-
-# zuerst similarity probieren, dann pre-trained model in betracht ziehen, da similarity nicht immer Sinn macht (bestmögliche matches antrainieren)
+# Tonal mit Noise gegenmatchen
 
 class MomentMatcher(object):
     def __init__(self, waveform, sr):
@@ -44,8 +43,6 @@ class MomentMatcher(object):
         return float(similarity[0][0])
 
 
-
-
     def getSpectralFlatnessScore(self, moment_y ):
         
         min_columns = self.feature.shape[1]
@@ -73,11 +70,12 @@ class MomentMatcher(object):
             spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)
             mfcc_similarity = self.getMFCCScore(moment_y, moment_sr)
 
+            # score = ((mfcc_similarity)+(spectral_flatness_similarity))/2
             score = ((mfcc_similarity)+(spectral_flatness_similarity))/2
-            similarity_score = {"name": key, "score": score,
-                                "flatness": spectral_flatness_similarity,
-                                "mfcc": mfcc_similarity
-                                  }
+
+            similarity_score = {"name": key, "score": round(score,3),
+                                "flatness": round(spectral_flatness_similarity,3),
+                                "mfcc": round(mfcc_similarity,3)}
             # print(similarity_score)
             similarity_scores.append(similarity_score)
 

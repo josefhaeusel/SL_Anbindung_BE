@@ -86,8 +86,10 @@ def filterMoments(color_detection_analysis, video_path):
 try:
     if len(sys.argv) > 1:
 
+        
         video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
-
+        if LOGGING: 
+            print("\nStarting Detection...")
         color_detection_analysis = ColorDetection(video_path, False).detectMoments()
         if LOGGING:  
             print("\nCOLOR DETECTION",color_detection_analysis)

@@ -8,6 +8,64 @@ import numpy as np
 import matplotlib
 import soundfile
 
+LOGGING = False
+
+def getID(selectedName, similarityScores):
+
+    for i, score in enumerate(similarityScores):
+        if score["name"] == selectedName:
+            return i
+
+def avoidRepetition(moments):
+
+    selectedNames = [moment["name"] for moment in moments]
+    # anyRepetition = True
+    if LOGGING:
+        print("selectedNames",selectedNames)
+
+    for i, _ in enumerate(selectedNames):
+        if LOGGING:
+            print("U",i)
+        if i < (len(selectedNames)-2):
+
+            doubleRepetition = selectedNames[i] == selectedNames[i+1] == selectedNames[i+2]
+            # print("doubleRepetition", doubleRepetition)
+
+            if doubleRepetition:
+                # print(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                middleSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                updateMomentID = i+1
+                selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]
+                if LOGGING:
+                    print(f"(DR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][middleSelectedNameID]["name"]} to {moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]}")
+
+
+        if i < (len(selectedNames)-1):
+            singleRepetition = selectedNames[i+1] == (selectedNames[i])
+            # print("singleRepetition", singleRepetition)
+
+            if singleRepetition:
+                currentSelectedNameID = getID(selectedNames[i], moments[i]["similarity_scores"])
+                currentNextScore = moments[i]["similarity_scores"][currentSelectedNameID+1]["score"]
+                nextSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                nextNextScore = moments[i+1]["similarity_scores"][nextSelectedNameID+1]["score"]
+                # print("YOOO")
+                updateMomentID, updateSelectedNameID =  (i, currentSelectedNameID+1) if currentNextScore > nextNextScore else (i+1, nextSelectedNameID+1)
+                selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][updateSelectedNameID]["name"]
+                if LOGGING:
+                    print(f"(SR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][updateSelectedNameID-1]} to {moments[updateMomentID]["similarity_scores"][updateSelectedNameID]})")
+
+        if LOGGING:
+            print("B",i)
+
+        for i, selectedName in enumerate(selectedNames):
+            moments[i]["name"] = selectedName
+        
+    if LOGGING:
+        print("\nAFTER REPETITION FILTERING",selectedNames)
+
+    return moments
+    
 
 if len(sys.argv) > 1:
     try:
@@ -52,11 +110,17 @@ if len(sys.argv) > 1:
                     y_segment = y[moment_start:moment_end]
        
                 y_harmonic, y_percussive = librosa.effects.hpss(y_segment)
-                moment["key"] = Tonal_Fragment(y_harmonic, sr).get_key_info()
+                moment["key"] = Tonal_Fragment(y_harmonic, sr).get_list_of_neutral_keys()
                 moment["similarity_scores"] = MomentMatcher(y_segment, sr).getSimilarityScores()
-                moment["name"] = moment["similarity_scores"][1]["name"]
+                moment["name"] = moment["similarity_scores"][0]["name"]
 
                 moments_with_keys.append(moment)
+
+            if LOGGING:
+                print(f"\n{moments_with_keys}")
+            moments_with_keys = avoidRepetition(moments_with_keys)
+            if LOGGING:
+                print(f"\n{moments_with_keys}")
 
         analysis = {
             "analyzed_audio": audio_path,
@@ -74,7 +138,6 @@ if len(sys.argv) > 1:
 
 else:
     print("Please provide a song name as an argument.")
-
 
 
     

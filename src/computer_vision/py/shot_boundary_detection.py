@@ -24,7 +24,7 @@ class ShotBoundaryDetection:
         self.rescaled_frame_height = int(self.frame_height*self.rescale_factor)
 
         self.total_rescaled_pixels = int(self.rescaled_frame_height * self.rescaled_frame_width)
-        self.delta_threshold = -0.2
+        self.delta_threshold = -0.18
         self.minimumMomentDuration = 0.5
         self.lastFineFrameDetected = False
         self.face_detected = False
@@ -91,6 +91,7 @@ class ShotBoundaryDetection:
             "active": False,
             "id": len(self.detectedMoments)+len(self.colorDetectionMoments["detected_moments"]),
             "frame": self.current_frame_pos,
+            "tooltip": {"key": False, "type": False}
         }
 
         # if face_detected:

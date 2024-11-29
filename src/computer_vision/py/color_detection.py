@@ -84,7 +84,9 @@ class ColorDetection:
             "relevance":  relevance,
             "faces": {"detected": False},
             "active": False,
-            "id": len(self.detectedMoments)
+            "id": len(self.detectedMoments),
+            "tooltip": {"key": False, "type": False}
+
         }
 
         return momentDict
