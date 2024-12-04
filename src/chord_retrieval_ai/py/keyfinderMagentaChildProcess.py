@@ -97,21 +97,19 @@ if len(sys.argv) > 1:
         else:
 
             moments_with_keys = []
+            startTolerance = -0.25
+            endTolerance = 0.75
+
+
 
             for moment in magenta_moments:
 
-                if moment["type"] == "cut":
-                    moment_start=librosa.time_to_samples(max(float(moment["startTime"])-1, 0), sr=sr)
-                    moment_end=librosa.time_to_samples(min(float(moment["startTime"])+0.5, duration), sr=sr)
-                    y_segment = y[moment_start:moment_end]
-                elif moment["type"] == "magenta":
-                    moment_start=librosa.time_to_samples(max(float(moment["startTime"]-1),0), sr=sr)
-                    moment_end=librosa.time_to_samples(min(float(moment["startTime"]+0.5), duration), sr=sr)
-                    y_segment = y[moment_start:moment_end]
-       
-                y_harmonic, y_percussive = librosa.effects.hpss(y_segment)
-                moment["key"] = Tonal_Fragment(y_harmonic, sr).get_list_of_neutral_keys()
-                moment["similarity_scores"] = MomentMatcher(y_segment, sr).getSimilarityScores()
+                key_moment_start=librosa.time_to_samples(max(float(moment["startTime"])+startTolerance, 0), sr=sr)
+                key_moment_end=librosa.time_to_samples(min(float(moment["startTime"])+endTolerance, duration), sr=sr)
+                y_key_segment = y[key_moment_start:key_moment_end]
+                y_key_segment_harmonic, _ = librosa.effects.hpss(y_key_segment)
+                moment["key"] = Tonal_Fragment(y_key_segment_harmonic, sr).get_list_of_neutral_keys()
+                moment["similarity_scores"] = MomentMatcher(y, sr, moment).getSimilarityScores()
                 moment["name"] = moment["similarity_scores"][0]["name"]
 
                 moments_with_keys.append(moment)
