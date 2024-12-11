@@ -24,42 +24,51 @@ def avoidRepetition(moments):
         print("selectedNames",selectedNames)
 
     for i, _ in enumerate(selectedNames):
-        if LOGGING:
-            print("U",i)
-        if i < (len(selectedNames)-2):
 
-            doubleRepetition = selectedNames[i] == selectedNames[i+1] == selectedNames[i+2]
-            # print("doubleRepetition", doubleRepetition)
+        singleRepetition = True
+        doubleRepetition = True
+        while doubleRepetition and singleRepetition:
+            if LOGGING:
+                print("U",i)
+            if i < (len(selectedNames)-2):
 
-            if doubleRepetition:
-                # print(selectedNames[i+1], moments[i+1]["similarity_scores"])
-                middleSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
-                updateMomentID = i+1
-                selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]
-                if LOGGING:
-                    print(f"(DR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][middleSelectedNameID]["name"]} to {moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]}")
+                doubleRepetition = selectedNames[i] == selectedNames[i+1] == selectedNames[i+2]
+                # print("doubleRepetition", doubleRepetition)
+
+                if doubleRepetition:
+                    # print(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                    middleSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                    updateMomentID = i+1
+                    selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]
+                    for i, selectedName in enumerate(selectedNames):
+                        moments[i]["name"] = selectedName
+                    doubleRepetition = False
+                    if LOGGING:
+                        print(f"(DR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][middleSelectedNameID]["name"]} to {moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]}")
 
 
-        if i < (len(selectedNames)-1):
-            singleRepetition = selectedNames[i+1] == (selectedNames[i])
-            # print("singleRepetition", singleRepetition)
+            if i < (len(selectedNames)-1):
+                singleRepetition = selectedNames[i+1] == (selectedNames[i])
+                # print("singleRepetition", singleRepetition)
 
-            if singleRepetition:
-                currentSelectedNameID = getID(selectedNames[i], moments[i]["similarity_scores"])
-                currentNextScore = moments[i]["similarity_scores"][currentSelectedNameID+1]["score"]
-                nextSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
-                nextNextScore = moments[i+1]["similarity_scores"][nextSelectedNameID+1]["score"]
-                # print("YOOO")
-                updateMomentID, updateSelectedNameID =  (i, currentSelectedNameID+1) if currentNextScore > nextNextScore else (i+1, nextSelectedNameID+1)
-                selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][updateSelectedNameID]["name"]
-                if LOGGING:
-                    print(f"(SR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][updateSelectedNameID-1]} to {moments[updateMomentID]["similarity_scores"][updateSelectedNameID]})")
+                if singleRepetition:
+                    currentSelectedNameID = getID(selectedNames[i], moments[i]["similarity_scores"])
+                    currentNextScore = moments[i]["similarity_scores"][currentSelectedNameID+1]["score"]
+                    nextSelectedNameID = getID(selectedNames[i+1], moments[i+1]["similarity_scores"])
+                    nextNextScore = moments[i+1]["similarity_scores"][nextSelectedNameID+1]["score"]
+                    # print("YOOO")
+                    updateMomentID, updateSelectedNameID =  (i, currentSelectedNameID+1) if currentNextScore > nextNextScore else (i+1, nextSelectedNameID+1)
+                    selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][updateSelectedNameID]["name"]
+                    singleRepetition = False
+                    for i, selectedName in enumerate(selectedNames):
+                        moments[i]["name"] = selectedName
+                    if LOGGING:
+                        print(f"(SR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][updateSelectedNameID-1]} to {moments[updateMomentID]["similarity_scores"][updateSelectedNameID]})")
 
-        if LOGGING:
-            print("B",i)
+            if LOGGING:
+                print("B",i)
 
-        for i, selectedName in enumerate(selectedNames):
-            moments[i]["name"] = selectedName
+
         
     if LOGGING:
         print("\nAFTER REPETITION FILTERING",selectedNames)
@@ -99,9 +108,6 @@ if len(sys.argv) > 1:
             moments_with_keys = []
             startTolerance = -0.25
             endTolerance = 0.75
-
-
-
             for moment in magenta_moments:
 
                 key_moment_start=librosa.time_to_samples(max(float(moment["startTime"])+startTolerance, 0), sr=sr)
