@@ -16,20 +16,29 @@ def getID(selectedName, similarityScores):
         if score["name"] == selectedName:
             return i
 
+def checkRepetition(selectedNames):
+
+    for i, selectedName in enumerate(selectedNames):
+        if i > 0 and selectedName == selectedNames[i - 1]:
+            if LOGGING:
+                print("hasRepetition?", True)
+            return True 
+    if LOGGING:
+        print("hasRepetition?", False)
+    return False  
+
 def avoidRepetition(moments):
 
     selectedNames = [moment["name"] for moment in moments]
-    # anyRepetition = True
+
     if LOGGING:
         print("selectedNames",selectedNames)
 
-    for i, _ in enumerate(selectedNames):
+    hasRepetition = checkRepetition(selectedNames)
 
-        singleRepetition = True
-        doubleRepetition = True
-        while doubleRepetition and singleRepetition:
-            if LOGGING:
-                print("U",i)
+    while hasRepetition:
+        for i, _ in enumerate(selectedNames):
+
             if i < (len(selectedNames)-2):
 
                 doubleRepetition = selectedNames[i] == selectedNames[i+1] == selectedNames[i+2]
@@ -42,7 +51,6 @@ def avoidRepetition(moments):
                     selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]
                     for i, selectedName in enumerate(selectedNames):
                         moments[i]["name"] = selectedName
-                    doubleRepetition = False
                     if LOGGING:
                         print(f"(DR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][middleSelectedNameID]["name"]} to {moments[updateMomentID]["similarity_scores"][middleSelectedNameID+1]["name"]}")
 
@@ -59,17 +67,16 @@ def avoidRepetition(moments):
                     # print("YOOO")
                     updateMomentID, updateSelectedNameID =  (i, currentSelectedNameID+1) if currentNextScore > nextNextScore else (i+1, nextSelectedNameID+1)
                     selectedNames[updateMomentID] = moments[updateMomentID]["similarity_scores"][updateSelectedNameID]["name"]
-                    singleRepetition = False
                     for i, selectedName in enumerate(selectedNames):
                         moments[i]["name"] = selectedName
                     if LOGGING:
                         print(f"(SR) Moment #{updateMomentID} changed from  {moments[updateMomentID]["similarity_scores"][updateSelectedNameID-1]} to {moments[updateMomentID]["similarity_scores"][updateSelectedNameID]})")
 
             if LOGGING:
-                print("B",i)
-
-
+                print("B", i, selectedNames)
         
+        hasRepetition = checkRepetition(selectedNames)
+
     if LOGGING:
         print("\nAFTER REPETITION FILTERING",selectedNames)
 
