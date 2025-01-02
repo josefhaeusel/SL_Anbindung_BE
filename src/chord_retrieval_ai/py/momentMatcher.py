@@ -46,7 +46,6 @@ class MomentMatcher(object):
     def getMFCCScore(self, moment_y, moment_sr):
         moment_mfccs = librosa.feature.mfcc(y=moment_y, sr=moment_sr, n_mfcc=13)
         min_columns = min(self.mfcc_feature.shape[1], moment_mfccs.shape[1])
-        
         reference_mfccs = self.mfcc_feature[:, :min_columns]
         moment_mfccs = moment_mfccs[:, :min_columns]
 
@@ -57,15 +56,11 @@ class MomentMatcher(object):
 
         return float(similarity[0][0])
 
-
-    def getSpectralFlatnessScore(self, moment_y ):
-        
+    def getSpectralFlatnessScore(self, moment_y):
         min_columns = self.spectral_flatness_feature.shape[1]
         moment_feature = librosa.feature.spectral_flatness(y=moment_y)
-
         min_columns = min(min_columns, moment_feature.shape[1])
         self.spectral_flatness_feature = self.spectral_flatness_feature[:, :min_columns]
-        moment_feature = librosa.feature.spectral_flatness(y=moment_y)
         moment_feature = moment_feature[:, :min_columns]
         contrast_similarity = np.mean(np.abs(self.spectral_flatness_feature - moment_feature))
         normalized_similarity = 1 - contrast_similarity / np.max([np.abs(self.spectral_flatness_feature), np.abs(moment_feature)])
