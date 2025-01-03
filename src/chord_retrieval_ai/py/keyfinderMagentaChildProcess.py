@@ -139,6 +139,10 @@ if len(sys.argv) > 1:
             "overall_loudness": overall_loudness,
             "moments_with_keys": moments_with_keys,
             }
+        
+
+        with open(magenta_moments_json, 'w') as json_file:
+            json.dump(analysis, json_file)
 
         print(json.dumps(analysis))
         sys.stdout.flush()
