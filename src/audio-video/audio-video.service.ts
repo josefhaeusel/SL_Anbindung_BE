@@ -10,6 +10,7 @@ export interface VideoData {
   fidelity: string
   codec_name: string | null
   codec_name_long: string | null
+  extension: string | null
   profile: string | null
   pixel_format: string | null
   supported_ratio: boolean
@@ -139,6 +140,7 @@ export class AudioVideoService {
       fidelity: '',
       codec_name: null,
       codec_name_long: null,
+      extension: null,
       profile: null,
       pixel_format: null,
       supported_ratio: null,
@@ -148,6 +150,10 @@ export class AudioVideoService {
       duration_ms: null,
       rotation: null,
     }
+
+
+    const inputPathParsed = path.parse(inputVideoPath)
+    const inputPathExt = inputPathParsed.ext
 
     const videoStream = await this._getVideoCodecSettings(inputVideoPath)
     this.logger.debug(videoStream)
@@ -174,6 +180,7 @@ export class AudioVideoService {
     videoData.height = videoStream.height
     videoData.codec_name = videoStream.codec_name
     videoData.codec_name_long = videoStream.codec_long_name
+    videoData.extension = inputPathExt
     videoData.pixel_format = videoStream.pix_fmt
     videoData.profile = videoStream.profile
     videoData.duration_ms = videoStream.duration * 1000
