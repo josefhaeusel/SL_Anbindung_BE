@@ -123,7 +123,7 @@ async function bootstrap() {
   }
 
   // start
-  await app.listen(3000)
+  await app.listen(3001)
   Logger.log(
     `Nest application is running on: ${await app.getUrl()}`,
     'NestApplication',
