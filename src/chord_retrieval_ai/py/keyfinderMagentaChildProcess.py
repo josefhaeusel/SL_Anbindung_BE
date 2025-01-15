@@ -101,7 +101,7 @@ if len(sys.argv) > 1:
         duration = librosa.get_duration(y=y, sr=sr) # Duration of the split .aac file (from Phase "Splitting Audio from Video") !Not length of appended animation!
 
         # Overall Loudness Analysis
-        meter = pyln.Meter(sr, filter_class="DeMan") 
+        meter = pyln.Meter(sr, filter_class="Fenton/Lee 2") 
         overall_loudness = meter.integrated_loudness(y)  # measure loudness
 
         analysisSegmentEmpty = False

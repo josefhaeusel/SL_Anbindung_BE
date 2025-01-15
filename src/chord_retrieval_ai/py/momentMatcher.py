@@ -93,7 +93,7 @@ class MomentMatcher(object):
             
             moment_y, moment_sr = self.loadAndTrimMoment(value)
 
-            spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)
+            spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)*1.25
             mfcc_similarity = self.getMFCCScore(moment_y, moment_sr)
 
             score = ((mfcc_similarity)+(spectral_flatness_similarity))/2
@@ -101,11 +101,11 @@ class MomentMatcher(object):
             similarity_score = {"name": key, "score": round(score,3),
                                 "flatness": round(spectral_flatness_similarity,3),
                                 "mfcc": round(mfcc_similarity,3)}
+            
+            # MEASURE AND SET LOCAL LOUDNESS
 
             similarity_scores.append(similarity_score)
 
         similarity_scores = sorted(similarity_scores, key=lambda x: x["score"], reverse=True)
 
         return similarity_scores
-
-        
