@@ -93,8 +93,8 @@ class MomentMatcher(object):
             
             moment_y, moment_sr = self.loadAndTrimMoment(value)
 
-            spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)*1.25
-            mfcc_similarity = self.getMFCCScore(moment_y, moment_sr)
+            spectral_flatness_similarity = self.getSpectralFlatnessScore(moment_y)
+            mfcc_similarity = self.getMFCCScore(moment_y, moment_sr)*0.8
 
             score = ((mfcc_similarity)+(spectral_flatness_similarity))/2
 
