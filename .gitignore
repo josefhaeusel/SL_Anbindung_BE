@@ -29,6 +29,7 @@ lerna-debug.log*
 
 # Tests
 /coverage
+# /src/chord_retrieval_ai/py/test*
 /src/computer_vision/py/test/*
 /.nyc_output
 
