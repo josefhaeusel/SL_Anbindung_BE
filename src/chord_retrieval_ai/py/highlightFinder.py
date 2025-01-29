@@ -190,7 +190,7 @@ class AudioHighlightAnalyzer:
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.realpath(__file__))
     songs = ['hermann.mp3','strangers.mp3', 'intheairtonight.wav', 'theneedle.mp3',  'leadership.mp3', 'TMTM_2023.mp3','TMTM_2024.mp3', 'classic.mp3', 'ambient.mp3', 'gaming.mp3']
-    audio_file = songs[7] 
+    audio_file = songs[2] 
     audio_path = os.path.join(script_dir, 'test', audio_file)
     analyzer = AudioHighlightAnalyzer(audio_path)
     print("\nAnalyzing", audio_path)
