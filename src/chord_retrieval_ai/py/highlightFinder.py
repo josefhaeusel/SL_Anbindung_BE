@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import os
 from midiutil import MIDIFile
 from sklearn.cluster import KMeans
+# from pychorus import create_chroma
+# from pychorus.similarity_matrix import TimeTimeSimilarityMatrix, TimeLagSimilarityMatrix
+from pychorus import find_and_output_chorus
+
 
 
 class AudioHighlightAnalyzer:
@@ -13,26 +17,23 @@ class AudioHighlightAnalyzer:
         self.audio_file = audio_file
         self.sr = sr
         self.y, self.sr = librosa.load(audio_file, sr=sr)
-        self.onset_env = None
-        self.beat_times = None
-        self.rms = None
-        self.spectral_contrast = None
+        self.length = librosa.get_duration(y=self.y, sr=self.sr)
+        self.chorus_found = False
+        self.chorus_length = 15
+
         self.highlights = []
 
     def analyze_highlights(self, top_n=5):
 
-        self.onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr, aggregate=np.median)
-        
-        tempo, beat_frames = librosa.beat.beat_track(y=self.y, sr=self.sr)
-        self.beat_times = librosa.frames_to_time(beat_frames, sr=self.sr)
+
         print("\n", "self.beat_times",self.beat_times)
         
         onset_times = librosa.onset.onset_detect(y=self.y, sr=self.sr, units='time')
         
-        self.rms = librosa.feature.rms(y=self.y)[0]
-        self.rms = self.rms / np.max(self.rms) 
+        # self.rms = librosa.feature.rms(y=self.y)[0]
+        # self.rms = self.rms / np.max(self.rms) 
         
-        self.spectral_contrast = librosa.feature.spectral_contrast(y=self.y, sr=self.sr)
+        # self.spectral_contrast = librosa.feature.spectral_contrast(y=self.y, sr=self.sr)
         
         candidates = []
         for onset in onset_times:
@@ -54,17 +55,56 @@ class AudioHighlightAnalyzer:
 
         if not self.highlights:
             raise ValueError("No highlights found. Run 'analyze_highlights' first.")
-        
-        highlight_times = [t[0] for t in self.highlights]
-        
+
         plt.figure(figsize=(14, 5))
-        librosa.display.waveshow(self.y, sr=self.sr, alpha=0.6)
-        plt.vlines(highlight_times, ymin=-1, ymax=1, color='r', label='Highlights')
+
+        # Plot waveform
+        librosa.display.waveshow(self.y, sr=self.sr, alpha=0.6, label="Waveform")
+
+        # Plot highlight sections as shaded regions
+        for i, (start_time, volume) in enumerate(self.highlights):
+            duration = 0.1  # Default duration (adjust based on your logic)
+            alpha = volume
+            label = "Highlights"
+            if self.chorus_found:
+                duration = self.chorus_length
+                label = "Chorus"
+                alpha = 0.3
+
+            end_time = start_time + duration
+
+            plt.axvspan(start_time, end_time, color='red', alpha=alpha, label=label if i == 0 else "")
+
+            text = f"{volume:.2f} (Vol)"
+
+            # Display volume and duration above each highlight
+            plt.text((start_time + end_time) / 2, 0, f"{duration}s" if self.chorus_found else f"{volume:.2f} (Vol)", 
+                    color="black", fontsize=10, ha="center",  bbox=dict(facecolor='white', alpha=0.6))
+
+
         plt.legend()
-        plt.title('Musical Highlights')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Amplitude')
+        plt.title("Musical Highlights with Duration and Volume")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Amplitude")
         plt.show()
+
+    def analyze_chorus(self ):
+
+        while self.chorus_length >= 4 and not self.chorus_found:
+            chorus_secs = find_and_output_chorus(self.audio_file, None, clip_length=self.chorus_length)
+            print(chorus_secs)
+
+            if chorus_secs is not None:
+                self.highlights.append((chorus_secs, 1))
+                self.chorus_found = True
+                print(self.highlights)
+            else:
+                self.chorus_length -= 1
+                print("\n### Looking for chorus length:", self.chorus_length, "\n")
+
+        
+        return self.highlights
+
 
     def writeMIDI(self):
 
@@ -77,8 +117,18 @@ class AudioHighlightAnalyzer:
         
         for highlight in self.highlights:
             time = highlight[0]
-            midiFile.addNote(track=0, channel=9, pitch=60, time=time, duration=0.5, volume=max(int(highlight[1]*127), 1))
-        
+            duration = 0.5
+
+            if self.chorus_found:
+                duration = self.chorus_length
+                print("DURATION 10")
+
+            midiFile.addNote(track=0, channel=9, pitch=60, time=time, duration=duration, volume=max(int(highlight[1]*127), 1))
+
+        # Trick to get track to length of song
+        print("LENGTH",self.length)
+        midiFile.addControllerEvent(track=0, channel=9, time=self.length, controller_number=3,parameter=4)
+
 
         with open(midi_output_path, "wb") as output_file:
             midiFile.writeFile(output_file)
@@ -94,6 +144,14 @@ class AudioHighlightAnalyzer:
         return derivative
 
     def get_clustered_highlights(self, top_n=5):
+
+        self.onset_env = librosa.onset.onset_strength(y=self.y, sr=self.sr, aggregate=np.median)
+        _, beat_frames = librosa.beat.beat_track(y=self.y, sr=self.sr)
+        self.beat_times = librosa.frames_to_time(beat_frames, sr=self.sr)
+
+        self.rms = librosa.feature.rms(y=self.y)[0]
+        self.rms = self.rms / np.max(self.rms)
+        self.spectral_contrast = librosa.feature.spectral_contrast(y=self.y, sr=self.sr)
 
         if len(self.beat_times) == 0:
             raise ValueError("No beat times detected to cluster.")
@@ -188,14 +246,41 @@ class AudioHighlightAnalyzer:
 
 
 if __name__ == "__main__":
+    BATCH_PROCESS = True
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    songs = ['hermann.mp3','strangers.mp3', 'intheairtonight.wav', 'theneedle.mp3',  'leadership.mp3', 'TMTM_2023.mp3','TMTM_2024.mp3', 'classic.mp3', 'ambient.mp3', 'gaming.mp3']
-    audio_file = songs[2] 
-    audio_path = os.path.join(script_dir, 'test', audio_file)
-    analyzer = AudioHighlightAnalyzer(audio_path)
-    print("\nAnalyzing", audio_path)
-    highlights = analyzer.analyze_highlights(top_n=6)
-    clustered_highlights = analyzer.get_clustered_highlights(top_n=5)
+    songs = ['hermann.mp3','strangers.mp3', 'intheairtonight.mp3', 'theneedle.mp3',  'leadership.mp3', 'TMTM_2023.mp3',  'TMTM_2024.mp3','classic.mp3', 'ambient.mp3','gaming.mp3', 'strawberry_fields_forever.mp3', 'day_in_the_life.mp3', 'tangled_up.mp3']
+    if not BATCH_PROCESS:
+        audio_file = songs[6] 
+        audio_path = os.path.join(script_dir, 'test', audio_file)
+        analyzer = AudioHighlightAnalyzer(audio_path)
+        print("\nAnalyzing", audio_path)
 
-    analyzer.writeMIDI()
-    analyzer.visualize_highlights()
+        
+        chorus = analyzer.analyze_chorus()
+        print("CHORUS", chorus)
+        if not chorus:
+            # highlights = analyzer.analyze_highlights(top_n=6)
+            print("HIGHLIGHTS GO")
+            clustered_highlights = analyzer.get_clustered_highlights(top_n=5)
+
+        analyzer.writeMIDI()
+        analyzer.visualize_highlights()
+    else:
+        for song in songs:
+            audio_file = song
+            audio_path = os.path.join(script_dir, 'test', audio_file)
+            analyzer = AudioHighlightAnalyzer(audio_path)
+            print(f"\nAnalyzing", audio_path)
+            chorus = analyzer.analyze_chorus()
+            if not chorus:
+                print("HIGHLIGHTS GO")
+                clustered_highlights = analyzer.get_clustered_highlights(top_n=5)
+
+            analyzer.writeMIDI()
+            analyzer.visualize_highlights()
+
+
+
+
+
+        
