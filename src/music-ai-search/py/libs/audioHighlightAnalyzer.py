@@ -142,7 +142,7 @@ class AudioHighlightAnalyzer:
 
     def get_most_important_highlight(self):
 
-        # chorus = self.analyze_chorus()
+        chorus = self.analyze_chorus()
         chorus = None
         if chorus:
             return chorus

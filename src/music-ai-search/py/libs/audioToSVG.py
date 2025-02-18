@@ -31,9 +31,9 @@ class WaveToSVG(object):
 
 
         # SVG parameters
-        width = 400  # SVG width
-        height = 40  # SVG height
-        gap = 2  # Gap between bars
+        width = 800  # SVG width
+        height = 80  # SVG height
+        gap = 4  # Gap between bars
         bar_width = (width / num_samples) - gap  # Bar width with spacing
 
         # Normalize amplitudes to fit SVG height
@@ -51,7 +51,7 @@ class WaveToSVG(object):
             bar_height = amp * 2  # Double the amplitude for full scale
             y = (height / 2) - (bar_height / 2)  # Center vertically
 
-            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="1" ry="1"/>\n'
+            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="0.5" ry="0.5"/>\n'
 
         # Close SVG
         svg_content += "</svg>"
