@@ -3,8 +3,6 @@ import librosa.display
 import numpy as np
 from sklearn.cluster import KMeans
 import contextlib, io
-# from pychorus import create_chroma
-# from pychorus.similarity_matrix import TimeTimeSimilarityMatrix, TimeLagSimilarityMatrix
 from pychorus import find_and_output_chorus
 
 
