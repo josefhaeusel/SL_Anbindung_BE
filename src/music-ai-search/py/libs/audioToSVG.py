@@ -40,7 +40,7 @@ class WaveToSVG(object):
 
         # Start SVG string
         svg_content = f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">\n'
-        svg_content += '<rect width="100%" height="100%" fill="white"/>\n'  # Background
+        # svg_content += '<rect width="100%" height="100%" fill="white"/>\n'  # Background
 
         # Draw rounded waveform bars with gaps
         for i, amp in enumerate(amplitudes):
