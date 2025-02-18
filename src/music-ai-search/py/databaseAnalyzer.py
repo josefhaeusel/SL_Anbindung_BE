@@ -30,17 +30,17 @@ if len(sys.argv) > 1:
 
         # # # Analyze Highlight Section
         highlight_analyzer = AudioHighlightAnalyzer(y, sr, audio_path)
-        highlight_section = highlight_analyzer.get_most_important_highlight()
+        highlight_times = highlight_analyzer.get_most_important_highlight()
 
         # # # Create Waveform SVG
-        audio_to_svg = WaveToSVG(y,sr)
+        audio_to_svg = WaveToSVG(y, sr, highlight_times)
         svg = audio_to_svg.generate_svg_waveform(svg_out_path)
         
 
         analysis = {
             "key": key,
             "bpm": bpm,
-            "highlight_section": highlight_section,
+            "highlight_times": highlight_times,
             "svg": svg
         }
 

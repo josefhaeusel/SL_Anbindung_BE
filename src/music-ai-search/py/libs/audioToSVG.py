@@ -6,10 +6,12 @@ import base64
 
 
 class WaveToSVG(object):
-    def __init__(self, y, sr):
+    def __init__(self, y, sr, highlight_times):
 
         self.y = np.abs(y)  # Use absolute amplitude to avoid negative values
         self.sr = sr
+        self.highlight_times = highlight_times
+
 
 
     def generate_svg_waveform(self,  output_svg=None, num_samples=100):
@@ -40,6 +42,8 @@ class WaveToSVG(object):
         max_amplitude = np.max(amplitudes)
         amplitudes = (amplitudes / max_amplitude) * (height/2)  # Scale to half-height (50)
 
+        highlight_start_idx = int((self.highlight_times["start"] / (len(self.y) / self.sr)) * num_samples)
+        highlight_end_idx = int((self.highlight_times["end"] / (len(self.y) / self.sr)) * num_samples)
 
         # Start SVG string
         svg_content = f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">\n'
@@ -50,8 +54,9 @@ class WaveToSVG(object):
             x = i * (bar_width + gap)  # Adjust x position to include the gap
             bar_height = amp * 2  # Double the amplitude for full scale
             y = (height / 2) - (bar_height / 2)  # Center vertically
+            opacity = 1.0 if highlight_start_idx <= i <= highlight_end_idx else 0.6
 
-            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="0.5" ry="0.5"/>\n'
+            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="0.5" ry="0.5" opacity="{opacity}"/>\n'
 
         # Close SVG
         svg_content += "</svg>"
