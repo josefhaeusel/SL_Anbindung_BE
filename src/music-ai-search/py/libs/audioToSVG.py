@@ -28,15 +28,18 @@ class WaveToSVG(object):
         window_size = len(self.y) // num_samples  
         amplitudes = np.array([np.sum(self.y[i * window_size: (i + 1) * window_size]) for i in range(num_samples)])
 
-        # Normalize amplitudes to fit SVG height
-        max_amplitude = np.max(amplitudes)
-        amplitudes = (amplitudes / max_amplitude) * 50  # Scale to half-height (50)
+
 
         # SVG parameters
         width = 400  # SVG width
-        height = 100  # SVG height
+        height = 40  # SVG height
         gap = 2  # Gap between bars
         bar_width = (width / num_samples) - gap  # Bar width with spacing
+
+        # Normalize amplitudes to fit SVG height
+        max_amplitude = np.max(amplitudes)
+        amplitudes = (amplitudes / max_amplitude) * (height/2)  # Scale to half-height (50)
+
 
         # Start SVG string
         svg_content = f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">\n'
@@ -48,7 +51,7 @@ class WaveToSVG(object):
             bar_height = amp * 2  # Double the amplitude for full scale
             y = (height / 2) - (bar_height / 2)  # Center vertically
 
-            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="5" ry="5"/>\n'
+            svg_content += f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_width:.2f}" height="{bar_height:.2f}" fill="black" rx="1" ry="1"/>\n'
 
         # Close SVG
         svg_content += "</svg>"
