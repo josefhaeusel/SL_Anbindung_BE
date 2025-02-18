@@ -1,9 +1,6 @@
 import librosa
 import librosa.display
 import numpy as np
-import matplotlib.pyplot as plt
-import os
-from midiutil import MIDIFile
 from sklearn.cluster import KMeans
 import contextlib, io
 # from pychorus import create_chroma
