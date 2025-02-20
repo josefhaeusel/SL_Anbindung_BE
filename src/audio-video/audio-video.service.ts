@@ -13,8 +13,8 @@ export interface VideoData {
   extension: string | null
   profile: string | null
   pixel_format: string | null
-  supported_ratio: boolean
   supported_resolution: boolean
+  supported_ratio: boolean
   supported_length: boolean
   audio: string | null
 }
@@ -143,14 +143,13 @@ export class AudioVideoService {
       extension: null,
       profile: null,
       pixel_format: null,
-      supported_ratio: null,
       supported_resolution: null,
+      supported_ratio: null,
       supported_length: null,
       audio: null,
       duration_ms: null,
       rotation: null,
     }
-
 
     const inputPathParsed = path.parse(inputVideoPath)
     const inputPathExt = inputPathParsed.ext
@@ -173,8 +172,8 @@ export class AudioVideoService {
     }
 
     videoData.supported_length = await this._checkLength(videoStream.duration)
-    videoData.supported_ratio = resolutionRatioCheck.supportedRatio
     videoData.supported_resolution = resolutionRatioCheck.supportedResolution
+    videoData.supported_ratio = resolutionRatioCheck.supportedRatio
     videoData.ratio = videoStream.display_aspect_ratio
     videoData.width = videoStream.width
     videoData.height = videoStream.height
@@ -189,6 +188,7 @@ export class AudioVideoService {
       videoData.audio = audioStream.codec_long_name
     }
 
+
     // 2024-10-12, honor the rotation
     if (Math.abs(videoStream.rotation) === 90) {
       this.logger.warn('rotated video detected')
@@ -196,28 +196,15 @@ export class AudioVideoService {
       // swap width and height
       videoData.width = videoStream.height
       videoData.height = videoStream.width
-
-      // replace ratio
-      if (videoStream.display_aspect_ratio === '16_9') {
-        videoData.ratio = '9_16'
-      } else if (videoStream.display_aspect_ratio === '9_16') {
-        videoData.ratio = '16_9'
-      }
     }
 
-    // fidelity
-    if (videoData.width == 1080 || videoData.height == 1080) {
-      videoData.fidelity = 'hd'
-    } else if (videoData.width == 2160 || videoData.height == 2160) {
-      videoData.fidelity = 'uhd'
-    } else {
-      videoData.fidelity = 'low'
-    }
-
-    if (!videoData.supported_resolution || !videoData.supported_ratio) {
+    if (!videoData.supported_resolution) {
       fs.unlinkSync(inputVideoPath)
       this.logger.warn(`Deleted ${inputVideoPath}`)
+    } else {
+      videoData.fidelity = this._getFidelity(videoStream);
     }
+
 
     return new Promise((resolve) => {
       resolve(videoData)
@@ -248,6 +235,7 @@ export class AudioVideoService {
       `.${path.sep}src${path.sep}audio-video${path.sep}animations${path.sep}noaudio${path.sep}T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
     )
     */
+
     const rootPath =
       process.env.NODE_ENV == 'production'
         ? __dirname
@@ -256,7 +244,7 @@ export class AudioVideoService {
       rootPath,
       'animations',
       'noaudio',
-      `T_outro_claim_hard_cut_${videoData.ratio}_${videoData.fidelity}.mp4`,
+      `T_outro_claim_hard_cut_${videoData.width}x${videoData.height}.mp4`,
     )
 
     this.logger.debug(`appendAnimationPath: ${appendAnimationPath}`)
@@ -367,49 +355,62 @@ export class AudioVideoService {
     })
   }
 
-  private _checkResolution(videoStream) {
-    let supportedRatio = true
-    let supportedResolution = true
+  private _checkResolution(videoStream: { width: number; height: number }) {
 
-    videoStream.display_aspect_ratio = videoStream.display_aspect_ratio.replace(
-      ':',
-      '_',
+    const rootPath =
+      process.env.NODE_ENV == 'production'
+        ? __dirname
+        : path.join(process.cwd(), 'src', 'audio-video')
+
+    const animationFolderPath = path.join(
+      rootPath,
+      'animations',
+      'noaudio',
     )
 
-    if (videoStream.display_aspect_ratio == 'N/A') {
-      const ratio = videoStream.width / videoStream.height
-      switch (ratio) {
-        case 16 / 9:
-          videoStream.display_aspect_ratio = '16_9'
-          break
-        case 9 / 16:
-          videoStream.display_aspect_ratio = '9_16'
-          break
-        case 1:
-          videoStream.display_aspect_ratio = '1_1'
-          break
-        default:
-          videoStream.display_aspect_ratio = ratio
-      }
-    }
+    const filenames = fs.readdirSync(animationFolderPath);
+    const resolutionString = `${videoStream.width}x${videoStream.height}`;
 
-    if (
-      videoStream.display_aspect_ratio != '1_1' &&
-      videoStream.display_aspect_ratio != '16_9' &&
-      videoStream.display_aspect_ratio != '9_16'
-    ) {
-      supportedRatio = false
-    }
+    const matchedFiles = filenames.filter((file) => {
 
-    if (videoStream.width < 1080 || videoStream.height < 1080) {
-      supportedResolution = false
-    }
+      const match = file.match(/(\d+)x(\d+)/);
+      if (!match) return false;
+
+      const fileResolution = `${match[1]}x${match[2]}`;
+      return fileResolution === resolutionString;
+    });
+
+    let supportedResolution = matchedFiles.length > 0;
+    let supportedRatio = matchedFiles.length > 0;
 
     return {
-      supportedRatio: supportedRatio,
-      supportedResolution: supportedResolution,
-    }
+      supportedResolution,
+      supportedRatio, 
+    };
   }
+
+  private _getFidelity(videoStream: { width: number; height: number }) {
+
+    const rootPath =
+      process.env.NODE_ENV == 'production'
+        ? __dirname
+        : path.join(process.cwd(), 'src', 'audio-video')
+
+    const resolution_data_path = path.join(
+      rootPath,
+      'resolution_data.json'
+    )
+
+    const resolutionString = `${videoStream.width}x${videoStream.height}`;
+    const resolution_json = JSON.parse(fs.readFileSync(resolution_data_path, 'utf8'));
+    
+    const fidelity = resolution_json[resolutionString].fidelity
+
+    return fidelity
+    
+  }
+
+  
 
   private _checkLength(duration) {
     return duration <= 120.0
