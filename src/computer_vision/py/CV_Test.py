@@ -9,12 +9,12 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 # logo_time = ComputerVision(videoPath).matchVideoFrames(showVideoPlayer = True)
 # print("Logo Time",logo_time)
-animations = ["T_outro_claim_hard_cut_3480x1600.mp4", "T_outro_claim_hard_cut_3440x1440.mp4", "T_outro_claim_hard_cut_2560x1440.mp4", "T_outro_claim_hard_cut_768x576.mp4 "",T_outro_claim_hard_cut_854x480.mp4 "",T_outro_claim_hard_cut_960x540.mp4 "",T_outro_claim_hard_cut_1920x1080.mp4", "T_outro_claim_hard_cut_1280x720.mp4 ","T_outro_claim_hard_cut_7680x4320.mp4", "T_outro_claim_hard_cut_3840x2160.mp4", "T_outro_claim_hard_cut_1600x3840.mp4", "T_outro_claim_hard_cut_1440x3440.mp4", "T_outro_claim_hard_cut_1440x2560.mp4", "T_outro_claim_hard_cut_720x1080.mp4 ","T_outro_claim_hard_cut_1080x1920.mp4", "T_outro_claim_hard_cut_4320x7680.mp4", "T_outro_claim_hard_cut_2160x3840.mp4", "T_outro_claim_hard_cut_1920x1440.mp4", "T_outro_claim_hard_cut_1440x1440.mp4", "T_outro_claim_hard_cut_1440x1920.mp4", "T_outro_claim_hard_cut_720x720.mp4 "",T_outro_claim_hard_cut_1080x1080.mp4", "T_outro_claim_hard_cut_4320x4320.mp4", "T_outro_claim_hard_cut_2160x2160.mp4",]
+animations = ["T_outro_claim_hard_cut_720x720.mp4", "T_outro_claim_hard_cut_720x1080.mp4", "T_outro_claim_hard_cut_768x576.mp4", "T_outro_claim_hard_cut_854x480.mp4", "T_outro_claim_hard_cut_960x540.mp4", "T_outro_claim_hard_cut_1080x1080.mp4", "T_outro_claim_hard_cut_1080x1920.mp4", "T_outro_claim_hard_cut_1280x720.mp4", "T_outro_claim_hard_cut_1440x1440.mp4", "T_outro_claim_hard_cut_1440x1920.mp4", "T_outro_claim_hard_cut_1440x2560.mp4", "T_outro_claim_hard_cut_1440x3440.mp4", "T_outro_claim_hard_cut_1600x3840.mp4", "T_outro_claim_hard_cut_1920x1080.mp4", "T_outro_claim_hard_cut_1920x1440.mp4", "T_outro_claim_hard_cut_2160x2160.mp4", "T_outro_claim_hard_cut_2160x3840.mp4", "T_outro_claim_hard_cut_2560x1440.mp4", "T_outro_claim_hard_cut_3440x1440.mp4", "T_outro_claim_hard_cut_3480x1600.mp4", "T_outro_claim_hard_cut_3840 x 2160.mp4", "T_outro_claim_hard_cut_4320x4320.mp4", "T_outro_claim_hard_cut_4320x7680.mp4", "T_outro_claim_hard_cut_7680x4320.mp4",]
 results = []
 for i in range(len(animations)):
     videoPath= f"{script_dir}/noaudio/{animations[i]}"
     print(animations[i])
-    result = ComputerVision(videoPath).matchVideoFrames(showVideoPlayer = True)
+    result = ComputerVision(videoPath).matchVideoFrames(showVideoPlayer = False)
     results.append(result)
     print(results[len(results)-1], "\n")
 

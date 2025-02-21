@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import cv2
+import json
 
 class ComputerVision:
     def __init__(self, videoPath):
@@ -20,18 +21,29 @@ class ComputerVision:
         self.setVideoBeforeEnd()
         self.method = cv2.TM_CCOEFF_NORMED
         self.detection_scales = np.linspace(0.4, 1.0, 7)[::-1]
-        self.isUHD = self.checkUHDResize()
+        
+        self.resolution_data = self.getResolutionData()
+        self.source_scale_factor = 1/self.resolution_data["tm_scale"]
+        self.rescaled_frame_width = int(self.frame_width * self.source_scale_factor)
+        self.rescaled_frame_height = int(self.frame_height * self.source_scale_factor)
 
         self.logo_scale = None
         self.logo_scale_id = None
         self.detected_time = None
 
-    def checkUHDResize(self):
-        if (self.frame_width + self.frame_height) == 6000 or (self.frame_width + self.frame_height) == 4320:
-            self.detection_scales *= 2
-            return True
-        else:
-            return False
+        
+    def getResolutionData(self):
+
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        resolution_path = os.path.join(script_dir, '..', '..', 'audio-video', 'resolution_data.json')
+        resolution_key = f'{self.frame_width}x{self.frame_height}'
+
+        with open(resolution_path, 'r') as file:
+            resolution_json = json.load(file)
+            resolution_data = resolution_json[resolution_key]
+            # print(resolution_json, "\n", resolution_data)
+            return resolution_data
+
 
     def getCurrentTime(self):
         currentFrame = self.video.get(cv2.CAP_PROP_POS_FRAMES)
@@ -53,11 +65,6 @@ class ComputerVision:
         start_frame = int(start_time * self.fps)
         self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
-    def setVideoBeforeEnd(self):
-        start_time = self.duration_secs - self.analysisStartBeforeEnd
-        start_frame = int(start_time * self.fps)
-        self.video.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-
     def matchTemplateMultiScale(self, frame):
         found = None
         h, w = self.template.shape[:2]
@@ -72,12 +79,9 @@ class ComputerVision:
         return found
 
     def scaleDropout(self):
-        UHDScaleFactor = 1
-        if (self.isUHD):
-            UHDScaleFactor=2
-            
-        self.detection_scales = np.linspace((self.logo_scale-(0.1*UHDScaleFactor)), (self.logo_scale+(0.1*UHDScaleFactor)), 3)[::-1]
-        self.detection_scales = self.detection_scales[self.detection_scales<=1.0*UHDScaleFactor]
+
+        self.detection_scales = np.linspace((self.logo_scale-(0.1)), (self.logo_scale+(0.1)), 3)[::-1] # create three values centering at logo-scale
+        self.detection_scales = self.detection_scales[self.detection_scales<=1.0] #remove values above fullscale
         
     def matchVideoFrames(self, showVideoPlayer=False):
         isDetecting = True
@@ -89,10 +93,12 @@ class ComputerVision:
                 next_frame = current_frame + self.frameSearchSkip
                 self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame)
                 ret, frame = self.video.retrieve()
+                resized_frame = cv2.resize(frame, (self.rescaled_frame_width, self.rescaled_frame_height))
+
 
                 if not ret:
                     break
-                frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
+                frame2 = cv2.cvtColor(resized_frame.copy(), cv2.COLOR_BGR2GRAY)
                 found = self.matchTemplateMultiScale(frame2)
 
                 # Dropout Condition
@@ -110,11 +116,13 @@ class ComputerVision:
                         self.video.set(cv2.CAP_PROP_POS_FRAMES, next_frame - self.frameSearchSkip)
                         self.scaleDropout()
 
-                        for i in range(self.frameSearchSkip + 1):
+                        for _ in range(self.frameSearchSkip + 1):
                             ret, frame = self.video.read()
                             if not ret:
                                 break
-                            frame2 = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
+
+                            resized_frame = cv2.resize(frame, (self.rescaled_frame_width, self.rescaled_frame_height))
+                            frame2 = cv2.cvtColor(resized_frame.copy(), cv2.COLOR_BGR2GRAY)
 
                             found = self.matchTemplateMultiScale(frame2)
                             if found:
@@ -132,15 +140,15 @@ class ComputerVision:
                                         h, w = self.template.shape[:2]
                                         top_left = location
                                         bottom_right = (int(top_left[0] + w * self.logo_scale), int(top_left[1] + h * self.logo_scale))
-                                        cv2.rectangle(frame, top_left, bottom_right, 255, 5)
+                                        cv2.rectangle(resized_frame, top_left, bottom_right, 255, 5)
                                         message = f"Logo Frame Matched. Accuracy: {detection_value * 100:.2f}%"
-                                        cv2.putText(frame, message, (top_left[0], bottom_right[1] + 50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
+                                        cv2.putText(resized_frame, message, (top_left[0], bottom_right[1] + 50), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0))
                                     else:
                                         isDetecting = False
                                     break
 
                     if showVideoPlayer:
-                        cv2.imshow('Video', frame)
+                        cv2.imshow('Video', resized_frame)
                         if match_found:
                             cv2.waitKey(200)
 

@@ -2,7 +2,7 @@ import sys, json
 from computer_vision import ComputerVision
 
 if len(sys.argv) > 1:
-    video_path = sys.argv[1]  # The first argument is the script name, so the song name is the second argument
+    video_path = sys.argv[1]
 
     analysis = ComputerVision(video_path).matchVideoFrames()
     if analysis["logo_start"] == "None":
