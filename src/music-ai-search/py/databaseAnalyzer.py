@@ -34,7 +34,7 @@ if len(sys.argv) > 1:
 
         # # # Create Waveform SVG
         audio_to_svg = WaveToSVG(y, sr, highlight_times)
-        svg = audio_to_svg.generate_svg_waveform(svg_out_path)
+        svg = audio_to_svg.generate_svg_fluent_waveform(svg_out_path)
         
 
         analysis = {

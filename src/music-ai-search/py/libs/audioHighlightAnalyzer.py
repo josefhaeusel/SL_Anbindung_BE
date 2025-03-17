@@ -149,6 +149,6 @@ class AudioHighlightAnalyzer:
         else:
             best_highlight = self.get_clustered_highlights(top_n=1)
             best_highlight_start = round(best_highlight[0][0], 2)
-            highlight_times = { "start":best_highlight_start, "end": round(best_highlight_start+5, 2), "chorus": False}
+            highlight_times = { "start":best_highlight_start, "end": round(best_highlight_start+8, 2), "chorus": False}
 
             return highlight_times
