@@ -66,8 +66,8 @@ class WaveToSVG(object):
         else:
             return {"path": "No path given. Raw svg is returned", "content": svg_content}
             
-    def generate_svg_fluent_waveform(self, output_svg=None, num_samples=800):
-        width = 800  # SVG width
+    def generate_svg_fluent_waveform(self, output_svg=None, num_samples=925*4):
+        width = 925  # SVG width
         height = 80  # SVG height
 
         # Downsample signal
