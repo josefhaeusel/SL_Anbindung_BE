@@ -29,7 +29,7 @@ export class CsrfInjectMiddleware implements NestMiddleware {
         "worker-src 'self' blob:; " +
         "object-src 'none'; " +
         "frame-ancestors 'none'; " +
-        "img-src 'self' data:; " +
+        "img-src 'self' blob: data:; " +
         "media-src 'self';",
     )
 

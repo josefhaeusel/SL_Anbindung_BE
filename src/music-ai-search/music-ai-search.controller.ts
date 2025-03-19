@@ -73,6 +73,7 @@ export class MusicAiSearchController {
       properties: {
         prompt: { type: 'string' },
         tagIds: { type: 'array', items: { type: 'number' } },
+        include_custom_analyze: { type: 'boolean' }
       },
     },
     required: true,
@@ -80,9 +81,11 @@ export class MusicAiSearchController {
   async freeTextSearch(
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
+    @Body('custom_analysis') include_custom_analyze: boolean = true,
   ) {
     this.logger.debug(prompt)
     this.logger.debug(tagIds)
+    this.logger.debug(include_custom_analyze)
 
     return await this.musicAiSearchService.freeTextSearch(prompt, tagIds)
 
@@ -149,10 +152,15 @@ export class MusicAiSearchController {
   })
   async getImageData(
     @Body('trackId') trackId: number,
-    @Body('imageType') imageType: 'Waveform' | 'Cover') {
-    this.logger.debug(trackId, imageType)
-
-    return await this.musicAiSearchService.imageData(trackId, imageType)
+    @Body('imageType') imageType: 'Waveform' | 'Cover',
+    @Res() res: Response
+  ) {
+    this.logger.debug(`Image request - trackId: ${trackId}, type: ${imageType}`);
+  
+    const { data, contentType } = await this.musicAiSearchService.imageData(trackId, imageType);
+  
+    res.setHeader('Content-Type', contentType);
+    res.send(Buffer.from(data)); // 👈 send as binary buffer
   }
 
   @Get('audioData/:trackId')

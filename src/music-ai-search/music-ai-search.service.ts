@@ -18,7 +18,9 @@ export class MusicAiSearchService {
       trackIds,
     }
 
-    const urlPayload = {}
+    const urlPayload = { 
+
+    }
 
     const { data } = await firstValueFrom(
       this.httpService
@@ -49,9 +51,11 @@ export class MusicAiSearchService {
     const urlData = {
       searchTerm,
       tagIds,
+      include_custom_analyze: true
     }
 
-    const urlPayload = {}
+    const urlPayload = {
+    }
 
     return this._doSearch(url, urlData, urlPayload)
   }
@@ -73,12 +77,12 @@ export class MusicAiSearchService {
 
     const url = `loadTrack${imageType}Image/${trackId}/mode/search`
 
-    const { data } = await firstValueFrom(
+    const { data, headers } = await firstValueFrom(
       this.httpService
         .get(url, {
           baseURL: process.env.S12_API_URL,
           headers: this._getHeaders({}),
-          responseType: 'text'
+          responseType: 'arraybuffer'
         })
         .pipe(
           catchError((error: AxiosError) => {
@@ -91,7 +95,9 @@ export class MusicAiSearchService {
     // this.logger.debug('data', data)
 
     return {
-      data: data
+      data,
+      contentType: headers['content-type'] || 'image/jpeg',
+
     }
   }
 
@@ -104,7 +110,8 @@ export class MusicAiSearchService {
       "mode": "search"
     }
 
-    const urlPayload = {}
+    const urlPayload = {
+    }
 
     const { data, headers } = await firstValueFrom(
       this.httpService
@@ -134,6 +141,7 @@ export class MusicAiSearchService {
         .post(url, urlData, {
           baseURL: process.env.S12_API_URL,
           headers: this._getHeaders(urlPayload),
+          // params: { include_custom_analyze: true },
         })
         .pipe(
           catchError((error: AxiosError) => {
