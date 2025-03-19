@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, Search } from '@nestjs/common'
 import param from 'jquery-param'
 import * as crypto from 'crypto'
 import { HttpService } from '@nestjs/axios'
@@ -9,7 +9,7 @@ import { AxiosError } from 'axios'
 export class MusicAiSearchService {
   private readonly logger = new Logger(MusicAiSearchService.name)
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) { }
 
   async allTags(trackIds: number[]) {
     const url = 'gettestcyanitetags'
@@ -67,6 +67,65 @@ export class MusicAiSearchService {
     const urlPayload = {}
 
     return this._doSearch(url, urlData, urlPayload)
+  }
+
+  async imageData(trackId: number, imageType: 'Waveform' | 'Cover') {
+
+    const url = `loadTrack${imageType}Image/${trackId}/mode/search`
+
+    const { data } = await firstValueFrom(
+      this.httpService
+        .get(url, {
+          baseURL: process.env.S12_API_URL,
+          headers: this._getHeaders({}),
+          responseType: 'text'
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response.data)
+            throw 'An error happened!'
+          }),
+        ),
+    )
+
+    // this.logger.debug('data', data)
+
+    return {
+      data: data
+    }
+  }
+
+
+  async audioData(trackId: number) {
+    const url = 'playcephtrack'
+
+    const urlData = {
+      "track_id": trackId,
+      "mode": "search"
+    }
+
+    const urlPayload = {}
+
+    const { data, headers } = await firstValueFrom(
+      this.httpService
+        .post(url, urlData, {
+          baseURL: process.env.S12_API_URL,
+          headers: this._getHeaders(urlPayload),
+          responseType: 'stream',
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response.data)
+            throw 'An error happened!'
+          }),
+        ),
+    )
+
+    return {
+      stream: data,
+      contentType: headers['content-type'] || 'audio/mpeg',
+      contentDisposition: headers['content-disposition'] || 'attachment; filename="track.mp3"',
+    }
   }
 
   private async _doSearch(url: string, urlData: any, urlPayload: any) {
