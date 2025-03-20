@@ -66,7 +66,7 @@ export class MusicAiSearchService {
     const urlData = {
       searchTerm,
       tagIds,
-      include_custom_analyze
+      include_custom_analyze 
     }
 
     const urlPayload = {}

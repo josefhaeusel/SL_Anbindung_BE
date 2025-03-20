@@ -30,7 +30,7 @@ export class CsrfInjectMiddleware implements NestMiddleware {
         "object-src 'none'; " +
         "frame-ancestors 'none'; " +
         "img-src 'self' blob: data:; " +
-        "media-src 'self';",
+        "media-src 'self' blob: data:;",
     )
 
     if (req.originalUrl === '/') {
