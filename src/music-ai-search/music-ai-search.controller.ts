@@ -87,7 +87,7 @@ export class MusicAiSearchController {
     this.logger.debug(tagIds)
     this.logger.debug(include_custom_analyze)
 
-    return await this.musicAiSearchService.freeTextSearch(prompt, tagIds)
+    return await this.musicAiSearchService.freeTextSearch(prompt, tagIds, include_custom_analyze)
 
     /*
     let searchResults = await this.musicAiSearchService.freeTextSearch(prompt)
@@ -113,6 +113,7 @@ export class MusicAiSearchController {
       properties: {
         prompt: { type: 'string' },
         tagIds: { type: 'array', items: { type: 'number' } },
+        include_custom_analyze: { type: 'boolean' }
       },
     },
     required: true,
@@ -120,11 +121,12 @@ export class MusicAiSearchController {
   async tagSearch(
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
+    @Body('custom_analysis') include_custom_analyze: boolean = true,
   ) {
     this.logger.debug(prompt)
     this.logger.debug(tagIds)
 
-    return await this.musicAiSearchService.tagtSearch(prompt, tagIds)
+    return await this.musicAiSearchService.tagtSearch(prompt, tagIds, include_custom_analyze)
   }
 
 

@@ -45,13 +45,13 @@ export class MusicAiSearchService {
     }
   }
 
-  async freeTextSearch(searchTerm: string, tagIds = []) {
+  async freeTextSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean) {
     const url = 'gettestfreetextsearch'
 
     const urlData = {
       searchTerm,
       tagIds,
-      include_custom_analyze: true
+      include_custom_analyze
     }
 
     const urlPayload = {
@@ -60,12 +60,13 @@ export class MusicAiSearchService {
     return this._doSearch(url, urlData, urlPayload)
   }
 
-  async tagtSearch(searchTerm: string, tagIds = []) {
+  async tagtSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean) {
     const url = 'gettestkeywordsearch'
 
     const urlData = {
       searchTerm,
       tagIds,
+      include_custom_analyze
     }
 
     const urlPayload = {}
@@ -141,7 +142,6 @@ export class MusicAiSearchService {
         .post(url, urlData, {
           baseURL: process.env.S12_API_URL,
           headers: this._getHeaders(urlPayload),
-          // params: { include_custom_analyze: true },
         })
         .pipe(
           catchError((error: AxiosError) => {
