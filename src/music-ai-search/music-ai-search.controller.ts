@@ -100,7 +100,7 @@ export class MusicAiSearchController {
   async freeTextSearch(
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
-    @Body('custom_analysis') include_custom_analyze: boolean = true,
+    @Body('include_custom_analyze') include_custom_analyze: boolean = true,
     @Body('exclusive') exclusive: string = 'unconsidered',
     @Body('brand') brand: string,
 
@@ -165,7 +165,7 @@ export class MusicAiSearchController {
   async tagSearch(
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
-    @Body('custom_analysis') include_custom_analyze: boolean = true,
+    @Body('include_custom_analyze') include_custom_analyze: boolean = true,
     @Body('exclusive') exclusive: string = 'unconsidered',
     @Body('brand') brand: string,
   ) {
