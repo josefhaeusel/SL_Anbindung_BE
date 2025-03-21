@@ -45,28 +45,32 @@ export class MusicAiSearchService {
     }
   }
 
-  async freeTextSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean) {
+  async freeTextSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean, exclusive: string = 'unconsidered', brand: string) {
     const url = 'gettestfreetextsearch'
 
     const urlData = {
       searchTerm,
       tagIds,
-      include_custom_analyze
+      include_custom_analyze,
+      exclusive,
+      brand
     }
-
+       
     const urlPayload = {
     }
 
     return this._doSearch(url, urlData, urlPayload)
   }
 
-  async tagtSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean) {
+  async tagtSearch(searchTerm: string, tagIds = [], include_custom_analyze: boolean, exclusive: string = 'unconsidered', brand: string) {
     const url = 'gettestkeywordsearch'
 
     const urlData = {
       searchTerm,
       tagIds,
-      include_custom_analyze 
+      include_custom_analyze,
+      exclusive,
+      brand
     }
 
     const urlPayload = {}

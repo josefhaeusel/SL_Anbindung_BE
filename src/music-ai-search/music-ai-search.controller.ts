@@ -67,14 +67,33 @@ export class MusicAiSearchController {
     type: ResponseS12Ok,
   })
   @ApiBody({
-    description: 'the prompt and optional tag ids',
+    description: 'The prompt and optional tag ids. If exclusive is "exclusive" or "additive", brand is required.',
     schema: {
-      type: 'object',
-      properties: {
-        prompt: { type: 'string' },
-        tagIds: { type: 'array', items: { type: 'number' } },
-        include_custom_analyze: { type: 'boolean' }
-      },
+      oneOf: [
+        {
+          type: 'object',
+          required: ['prompt', 'exclusive'],
+          properties: {
+            prompt: { type: 'string' },
+            tagIds: { type: 'array', items: { type: 'number' } },
+            include_custom_analyze: { type: 'boolean' },
+            exclusive: { type: 'string', enum: ['unconsidered'] },
+            brand: { type: 'string', enum: [process.env.BRAND_UUID_0] },
+          },
+        },
+        {
+          type: 'object',
+          required: ['prompt', 'exclusive', 'brand'],
+          properties: {
+            prompt: { type: 'string' },
+            tagIds: { type: 'array', items: { type: 'number' } },
+            include_custom_analyze: { type: 'boolean' },
+            exclusive: { type: 'string', enum: ['exclusive', 'additive'] },
+            brand: { type: 'string', enum: [process.env.BRAND_UUID_0] },
+          },
+        },
+        
+      ],
     },
     required: true,
   })
@@ -82,12 +101,18 @@ export class MusicAiSearchController {
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
     @Body('custom_analysis') include_custom_analyze: boolean = true,
+    @Body('exclusive') exclusive: string = 'unconsidered',
+    @Body('brand') brand: string,
+
+
   ) {
     this.logger.debug(prompt)
     this.logger.debug(tagIds)
     this.logger.debug(include_custom_analyze)
+    this.logger.debug(exclusive)
+    this.logger.debug(brand)
 
-    return await this.musicAiSearchService.freeTextSearch(prompt, tagIds, include_custom_analyze)
+    return await this.musicAiSearchService.freeTextSearch(prompt, tagIds, include_custom_analyze, exclusive, brand)
 
     /*
     let searchResults = await this.musicAiSearchService.freeTextSearch(prompt)
@@ -109,12 +134,31 @@ export class MusicAiSearchController {
   @ApiBody({
     description: 'the prompt and optional tag ids',
     schema: {
-      type: 'object',
-      properties: {
-        prompt: { type: 'string' },
-        tagIds: { type: 'array', items: { type: 'number' } },
-        include_custom_analyze: { type: 'boolean' }
-      },
+      oneOf: [
+        {
+          type: 'object',
+          required: ['prompt', 'exclusive'],
+          properties: {
+            prompt: { type: 'string' },
+            tagIds: { type: 'array', items: { type: 'number' } },
+            include_custom_analyze: { type: 'boolean' },
+            exclusive: { type: 'string', enum: ['unconsidered'] },
+            brand: { type: 'string', enum: [process.env.BRAND_UUID_0] },
+          },
+        },
+        {
+          type: 'object',
+          required: ['prompt', 'exclusive', 'brand'],
+          properties: {
+            prompt: { type: 'string' },
+            tagIds: { type: 'array', items: { type: 'number' } },
+            include_custom_analyze: { type: 'boolean' },
+            exclusive: { type: 'string', enum: ['exclusive', 'additive'] },
+            brand: { type: 'string', enum: [process.env.BRAND_UUID_0] },
+          },
+        },
+        
+      ],
     },
     required: true,
   })
@@ -122,11 +166,13 @@ export class MusicAiSearchController {
     @Body('prompt') prompt: string,
     @Body('tagIds') tagIds: number[] = [],
     @Body('custom_analysis') include_custom_analyze: boolean = true,
+    @Body('exclusive') exclusive: string = 'unconsidered',
+    @Body('brand') brand: string,
   ) {
     this.logger.debug(prompt)
     this.logger.debug(tagIds)
 
-    return await this.musicAiSearchService.tagtSearch(prompt, tagIds, include_custom_analyze)
+    return await this.musicAiSearchService.tagtSearch(prompt, tagIds, include_custom_analyze, exclusive, brand)
   }
 
 
@@ -158,9 +204,9 @@ export class MusicAiSearchController {
     @Res() res: Response
   ) {
     this.logger.debug(`Image request - trackId: ${trackId}, type: ${imageType}`);
-  
+
     const { data, contentType } = await this.musicAiSearchService.imageData(trackId, imageType);
-  
+
     res.setHeader('Content-Type', contentType);
     res.send(Buffer.from(data)); // 👈 send as binary buffer
   }
@@ -174,7 +220,7 @@ export class MusicAiSearchController {
     description: 'Return audio/mpeg stream.',
     type: ResponseS12Ok,
   })
-  
+
   async getAudioData(@Param('trackId') trackId: number, @Res() res: Response) {
     this.logger.debug(trackId)
 
