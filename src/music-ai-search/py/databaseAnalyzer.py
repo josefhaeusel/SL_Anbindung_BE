@@ -1,6 +1,7 @@
 from libs.audioHighlightAnalyzer import AudioHighlightAnalyzer
 from libs.keyfinder import Keyfinder
 from libs.tempofinder import Tempofinder 
+from libs.loudnessfinder import Loudnessfinder
 from libs.audioToSVG import WaveToSVG
 import librosa
 import sys, json
@@ -28,6 +29,10 @@ if len(sys.argv) > 1:
         tempofinder = Tempofinder(y, sr)
         bpm = tempofinder.detect_bpm()
 
+        # # # Analyze LUFS
+        loudnessfinder = Loudnessfinder(y, sr)
+        lufs = loudnessfinder.detect_LUFS()
+
         # # # Analyze Highlight Section
         highlight_analyzer = AudioHighlightAnalyzer(y, sr, audio_path)
         highlight_times = highlight_analyzer.get_most_important_highlight()
@@ -40,6 +45,7 @@ if len(sys.argv) > 1:
         analysis = {
             "key": key,
             "bpm": bpm,
+            "lufs": lufs,
             "highlight_times": highlight_times,
             "svg": svg
         }
