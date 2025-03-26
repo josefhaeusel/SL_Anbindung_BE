@@ -10,6 +10,7 @@ import { DownloadService } from './download/download.service'
 import { ComputerVisionService } from './computer_vision/computer_vision.service'
 import { MusicAiSearchModule } from './music-ai-search/music-ai-search.module'
 import { VoiceOptimizationService } from './voice-optimization/voice-optimization.service';
+import { MagentaMomentsModule } from './magenta-moments/magenta-moments.module';
 import { CsrfInjectMiddleware } from './csrf-inject.middleware'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { TypeOrmConfigService } from './typeorm-inject.config'
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config'
 
 @Module({
   imports: [
+    MagentaMomentsModule,
     ChordRetrievalAiModule,
     MusicAiSearchModule,
     ServeStaticModule.forRoot({

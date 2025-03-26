@@ -54,4 +54,59 @@ export class ChordRetrievalAiService {
       })
     })
   }
+
+
+  analyzeSongMagenta(songPath: string, magentaMoments: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const rootPath =
+        process.env.NODE_ENV == 'production'
+          ? __dirname
+          : path.join(process.cwd(), 'src', 'chord_retrieval_ai')
+      const pythonFile =
+        'keyfinderMagentaChildProcess.' +
+        (process.env.NODE_ENV == 'production' ? 'pyc' : 'py')
+      const pythonPath = path.join(rootPath, 'py', pythonFile)
+      this.logger.debug(
+        `python3 ${pythonPath} ${songPath} '${magentaMoments}'`,
+      )
+      this.logger.debug(`env ${process.env.NODE_ENV}`)
+      this.logger.debug(`env ${process.env.NUMBA_CACHE_DIR}`)
+      this.logger.debug(`env ${process.env.MPLCONFIGDIR}`)
+      this.logger.debug(`env ${process.env.PYTHONWARNINGS}`)
+
+      const pythonProcess = spawn(
+        'python3',
+        [pythonPath, songPath, magentaMoments],
+        { env: process.env },
+      )
+      let stdoutData = ''
+
+      pythonProcess.stdout.on('data', (data) => {
+        stdoutData += data.toString() // Append data chunks
+        this.logger.log("Data Chunk:", stdoutData)
+      })
+
+      pythonProcess.stdout.on('close', () => {
+        try {
+          const result = JSON.parse(stdoutData)
+          resolve(result)
+        } catch (error) {
+          this.logger.error('error:', error)
+          console.error(`error: ${error.message}`)
+          reject(error)
+        }
+      })
+
+      pythonProcess.stderr.on('data', (data) => {
+        this.logger.warn('stderr:', data)
+        console.error(`stderr: ${data}`)
+      })
+
+      pythonProcess.on('error', (error) => {
+        this.logger.error('error:', error)
+        console.error(`error: ${error.message}`)
+        reject(error)
+      })
+    })
+  }
 }
