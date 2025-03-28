@@ -274,7 +274,7 @@ export class MagentaMomentsController {
   // @Csrf()
   @ApiOperation({ summary: 'Inputs video and audio path and returns it\'s analysis' })
   // @ApiSecurity('csrf')
-  async videoHandler(
+  async analyzeMoments(
     @Body('videoPath') videoPath: string,
     @Body('audioPath') audioPath: string,
     @Req() request: Request,
@@ -294,7 +294,6 @@ export class MagentaMomentsController {
 
 
     const analysisResult = {
-      audioAnalysis: {},
       videoAnalysis: {},
       csrfToken: null,
     }
@@ -338,8 +337,6 @@ export class MagentaMomentsController {
       // log
       // log.audioFileAnalyze = JSON.stringify(audioAnalysisResult)
 
-
-      analysisResult.audioAnalysis = audioAnalysisResult
       analysisResult.videoAnalysis = videoAnalysisResult
 
       // 2024-08-13, csrf
